@@ -38,7 +38,9 @@ class ActionPlugin(LayerPlugin):
         tempdir = tempfile.mkdtemp()
         backup = tempdir + "/bblayers.conf.bak"
         shutil.copy2(bblayers_conf, backup)
-
+        if self.tinfoil.config_data.getVar('LAYERS_RELATIVE'):
+            topdir = self.tinfoil.config_data.getVar('TOPDIR')
+            layerdir = os.path.join("${TOPDIR}", os.path.relpath(layerdir,topdir))
         try:
             notadded, _ = bb.utils.edit_bblayers_conf(bblayers_conf, layerdir, None)
             if not (args.force or notadded):
