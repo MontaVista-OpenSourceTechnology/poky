@@ -548,11 +548,13 @@ class RpmPM(PackageManager):
         if feed_uris == "":
             return
 
+        gpg_opts = ''
         if self.d.getVar('PACKAGE_FEED_SIGN') == '1':
-            gpg_opts = 'repo_gpgcheck=1\n'
+            gpg_opts += 'repo_gpgcheck=1\n'
             gpg_opts += 'gpgkey=file://%s/pki/packagefeed-gpg/PACKAGEFEED-GPG-KEY-%s-%s\n' % (self.d.getVar('sysconfdir'), self.d.getVar('DISTRO'), self.d.getVar('DISTRO_CODENAME'))
-        else:
-            gpg_opts = ''
+
+        if self.d.getVar('RPM_SIGN_PACKAGES') == '0':
+            gpg_opts += 'gpgcheck=0\n'
 
         bb.utils.mkdirhier(oe.path.join(self.target_rootfs, "etc", "yum.repos.d"))
         remote_uris = self.construct_uris(feed_uris.split(), feed_base_paths.split())
@@ -614,10 +616,12 @@ class RpmPM(PackageManager):
             self._invoke_dnf(["remove"] + pkgs)
         else:
             cmd = bb.utils.which(os.getenv('PATH'), "rpm")
-            args = ["-e", "--nodeps", "--root=%s" %self.target_rootfs]
+            args = ["-e", "-v", "--nodeps", "--root=%s" %self.target_rootfs]
 
             try:
+                bb.note("Running %s" % ' '.join([cmd] + args + pkgs))
                 output = subprocess.check_output([cmd] + args + pkgs, stderr=subprocess.STDOUT).decode("utf-8")
+                bb.note(output)
             except subprocess.CalledProcessError as e:
                 bb.fatal("Could not invoke rpm. Command "
                      "'%s' returned %d:\n%s" % (' '.join([cmd] + args + pkgs), e.returncode, e.output.decode("utf-8")))

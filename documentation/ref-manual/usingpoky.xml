@@ -107,7 +107,7 @@
             The <replaceable>target</replaceable> is the name of the recipe you want to build.
             Common targets are the images in <filename>meta/recipes-core/images</filename>,
             <filename>meta/recipes-sato/images</filename>, etc. all found in the
-            <ulink url='&YOCTO_DOCS_DEV_URL;#source-directory'>Source Directory</ulink>.
+            <link linkend='source-directory'>Source Directory</link>.
             Or, the target can be the name of a recipe for a specific piece of software such as
             BusyBox.
             For more details about the images the OpenEmbedded build system supports, see the
@@ -145,7 +145,8 @@
         <filename class="directory">tmp/deploy/images</filename>.
         For information on how to run pre-built images such as <filename>qemux86</filename>
         and <filename>qemuarm</filename>, see the
-        <ulink url='&YOCTO_DOCS_SDK_URL;#sdk-manual'>Yocto Project Software Development Kit (SDK) Developer's Guide</ulink>.
+        <ulink url='&YOCTO_DOCS_SDK_URL;#sdk-manual'>Yocto Project Application Development and the Extensible Software Development Kit (eSDK)</ulink>
+        manual.
         For information about how to install these images, see the documentation for your
         particular board or machine.
     </para>
@@ -176,16 +177,17 @@
         going wrong.
         For information on how to enable and use this feature, see the
         "<ulink url='&YOCTO_DOCS_DEV_URL;#using-the-error-reporting-tool'>Using the Error Reporting Tool</ulink>"
-        section in the Yocto Project Development Manual.
+        section in the Yocto Project Development Tasks Manual.
     </para>
 
     <para>
         For discussions on debugging, see the
         "<ulink url='&YOCTO_DOCS_DEV_URL;#platdev-gdb-remotedebug'>Debugging With the GNU Project Debugger (GDB) Remotely</ulink>" section
-        in the Yocto Project Developer's Manual
+        in the Yocto Project Development Tasks Manual
         and the
         "<ulink url='&YOCTO_DOCS_SDK_URL;#adt-eclipse'>Working within Eclipse</ulink>"
-        section in the Yocto Project Software Development Kit (SDK) Developer's Guide.
+        section in the Yocto Project Application Development and the
+        Extensible Software Development Kit (eSDK) manual.
     </para>
 
     <note>
@@ -873,7 +875,7 @@
             class implements these functions.
             See that class in the
             <filename>meta/classes</filename> folder of the
-            <ulink url='&YOCTO_DOCS_DEV_URL;#source-directory'>Source Directory</ulink>
+            <link linkend='source-directory'>Source Directory</link>
             for information.
         </para>
 
@@ -1034,7 +1036,8 @@
                     <ulink url='&YOCTO_WIKI_URL;/wiki/Bugzilla_Configuration_and_Bug_Tracking'>wiki page</ulink>"
                     or the
                     <ulink url='&YOCTO_DOCS_DEV_URL;#submitting-a-defect-against-the-yocto-project'>Submitting a Defect Against the Yocto Project</ulink>"
-                    section, which is in the Yocto Project Development Manual.
+                    section, which is in the Yocto Project Development Tasks
+                    Manual.
                     <note>
                         The manuals might not be the right place to document
                         variables that are purely internal and have a limited
@@ -1092,7 +1095,7 @@
         For information on how to use the Yocto Project implementation of
         QEMU, see the
         "<ulink url='&YOCTO_DOCS_DEV_URL;#dev-manual-qemu'>Using the Quick EMUlator (QEMU)</ulink>"
-        chapter in the Yocto Project Development Manual.
+        chapter in the Yocto Project Development Tasks Manual.
     </para>
 
     <section id='qemu-availability'>
@@ -1104,8 +1107,8 @@
             For more information on how to make sure you have
             QEMU available, see
             "<ulink url='&YOCTO_DOCS_SDK_URL;#the-qemu-emulator'>The QEMU Emulator</ulink>"
-            section in the Yocto Project Software Development Kit (SDK)
-            Developer's Guide.
+            section in the Yocto Project Application Development and the
+            Extensible Software Development Kit (eSDK) manual.
         </para>
     </section>
 
@@ -1180,8 +1183,8 @@
                     filesystem image file.
                     See the
                     "<ulink url='&YOCTO_DOCS_DEV_URL;#qemu-running-under-a-network-file-system-nfs-server'>Running Under a Network File System (NFS) Server</ulink>"
-                    section in the Yocto Project Development Manual for more
-                    information.
+                    section in the Yocto Project Development Tasks Manual for
+                    more information.
                     </para></listitem>
             </itemizedlist>
         </note>
@@ -1204,7 +1207,7 @@
             image.
             Minimally, through the use of options, you must provide either
             a machine name, a virtual machine image
-            (<filename>*.vmdk</filename>), or a kernel image
+            (<filename>*wic.vmdk</filename>), or a kernel image
             (<filename>*.bin</filename>).
         </para>
 
@@ -1299,9 +1302,8 @@
                 <listitem><para>
                     <replaceable>MACHINE</replaceable>:
                     The architecture of the QEMU machine, which must be one
-                    of the following: "qemux86",
-                    "qemux86", "qemux86-64", "qemuarm", "qemuarm64",
-                    "qemumips", “qemumips64", or "qemuppc".
+                    of the following: "qemux86", "qemux86-64", "qemuarm",
+                    "qemuarm64", "qemumips", “qemumips64", or "qemuppc".
                     The <replaceable>MACHINE</replaceable> and
                     <replaceable>QEMUARCH</replaceable> options are basically
                     identical.
@@ -1476,9 +1478,9 @@ qemux86" or "qemux86-64".
      INHERIT += "buildhistory"
      BUILDHISTORY_COMMIT = "1"
             </literallayout>
-            Enabling build history as previously described
-            causes the build process to collect build
-            output information and commit it to a local
+            Enabling build history as previously described causes the
+            OpenEmbedded build system to collect build output information and
+            commit it as a single commit to a local
             <link linkend='git'>Git</link> repository.
             <note>
                 Enabling build history increases your build times slightly,

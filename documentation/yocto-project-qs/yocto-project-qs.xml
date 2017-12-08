@@ -16,32 +16,34 @@
                 Permission is granted to copy, distribute and/or modify this document under
                 the terms of the <ulink type="http" url="http://creativecommons.org/licenses/by-sa/2.0/uk/">Creative Commons Attribution-Share Alike 2.0 UK: England &amp; Wales</ulink> as published by Creative Commons.
             </para>
-            <note><title>Manual Notes</title>
-                <itemizedlist>
-                    <listitem><para>
-                        For the latest version of the Yocto Project Quick
-                        Start associated with this Yocto Project release
-                        (version &YOCTO_DOC_VERSION;),
-                        see the Yocto Project Quick Start from the
-                        <ulink url='&YOCTO_HOME_URL;/documentation'>Yocto Project documentation page</ulink>.
+           <note><title>Manual Notes</title>
+               <itemizedlist>
+                   <listitem><para>
+                       This version of the
+                       <emphasis>Yocto Project Quick Start</emphasis>
+                       is for the &YOCTO_DOC_VERSION; release of the
+                       Yocto Project.
+                       To be sure you have the latest version of the manual
+                       for this release, use the manual from the
+                       <ulink url='&YOCTO_HOME_URL;/documentation'>Yocto Project documentation page</ulink>.
+                       </para></listitem>
+                   <listitem><para>
+                       For manuals associated with other releases of the Yocto
+                       Project, go to the
+                       <ulink url='&YOCTO_HOME_URL;/documentation'>Yocto Project documentation page</ulink>
+                       and use the drop-down "Active Releases" button
+                       and choose the manual associated with the desired
+                       Yocto Project.
+                       </para></listitem>
+                   <listitem><para>
+                        To report any inaccuracies or problems with this
+                        manual, send an email to the Yocto Project
+                        discussion group at
+                        <filename>yocto@yoctoproject.com</filename> or log into
+                        the freenode <filename>#yocto</filename> channel.
                         </para></listitem>
-                    <listitem><para>
-                        This version of the manual is version
-                        &YOCTO_DOC_VERSION;.
-                        For later releases of the Yocto Project (if they exist),
-                        go to the
-                        <ulink url='&YOCTO_HOME_URL;/documentation'>Yocto Project documentation page</ulink>
-                        and use the drop-down "Active Releases" button
-                        and choose the Yocto Project version for which you want
-                        the manual.
-                        </para></listitem>
-                    <listitem><para>
-                        For an in-development version of the Yocto Project
-                        Quick Start, see
-                        <ulink url='&YOCTO_DOCS_URL;/latest/yocto-project-qs/yocto-project-qs.html'></ulink>.
-                        </para></listitem>
-                </itemizedlist>
-            </note>
+               </itemizedlist>
+           </note>
         </legalnotice>
 
         <abstract>
@@ -128,15 +130,9 @@
                     <emphasis>Website:</emphasis>
                     The
                     <ulink url='&YOCTO_HOME_URL;'>Yocto Project Website</ulink>
-                    provides the latest builds, breaking news, full development
-                    documentation, and access to a rich Yocto Project
-                    Development Community into which you can tap.
-                    </para></listitem>
-                <listitem><para>
-                    <emphasis>Yocto Project Backgrounders:</emphasis>
-                    The
-                    <ulink url='&YOCTO_HOME_URL;/ecosystem/yocto-project-backgrounders'>Yocto Project Backgrounder</ulink>
-                    provides introductory information on the Yocto Project.
+                    provides bacground information, the latest builds, breaking
+                    news, full development documentation, and access to a rich
+                    Yocto Project Development Community into which you can tap.
                     </para></listitem>
                 <listitem><para>
                     <emphasis>Yocto Project Development Environment Overview:</emphasis>
@@ -217,7 +213,7 @@
                         Work through the first six steps of the procedure
                         in the
                         "<ulink url='&YOCTO_DOCS_DEV_URL;#setting-up-to-use-crops'>Setting Up to Use CROss PlatformS (CROPS)</ulink>"
-                        section of the Yocto Project Development Manual.
+                        section of the Yocto Project Development Tasks Manual.
                         </para></listitem>
                     <listitem><para>
                         <emphasis>Set Up the Poky Container to Use the Yocto Project:</emphasis>
@@ -433,9 +429,9 @@
                     If your build host is using a Poky container, you can
                     use the same Git commands.
                 </note>
-                The example clones the <filename>poky</filename> repository
-                and then checks out the latest Yocto Project Release by tag
-                (i.e. <filename>&DISTRO_REL_TAG;</filename>):
+                The following example clones the <filename>poky</filename>
+                repository and then checks out the latest Yocto Project Release
+                by tag (i.e. <filename>&DISTRO_REL_TAG;</filename>):
                 <literallayout class='monospaced'>
      $ git clone git://git.yoctoproject.org/poky
      Cloning into 'poky'...
@@ -462,8 +458,10 @@
                     Rather than checking out the entire development branch
                     of a release (i.e. the tip), which could be continuously
                     changing while you are doing your development, you would
-                    check out a branch based on a release tag.  Doing so
-                    provides you with an unchanging, stable set of files.
+                    check out a branch based on a release tag as shown in
+                    the previous example.
+                    Doing so provides you with an unchanging, stable set of
+                    files.
                 </note>
             </para>
 
@@ -471,7 +469,7 @@
                 For more options and information about accessing Yocto
                 Project related repositories, see the
                 "<ulink url='&YOCTO_DOCS_DEV_URL;#working-with-yocto-project-source-files'>Working With Yocto Project Source Files</ulink>"
-                section in the Yocto Project Development Manual.
+                section in the Yocto Project Development Tasks Manual.
             </para>
         </section>
     </section>
@@ -485,7 +483,8 @@
             your images.
             <note>
                 A graphical user interface to the Yocto Project is available
-                through Toaster.
+                through
+                <ulink url='&YOCTO_DOCS_REF_URL;#toaster-term'>Toaster</ulink>.
                 See the
                 <ulink url='&YOCTO_DOCS_TOAST_URL;'>Toaster User Manual</ulink>
                 for more information.
@@ -524,31 +523,32 @@
                 Use the following commands to build your image.
                 The OpenEmbedded build system creates an entire Linux
                 distribution, including the toolchain, from source.
-                <note><title>Note about Network Proxies</title>
-                    <para>
-                        By default, the build process searches for source code
-                        using a pre-determined order through a set of
-                        locations.
-                        If you are working behind a firewall and your build
-                        host is not set up for proxies, you could encounter
-                        problems with the build process when fetching source
-                        code (e.g. fetcher failures or Git failures).
-                    </para>
-
-                    <para>
-                        If you do not know your proxy settings, consult your
-                        local network infrastructure resources and get that
-                        information.
-                        A good starting point could also be to check your web
-                        browser settings.
-                        Finally, you can find more information on using the
-                        Yocto Project behind a firewall in the Yocto Project
-                        Reference Manual
-                        <ulink url='&YOCTO_DOCS_REF_URL;#how-does-the-yocto-project-obtain-source-code-and-will-it-work-behind-my-firewall-or-proxy-server'>FAQ</ulink>
-                        and on the
-                        "<ulink url='https://wiki.yoctoproject.org/wiki/Working_Behind_a_Network_Proxy'>Working Behind a Network Proxy</ulink>"
-                        wiki page.
-                    </para>
+                <note><title>Notes about Network Proxies</title>
+                    <itemizedlist>
+                        <listitem><para>
+                            By default, the build process searches for source
+                            code using a pre-determined order through a set of
+                            locations.
+                            If you are working behind a firewall and your build
+                            host is not set up for proxies, you could encounter
+                            problems with the build process when fetching source
+                            code (e.g. fetcher failures or Git failures).
+                            </para></listitem>
+                        <listitem><para>
+                            If you do not know your proxy settings, consult your
+                            local network infrastructure resources and get that
+                            information.
+                            A good starting point could also be to check your
+                            web browser settings.
+                            Finally, you can find more information on using the
+                            Yocto Project behind a firewall in the Yocto Project
+                            Reference Manual
+                            <ulink url='&YOCTO_DOCS_REF_URL;#how-does-the-yocto-project-obtain-source-code-and-will-it-work-behind-my-firewall-or-proxy-server'>FAQ</ulink>
+                            and on the
+                            "<ulink url='https://wiki.yoctoproject.org/wiki/Working_Behind_a_Network_Proxy'>Working Behind a Network Proxy</ulink>"
+                            wiki page.
+                            </para></listitem>
+                    </itemizedlist>
                 </note>
             </para>
 
@@ -726,7 +726,7 @@
                         </literallayout>
                         If you want to learn more about running QEMU, see the
                         "<ulink url="&YOCTO_DOCS_DEV_URL;#dev-manual-qemu">Using the Quick EMUlator (QEMU)</ulink>"
-                        chapter in the Yocto Project Development Manual.
+                        chapter in the Yocto Project Development Tasks Manual.
                         </para></listitem>
                     <listitem><para>
                         <emphasis>Exit QEMU:</emphasis>
@@ -981,14 +981,17 @@
                     </para></listitem>
                 <listitem><para>
                     <emphasis>Look Through the
-                    <ulink url='&YOCTO_DOCS_DEV_URL;'>Yocto Project Development Manual</ulink>:</emphasis>
+                    <ulink url='&YOCTO_DOCS_DEV_URL;#dev-manual-intro'>Yocto Project Development Tasks Manual</ulink>:</emphasis>
                     This manual contains procedural information grouped to
                     help you get set up, work with layers, customize images,
                     write new recipes, work with libraries, and use QEMU.
+                    The information is task-based and spans the breadth of the
+                    Yocto Project.
                     </para></listitem>
                 <listitem><para>
                     <emphasis>Look Through the
-                    <ulink url='&YOCTO_DOCS_SDK_URL;'>Yocto Project Software Development Kit (SDK) Developer's Guide</ulink>:</emphasis>
+                    <ulink url='&YOCTO_DOCS_SDK_URL;#sdk-intro'>Yocto Project Application Development and the Extensible Software Development Kit (eSDK)</ulink>
+                    manual:</emphasis>
                     This manual describes how to use both the
                     <ulink url='&YOCTO_DOCS_SDK_URL;#sdk-using-the-standard-sdk'>standard SDK</ulink>
                     and the
@@ -1002,6 +1005,14 @@
                     and
                     "<ulink url='&YOCTO_DOCS_SDK_URL;#using-devtool-in-your-sdk-workflow'>Using <filename>devtool</filename> in your SDK Workflow</ulink>"
                     sections for more information.
+                    </para></listitem>
+                <listitem><para>
+                    <emphasis>Learn About Kernel Development:</emphasis>
+                    If you want to see how to work with the kernel and
+                    understand Yocto Linux kernels, see the
+                    <ulink url='&YOCTO_DOCS_KERNEL_DEV_URL;#kernel-dev-intro'>Yocto Project Linux Kernel Development Manual</ulink>.
+                    This manual provides information on how to patch the
+                    kernel, modify kernel recipes, and configure the kernel.
                     </para></listitem>
                 <listitem><para>
                     <emphasis>Learn About Board Support Packages (BSPs):</emphasis>
@@ -1022,7 +1033,7 @@
                     </para></listitem>
                 <listitem><para>
                     <emphasis>Have Available the
-                    <ulink url='&YOCTO_DOCS_REF_URL;'>Yocto Project Reference Manual:</ulink></emphasis>
+                    <ulink url='&YOCTO_DOCS_REF_URL;#ref-manual-intro'>Yocto Project Reference Manual:</ulink></emphasis>
                     Unlike the rest of the Yocto Project manual set, this manual
                     is comprised of material suited for reference rather than
                     procedures.

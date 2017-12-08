@@ -16,8 +16,10 @@
         provides background information on the Yocto Linux kernel
         <ulink url='&YOCTO_DOCS_REF_URL;#metadata'>Metadata</ulink>,
         describes common tasks you can perform using the kernel tools,
-        and shows you how to use the kernel Metadata needed to work with
-        the kernel inside the Yocto Project.
+        shows you how to use the kernel Metadata needed to work with
+        the kernel inside the Yocto Project, and provides insight into how
+        the Yocto Project team develops and maintains Yocto Linux kernel
+        Git repositories and Metadata.
    </para>
 
    <para>
@@ -32,9 +34,13 @@
         Previous recipes in the release are refreshed and supported for at
         least one additional Yocto Project release.
         As they align, these previous releases are updated to include the
-        latest from the
-        <ulink url='&YOCTO_HOME_URL;/organization/long-term-support-initiative-ltsi'>Long Term Support Initiative</ulink>
-        (LTSI) project.
+        latest from the Long Term Support Initiative (LTSI) project.
+        You can learn more about Yocto Linux kernels and LTSI in the
+        "<link linkend='kernel-big-picture'>Yocto Project Kernel Development and Maintenance</link>"
+        section.
+    </para>
+
+    <para>
         Also included is a Yocto Linux kernel development recipe
         (<filename>linux-yocto-dev.bb</filename>) should you want to work
         with the very latest in upstream Yocto Linux kernel development and
@@ -106,13 +112,13 @@
                 </para></listitem>
             <listitem><para>
                 <ulink url='&YOCTO_DOCS_SDK_URL;#using-devtool-in-your-sdk-workflow'><filename>devtool</filename> workflow</ulink>
-                as described in the Yocto Project Software Development Kit
-                (SDK) Developer's Guide.
+                as described in the Yocto Project Application Development and
+                the Extensible Software Development Kit (eSDK) manual.
                 </para></listitem>
             <listitem><para>
                 The
-                "<ulink url='&YOCTO_DOCS_DEV_URL;#understanding-and-creating-layers'>Understanding and Creating Layers</ulink>" section
-                in the Yocto Project Development Manual
+                "<ulink url='&YOCTO_DOCS_DEV_URL;#understanding-and-creating-layers'>Understanding and Creating Layers</ulink>"
+                section in the Yocto Project Development Tasks Manual.
                 </para></listitem>
             <listitem><para>
                 The
@@ -212,7 +218,7 @@
                 Applicable:</emphasis>
                 If your situation calls for changing the kernel's
                 configuration, you can use
-                <link linkend='generating-configuration-files'><filename>menuconfig</filename></link>,
+                <link linkend='using-menuconfig'><filename>menuconfig</filename></link>,
                 which allows you to interactively develop and test the
                 configuration changes you are making to the kernel.
                 Saving changes you make with <filename>menuconfig</filename>

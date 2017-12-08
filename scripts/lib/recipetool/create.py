@@ -156,10 +156,12 @@ class RecipeHandler(object):
                         RecipeHandler.recipebinmap[prog] = pn
 
     @staticmethod
-    def checkfiles(path, speclist, recursive=False):
+    def checkfiles(path, speclist, recursive=False, excludedirs=None):
         results = []
         if recursive:
-            for root, _, files in os.walk(path):
+            for root, dirs, files in os.walk(path, topdown=True):
+                if excludedirs:
+                    dirs[:] = [d for d in dirs if d not in excludedirs]
                 for fn in files:
                     for spec in speclist:
                         if fnmatch.fnmatch(fn, spec):
@@ -613,9 +615,9 @@ def create_recipe(args):
 
     if args.src_subdir:
         srcsubdir = os.path.join(srcsubdir, args.src_subdir)
-        srctree_use = os.path.join(srctree, args.src_subdir)
+        srctree_use = os.path.abspath(os.path.join(srctree, args.src_subdir))
     else:
-        srctree_use = srctree
+        srctree_use = os.path.abspath(srctree)
 
     if args.outfile and os.path.isdir(args.outfile):
         outfile = None

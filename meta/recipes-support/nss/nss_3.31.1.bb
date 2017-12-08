@@ -66,8 +66,8 @@ do_compile_prepend_class-native() {
 
 do_compile() {
     export CROSS_COMPILE=1
-    export NATIVE_CC="gcc"
-    export NATIVE_FLAGS="${HOST_CFLAGS}"
+    export NATIVE_CC="${BUILD_CC}"
+    export NATIVE_FLAGS="${BUILD_CFLAGS}"
     export BUILD_OPT=1
 
     export FREEBL_NO_DEPEND=1
@@ -104,7 +104,12 @@ do_compile() {
     # We can modify CC in the environment, but if we set it via an
     # argument to make, nsinstall, a host program, will also build with it!
     #
-    export CC="${CC} -g"
+    # nss pretty much does its own thing with CFLAGS, so we put them into CC.
+    # Optimization will get clobbered, but most of the stuff will survive.
+    # The motivation for this is to point to the correct place for debug
+    # source files and CFLAGS does that.  Nothing uses CCC.
+    #
+    export CC="${CC} ${CFLAGS}"
     make -C ./nss CCC="${CXX} -g" \
         OS_TEST=${OS_TEST} \
         RPATH="${RPATH}"
@@ -118,7 +123,7 @@ do_install_prepend_class-nativesdk() {
 
 do_install() {
     export CROSS_COMPILE=1
-    export NATIVE_CC="gcc"
+    export NATIVE_CC="${BUILD_CC}"
     export BUILD_OPT=1
 
     export FREEBL_NO_DEPEND=1

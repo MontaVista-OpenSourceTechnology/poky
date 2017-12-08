@@ -99,7 +99,7 @@
         <note>For information on finding out who is responsible for (maintains)
             a particular area of code, see the
             "<ulink url='&YOCTO_DOCS_DEV_URL;#how-to-submit-a-change'>Submitting a Change to the Yocto Project</ulink>"
-            section of the Yocto Project Development Manual.
+            section of the Yocto Project Development Tasks Manual.
         </note>
     </para>
 
@@ -146,7 +146,7 @@
         This process is called “submitting a patch” or "submitting a change."
         For information on submitting patches and changes, see the
         "<ulink url='&YOCTO_DOCS_DEV_URL;#how-to-submit-a-change'>Submitting a Change to the Yocto Project</ulink>"
-        section in the Yocto Project Development Manual.
+        section in the Yocto Project Development Tasks Manual.
     </para>
 
     <para>
@@ -239,7 +239,7 @@
                 <link linkend='source-directory'>Source Directory</link>.
                 For information on how to use these scripts, see the
                 "<ulink url='&YOCTO_DOCS_DEV_URL;#pushing-a-change-upstream'>Using Scripts to Push a Change Upstream and Request a Pull</ulink>"
-                section in the Yocto Project Development Manual.
+                section in the Yocto Project Development Tasks Manual.
                 </para></listitem>
             <listitem><para>
                 <emphasis>Patch Workflow:</emphasis>
@@ -252,7 +252,7 @@
                 <filename>git send-email</filename>.
                 For information on how to use these scripts, see the
                 "<ulink url='&YOCTO_DOCS_DEV_URL;#how-to-submit-a-change'>Submitting a Change to the Yocto Project</ulink>"
-                section in the Yocto Project Development Manual.
+                section in the Yocto Project Development Tasks Manual.
                 </para></listitem>
         </itemizedlist>
     </para>
@@ -288,7 +288,7 @@
                     For examples beyond the limited few in this section on how
                     to use Git with the Yocto Project, see the
                     "<ulink url='&YOCTO_DOCS_DEV_URL;#working-with-yocto-project-source-files'>Working With Yocto Project Source Files</ulink>"
-                    section in the Yocto Project Development Manual.
+                    section in the Yocto Project Development Tasks Manual.
                     </para></listitem>
             </itemizedlist>
         </note>
@@ -336,7 +336,7 @@
             develop locally.
             For examples on how to clone Git repositories, see the
             "<ulink url='&YOCTO_DOCS_DEV_URL;#working-with-yocto-project-source-files'>Working With Yocto Project Source Files</ulink>"
-            section in the Yocto Project Development Manual.
+            section in the Yocto Project Development Tasks Manual.
         </para>
 
         <para>
@@ -692,7 +692,7 @@
                 For steps on how to view and access these upstream Git
                 repositories, see the
                 "<ulink url='&YOCTO_DOCS_DEV_URL;#accessing-source-repositories'>Accessing Source Repositories</ulink>"
-                Section in the Yocto Project Development Manual.
+                Section in the Yocto Project Development Tasks Manual.
                 </para></listitem>
             <listitem><para><anchor id='index-downloads' />
                 <emphasis>
@@ -711,7 +711,7 @@
                 <imagedata fileref="figures/index-downloads.png" align="center" width="6in" depth="3.5in" />
                 For steps on how to view and access these files, see the
                 "<ulink url='&YOCTO_DOCS_DEV_URL;#accessing-index-of-releases'>Accessing Index of Releases</ulink>"
-                section in the Yocto Project Development Manual.
+                section in the Yocto Project Development Tasks Manual.
                 </para></listitem>
             <listitem><para id='downloads-page'>
                 <emphasis>"Downloads" page for the
@@ -731,7 +731,7 @@
                 <imagedata fileref="figures/yp-download.png" align="center" width="6in" depth="4in" />
                 For steps on how to use the "Downloads" page, see the
                 "<ulink url='&YOCTO_DOCS_DEV_URL;#using-the-downloads-page'>Using the Downloads Page</ulink>"
-                section in the Yocto Project Development Manual.
+                section in the Yocto Project Development Tasks Manual.
                 </para></listitem>
         </itemizedlist>
     </para>
@@ -817,7 +817,7 @@
         open source licensing during the lifecycle of a product created using
         the Yocto Project, see the
         "<ulink url='&YOCTO_DOCS_DEV_URL;#maintaining-open-source-license-compliance-during-your-products-lifecycle'>Maintaining Open Source License Compliance During Your Product's Lifecycle</ulink>"
-        section.
+        section in the Yocto Project Development Tasks Manual.
     </para>
 </section>
 
@@ -1127,7 +1127,7 @@
         The following diagram represents development at a high level.
         The remainder of this chapter expands on the fundamental input, output,
         process, and
-        <ulink url='&YOCTO_DOCS_REF_URL;#metadata'>Metadata</ulink>) blocks
+        <link linkend='metadata'>Metadata</link>) blocks
         that make up development in the Yocto Project environment.
     </para>
 
@@ -1195,7 +1195,7 @@
             a build.
             These files are <filename>*.conf</filename> files.
             The minimally necessary ones reside as example files in the
-            <ulink url='&YOCTO_DOCS_DEV_URL;#source-directory'>Source Directory</ulink>.
+            <link linkend='source-directory'>Source Directory</link>.
             For simplicity, this section refers to the Source Directory as
             the "Poky Directory."
         </para>
@@ -1312,7 +1312,7 @@
             You can find more information on working with the
             <filename>bblayers.conf</filename> file in the
             "<ulink url='&YOCTO_DOCS_DEV_URL;#enabling-your-layer'>Enabling Your Layer</ulink>"
-            section in the Yocto Project Development Manual.
+            section in the Yocto Project Development Tasks Manual.
         </para>
 
         <para>
@@ -1465,7 +1465,7 @@
         <para>
             For more information on layers, see the
             "<ulink url='&YOCTO_DOCS_DEV_URL;#understanding-and-creating-layers'>Understanding and Creating Layers</ulink>"
-            section in the Yocto Project Development Manual.
+            section in the Yocto Project Development Tasks Manual.
         </para>
 
         <section id="distro-layer">
@@ -2230,7 +2230,9 @@
 
             <para>
                 After the root filesystem is built, processing begins on
-                the image through the <filename>do_image</filename> task.
+                the image through the
+                <link linkend='ref-tasks-image'><filename>do_image</filename></link>
+                task.
                 The build system runs any pre-processing commands as defined
                 by the
                 <link linkend='var-IMAGE_PREPROCESS_COMMAND'><filename>IMAGE_PREPROCESS_COMMAND</filename></link>
@@ -2241,20 +2243,38 @@
             </para>
 
             <para>
-                The <filename>do_image</filename> task dynamically creates
-                other <filename>do_image_*</filename> tasks as needed, which
-                include compressing the root filesystem image to reduce the
-                overall size of the image.
-                The process turns everything into an image file or a set of
-                image files.
-                The formats used for the root filesystem depend on the
+                The OpenEmbedded build system dynamically creates
+                <filename>do_image_*</filename> tasks as needed, based
+                on the image types specified in the
                 <link linkend='var-IMAGE_FSTYPES'><filename>IMAGE_FSTYPES</filename></link>
                 variable.
+                The process turns everything into an image file or a set of
+                image files and compresses the root filesystem image to reduce
+                the overall size of the image.
+                The formats used for the root filesystem depend on the
+                <filename>IMAGE_FSTYPES</filename> variable.
+            </para>
+
+            <para>
+                As an example, a dynamically created task when creating a
+                particular image <replaceable>type</replaceable> would take the
+                following form:
+                <literallayout class='monospaced'>
+     do_image_<replaceable>type</replaceable>[depends]
+                </literallayout>
+                So, if the <replaceable>type</replaceable> as specified by the
+                <filename>IMAGE_FSTYPES</filename> were
+                <filename>ext4</filename>, the dynamically generated task
+                would be as follows:
+                <literallayout class='monospaced'>
+     do_image_ext4[depends]
+                </literallayout>
             </para>
 
             <para>
                 The final task involved in image creation is the
-                <filename>do_image_complete</filename> task.
+                <link linkend='ref-tasks-image-complete'><filename>do_image_complete</filename></link>
+                task.
                 This task completes the image by applying any image
                 post processing as defined through the
                 <link linkend='var-IMAGE_POSTPROCESS_COMMAND'><filename>IMAGE_POSTPROCESS_COMMAND</filename></link>
@@ -2291,8 +2311,8 @@
                 <link linkend='ref-tasks-populate_sdk'><filename>do_populate_sdk</filename></link>
                 task, see the
                 "<ulink url='&YOCTO_DOCS_SDK_URL;#sdk-building-an-sdk-installer'>Building an SDK Installer</ulink>"
-                section in the Yocto Project Software Development Kit (SDK)
-                Developer's Guide.
+                section in the Yocto Project Application Development and the
+                Extensible Software Development Kit (SDK) manual.
             </note>
 
             <para>
@@ -2649,7 +2669,8 @@
                 section.
                 For information on setting up a cross-development
                 environment, see the
-                <ulink url='&YOCTO_DOCS_SDK_URL;#sdk-manual'>Yocto Project Software Development Kit (SDK) Developer's Guide</ulink>.
+                <ulink url='&YOCTO_DOCS_SDK_URL;#sdk-manual'>Yocto Project Application Development and the Extensible Software Development Kit (eSDK)</ulink>
+                manual.
             </para>
         </note>
 
