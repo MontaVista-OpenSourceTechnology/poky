@@ -2,13 +2,13 @@ require gcc-common.inc
 
 # Third digit in PV should be incremented after a minor release
 
-PV = "7.2.0"
+PV = "7.3.0"
 
 # BINV should be incremented to a revision after a minor gcc release
 
-BINV = "7.2.0"
+BINV = "7.3.0"
 
-FILESEXTRAPATHS =. "${FILE_DIRNAME}/gcc-7.2:${FILE_DIRNAME}/gcc-7.2/backport:"
+FILESEXTRAPATHS =. "${FILE_DIRNAME}/gcc-7.3:${FILE_DIRNAME}/gcc-7.3/backport:"
 
 DEPENDS =+ "mpfr gmp libmpc zlib"
 NATIVEDEPS = "mpfr-native gmp-native libmpc-native zlib-native"
@@ -70,7 +70,6 @@ SRC_URI = "\
            file://0043-gcc-final.c-fdebug-prefix-map-support-to-remap-sourc.patch \
            file://0044-libgcc-Add-knob-to-use-ldbl-128-on-ppc.patch \
            file://0045-Link-libgcc-using-LDFLAGS-not-just-SHLIB_LDFLAGS.patch \
-           file://0046-libgcc_s-Use-alias-for-__cpu_indicator_init-instead-.patch \
            file://0047-sync-gcc-stddef.h-with-musl.patch \
            file://0048-gcc-Enable-static-PIE.patch \
            file://fix-segmentation-fault-precompiled-hdr.patch \
@@ -78,11 +77,10 @@ SRC_URI = "\
            ${BACKPORTS} \
 "
 BACKPORTS = "\
-           file://0051-ARM-PR-82445-suppress-32-bit-aligned-ldrd-strd-peeph.patch \
-           file://0001-PR-rtl-optimization-81803.patch \
 "
-SRC_URI[md5sum] = "ff370482573133a7fcdd96cd2f552292"
-SRC_URI[sha256sum] = "1cf7adf8ff4b5aa49041c8734bbcf1ad18cc4c94d0029aae0f4e48841088479a"
+
+SRC_URI[md5sum] = "be2da21680f27624f3a87055c4ba5af2"
+SRC_URI[sha256sum] = "832ca6ae04636adbb430e865a1451adf6979ab44ca1c8374f61fba65645ce15c"
 
 S = "${TMPDIR}/work-shared/gcc-${PV}-${PR}/gcc-${PV}"
 #S = "${TMPDIR}/work-shared/gcc-${PV}-${PR}/git"

@@ -5,7 +5,7 @@ LIC_FILES_CHKSUM = "file://LICENSES;md5=e9a558e243b36d3209f380deb394b213 \
       file://posix/rxspencer/COPYRIGHT;md5=dc5485bb394a13b2332ec1c785f5d83a \
       file://COPYING.LIB;md5=4fbd65380cdd255951079008b364516c"
 
-DEPENDS += "gperf-native"
+DEPENDS += "gperf-native bison-native"
 
 SRCREV ?= "1c9a5c270d8b66f30dcfaf1cb2d6cf39d3e18369"
 
@@ -43,6 +43,11 @@ SRC_URI = "${GLIBC_GIT_URI};branch=${SRCBRANCH};name=glibc \
            file://0026-assert-Suppress-pedantic-warning-caused-by-statement.patch \
            file://0027-glibc-reset-dl-load-write-lock-after-forking.patch \
            file://0028-Bug-4578-add-ld.so-lock-while-fork.patch \
+           file://CVE-2017-15670.patch \
+           file://CVE-2017-15671.patch \
+           file://0029-assert-Support-types-without-operator-int-BZ-21972.patch \
+           file://CVE-2017-16997.patch \
+           file://CVE-2017-17426.patch \
 "
 
 NATIVESDKFIXES ?= ""
@@ -103,6 +108,10 @@ do_configure () {
 # version check and doesn't really help with anything
         (cd ${S} && gnu-configize) || die "failure in running gnu-configize"
         find ${S} -name "configure" | xargs touch
+        # "plural.c" may or may not get regenerated from "plural.y" so we
+        # touch "plural.y" to make sure it does. (This should not be needed
+        # for glibc version 2.26+)
+        find ${S}/intl -name "plural.y" | xargs touch
         CPPFLAGS="" oe_runconf
 }
 
