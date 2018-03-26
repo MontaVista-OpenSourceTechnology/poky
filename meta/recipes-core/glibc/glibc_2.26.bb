@@ -42,6 +42,7 @@ SRC_URI = "${GLIBC_GIT_URI};branch=${SRCBRANCH};name=glibc \
            file://0025-locale-fix-hard-coded-reference-to-gcc-E.patch \
            file://0027-glibc-reset-dl-load-write-lock-after-forking.patch \
            file://0028-Bug-4578-add-ld.so-lock-while-fork.patch \
+           file://0029-bits-siginfo-consts.h-enum-definition-for-TRAP_HWBKP.patch \
 "
 
 NATIVESDKFIXES ?= ""
@@ -50,6 +51,7 @@ NATIVESDKFIXES_class-nativesdk = "\
            file://0002-nativesdk-glibc-Fix-buffer-overrun-with-a-relocated-.patch \
            file://0003-nativesdk-glibc-Raise-the-size-of-arrays-containing-.patch \
            file://0004-nativesdk-glibc-Allow-64-bit-atomics-for-x86.patch \
+           file://relocate-locales.patch \
 "
 
 S = "${WORKDIR}/git"
@@ -135,12 +137,6 @@ do_compile () {
 		fi
 	fi
 
-}
-
-# Use the host locale archive when built for nativesdk so that we don't need to
-# ship a complete (100MB) locale set.
-do_compile_prepend_class-nativesdk() {
-    echo "complocaledir=/usr/lib/locale" >> ${S}/configparms
 }
 
 require glibc-package.inc
