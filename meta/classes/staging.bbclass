@@ -473,6 +473,7 @@ python extend_recipe_sysroot() {
         d2 = d
         destsysroot = recipesysroot
         variant = ''
+        recipe_variant = d2.getVar("BBEXTENDVARIANT")
         if setscenedeps[dep][2].startswith("virtual:multilib"):
             variant = setscenedeps[dep][2].split(":")[2]
             if variant != current_variant:
@@ -502,7 +503,8 @@ python extend_recipe_sysroot() {
                 if os.path.exists(manifest):
                     break
         if not os.path.exists(manifest):
-            bb.warn("Manifest %s not found?" % manifest)
+            if variant == recipe_variant or native: 
+               bb.warn("Manifest %s not found?" % manifest)
         else:
             newmanifest = collections.OrderedDict()
             if native:
