@@ -500,9 +500,9 @@ python extend_recipe_sysroot() {
             pkgarchs.append('allarch')
             if bb.data.inherits_class("image",d) and recipe_variant != "":
                alt_tune = d2.getVar("DEFAULTTUNE_virtclass-multilib-" + recipe_variant)
-               if alt_tune != "":
+               if alt_tune:
                   additional_pkgarchs = d2.getVar("PACKAGE_EXTRA_ARCHS_tune-" + alt_tune)
-                  if additional_pkgarchs != "":
+                  if additional_pkgarchs:
                      pkgarchs = pkgarchs + list(reversed(additional_pkgarchs.split()))
             for pkgarch in pkgarchs:
                 manifest = d2.expand("${SSTATE_MANIFESTS}/manifest-%s-%s.populate_sysroot" % (pkgarch, c))
