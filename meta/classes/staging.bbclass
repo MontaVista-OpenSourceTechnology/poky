@@ -498,7 +498,7 @@ python extend_recipe_sysroot() {
             pkgarchs = ['${MACHINE_ARCH}']
             pkgarchs = pkgarchs + list(reversed(d2.getVar("PACKAGE_EXTRA_ARCHS").split()))
             pkgarchs.append('allarch')
-            if bb.data.inherits_class("image",d) and recipe_variant != "":
+            if bb.data.inherits_class("image",d) and recipe_variant:
                alt_tune = d2.getVar("DEFAULTTUNE_virtclass-multilib-" + recipe_variant)
                if alt_tune:
                   additional_pkgarchs = d2.getVar("PACKAGE_EXTRA_ARCHS_tune-" + alt_tune)
