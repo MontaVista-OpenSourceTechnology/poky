@@ -148,7 +148,8 @@ def staging_copyfile(c, target, dest, postinsts, seendirs):
         #bb.warn(c)
     else:
         try:
-            os.link(c, dest)
+            if not os.path.exists(dest):
+                os.link(c, dest)
         except OSError as err:
             if err.errno == errno.EXDEV:
                 bb.utils.copyfile(c, dest)
