@@ -15,6 +15,9 @@ DEPENDS += "libxrender libxfixes"
 BBCLASSEXTEND = "native nativesdk"
 
 PE = "1"
+PR .= ".1"
+
+SRC_URI += "file://CVE-2017-16612.patch"
 
 XORG_PN = "libXcursor"
 
