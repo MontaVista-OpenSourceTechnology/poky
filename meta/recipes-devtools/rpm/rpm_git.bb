@@ -24,6 +24,7 @@ HOMEPAGE = "http://www.rpm.org"
 LICENSE = "GPL-2.0"
 LIC_FILES_CHKSUM = "file://COPYING;md5=f5259151d26ff18e78023450a5ac8d96"
 
+PR = "r1"
 SRC_URI = "git://github.com/rpm-software-management/rpm \
            file://0001-Do-not-add-an-unsatisfiable-dependency-when-building.patch \
            file://0001-Do-not-read-config-files-from-HOME.patch \
@@ -43,6 +44,7 @@ SRC_URI = "git://github.com/rpm-software-management/rpm \
            file://0003-rpmstrpool.c-make-operations-over-string-pools-threa.patch \
            file://0004-build-pack.c-remove-static-local-variables-from-buil.patch \
            file://0001-perl-disable-auto-reqs.patch \
+           file://CVE-2017-7501.patch \
            "
 UPSTREAM_VERSION_UNKNOWN = "1"
 
