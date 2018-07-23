@@ -12,6 +12,7 @@ DEPENDS_class-native = ""
 
 inherit autotools gettext texinfo
 
+PR = "r1"
 SRC_URI = "${GNU_MIRROR}/coreutils/${BP}.tar.xz;name=tarball \
            http://distfiles.gentoo.org/distfiles/${BP}-man.tar.xz;name=manpages \
            file://man-decouple-manpages-from-build.patch \
@@ -21,6 +22,8 @@ SRC_URI = "${GNU_MIRROR}/coreutils/${BP}.tar.xz;name=tarball \
            file://0001-uname-report-processor-and-hardware-correctly.patch \
            file://disable-ls-output-quoting.patch \
            file://0001-local.mk-fix-cross-compiling-problem.patch \
+           file://CVE-2017-18018-1.patch \
+           file://CVE-2017-18018-2.patch \
           "
 
 SRC_URI[tarball.md5sum] = "502795792c212932365e077946d353ae"
