@@ -6,6 +6,7 @@ require util-linux.inc
 OLDHOST = ""
 OLDHOST_class-native = "file://util-linux-native-qsort.patch"
 
+PR = "r1"
 SRC_URI += "file://configure-sbindir.patch \
             file://runuser.pamd \
             file://runuser-l.pamd \
@@ -14,6 +15,7 @@ SRC_URI += "file://configure-sbindir.patch \
             file://run-ptest \
             file://display_testname_for_subtest.patch \
             file://avoid_parallel_tests.patch \
+            file://CVE-2018-7738.patch \
 "
 SRC_URI[md5sum] = "eaa3429150268027908a1b8ae6ee9a62"
 SRC_URI[sha256sum] = "c208a4ff6906cb7f57940aa5bc3a6eed146e50a7cc0a092f52ef2ab65057a08d"
