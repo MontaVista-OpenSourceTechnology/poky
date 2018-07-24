@@ -17,9 +17,11 @@ xdg-terminal \
 LICENSE = "MIT"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=a5367a90934098d6b05af3b746405014"
 
+PR = "r1"
 SRC_URI = "http://portland.freedesktop.org/download/${BPN}-${PV}.tar.gz \
            file://0001-Reinstate-xdg-terminal.patch \
            file://0001-Don-t-build-the-in-script-manual.patch \
+           file://CVE-2017-18266.patch \
           "
 
 SRC_URI[md5sum] = "2d0aec6037769a5f138ff404b1bb4b15"
