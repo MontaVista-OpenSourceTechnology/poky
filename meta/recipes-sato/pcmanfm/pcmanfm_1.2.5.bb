@@ -12,12 +12,14 @@ DEPENDS = "gtk+3 startup-notification libfm intltool-native gettext-native glib-
 
 COMPATIBLE_HOST = '(x86_64.*|i.86.*|aarch64.*|arm.*|mips.*|powerpc.*|sh.*)-(linux|freebsd.*)'
 
+PR = "r1"
 SRC_URI = "${SOURCEFORGE_MIRROR}/pcmanfm/pcmanfm-${PV}.tar.xz \
 	   file://gnome-fs-directory.png \
 	   file://gnome-fs-regular.png \
 	   file://gnome-mime-text-plain.png \
 	   file://emblem-symbolic-link.png \
-	   file://no-desktop.patch"
+	   file://no-desktop.patch \
+	   file://CVE-2017-8934.patch"
 
 SRC_URI[md5sum] = "b4d1f8ce08d87e4f27805a246fc51ac2"
 SRC_URI[sha256sum] = "0c86cac028b705ff314c7464d814c2cf7ff604c17491c20aa204b1ef1a80ad67"
