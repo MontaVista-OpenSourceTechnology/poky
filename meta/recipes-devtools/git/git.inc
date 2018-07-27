@@ -6,10 +6,11 @@ DEPENDS = "openssl curl zlib expat"
 
 PROVIDES_append_class-native = " git-replacement-native"
 
-PR .= ".1"
+PR .= ".2"
 SRC_URI = "${KERNELORG_MIRROR}/software/scm/git/git-${PV}.tar.gz;name=tarball \
            ${KERNELORG_MIRROR}/software/scm/git/git-manpages-${PV}.tar.gz;name=manpages \
-           file://CVE-2017-15298.patch"
+           file://CVE-2017-15298.patch \
+           file://CVE-2018-11235.patch"
 
 S = "${WORKDIR}/git-${PV}"
 
