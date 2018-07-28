@@ -14,6 +14,7 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=94d55d512a9ba36caa9b7df079bae19f \
 
 DEPENDS = "libgpg-error"
 
+PR  = "r1"
 UPSTREAM_CHECK_URI = "https://gnupg.org/download/index.html"
 SRC_URI = "${GNUPG_MIRROR}/libgcrypt/libgcrypt-${PV}.tar.gz \
            file://0001-Add-and-use-pkg-config-for-libgcrypt-instead-of-conf.patch \
@@ -22,6 +23,7 @@ SRC_URI = "${GNUPG_MIRROR}/libgcrypt/libgcrypt-${PV}.tar.gz \
            file://0004-tests-Makefile.am-fix-undefined-reference-to-pthread.patch \
            file://0005-ecc-Add-input-validation-for-X25519.patch \
            file://0006-Fix-building-AArch32-CE-implementations-when-target-.patch \
+           file://CVE-2018-0495.patch \
 "
 SRC_URI[md5sum] = "110ce4352f9ea6f560bdc6c5644ae93c"
 SRC_URI[sha256sum] = "f6e470b7f2d3a703e8747f05a8c19d9e10e26ebf2d5f3d71ff75a40f504e12ee"
