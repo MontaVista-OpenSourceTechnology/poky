@@ -4,7 +4,7 @@ require perl.inc
 DEPENDS = "virtual/db grep-native"
 DEPENDS += "gdbm zlib"
 
-PR = "r3"
+PR = "r4"
 # Pick up patches from debian
 # http://ftp.de.debian.org/debian/pool/main/p/perl/perl_5.22.0-1.debian.tar.xz
 SRC_URI += " \
@@ -73,6 +73,7 @@ SRC_URI += " \
         file://CVE-2018-6798-2.patch \
         file://CVE-2018-6797.patch \
         file://CVE-2018-6913.patch \
+        file://CVE-2018-12015.patch \
 "
 
 # Fix test case issues
