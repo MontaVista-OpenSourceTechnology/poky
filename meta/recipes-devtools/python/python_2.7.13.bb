@@ -29,6 +29,7 @@ SRC_URI += "\
   file://Don-t-use-getentropy-on-Linux.patch \
   file://pass-missing-libraries-to-Extension-for-mul.patch \
   file://support_SOURCE_DATE_EPOCH_in_py_compile_2.7.patch \
+  file://fix-gc-alignment.patch \
 "
 
 S = "${WORKDIR}/Python-${PV}"
