@@ -19,6 +19,7 @@ SRC_URI = "http://download.osgeo.org/libtiff/tiff-${PV}.tar.gz \
            file://CVE-2018-10963.patch \
            file://CVE-2018-8905.patch \
            file://CVE-2018-7456.patch \
+           file://CVE-2017-17095.patch \
           "
 
 SRC_URI[md5sum] = "2a7d1c1318416ddf36d5f6fa4600069b"
@@ -27,7 +28,7 @@ SRC_URI[sha256sum] = "59d7a5a8ccd92059913f246877db95a2918e6c04fb9d43fd74e5c3390d
 # exclude betas
 UPSTREAM_CHECK_REGEX = "tiff-(?P<pver>\d+(\.\d+)+).tar"
 
-PR = "r1"
+PR = "r1.2"
 
 inherit autotools multilib_header
 
