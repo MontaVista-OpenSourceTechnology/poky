@@ -1,6 +1,6 @@
 require python.inc
 DEPENDS = "python-native libffi bzip2 gdbm openssl readline sqlite3 zlib"
-PR = "${INC_PR}.1"
+PR = "${INC_PR}.2"
 
 DISTRO_SRC_URI ?= "file://sitecustomize.py"
 DISTRO_SRC_URI_linuxstdbase = ""
@@ -30,6 +30,7 @@ SRC_URI += "\
   file://support_SOURCE_DATE_EPOCH_in_py_compile_2.7.patch \
   file://float-endian.patch \
   file://0001-closes-bpo-34540-Convert-shutil._call_external_zip-t.patch \
+  file://0001-2.7-bpo-34623-Use-XML_SetHashSalt-in-_elementtree-GH.patch \
 "
 
 S = "${WORKDIR}/Python-${PV}"
