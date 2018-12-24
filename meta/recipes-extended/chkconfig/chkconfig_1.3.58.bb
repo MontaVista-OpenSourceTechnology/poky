@@ -11,7 +11,7 @@ HOMEPAGE = "https://github.com/fedora-sysv"
 LICENSE = "GPLv2"
 LIC_FILES_CHKSUM = "file://COPYING;md5=5574c6965ae5f583e55880e397fbb018"
 
-DEPENDS = "libnewt popt"
+DEPENDS = "libnewt popt gettext-native"
 PROVIDES += "virtual/update-alternatives"
 
 PR = "r7"
