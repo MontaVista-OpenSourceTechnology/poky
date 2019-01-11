@@ -5,42 +5,33 @@ LICENSE = "(GPLv3 & Elfutils-Exception)"
 LIC_FILES_CHKSUM = "file://COPYING;md5=d32239bcb673463ab874e80d47fae504"
 DEPENDS = "libtool bzip2 zlib virtual/libintl"
 DEPENDS_append_libc-musl = " argp-standalone fts "
-SRC_URI = "https://sourceware.org/elfutils/ftp/${PV}/${BP}.tar.bz2"
-SRC_URI[md5sum] = "03599aee98c9b726c7a732a2dd0245d5"
-SRC_URI[sha256sum] = "1f844775576b79bdc9f9c717a50058d08620323c1e935458223a12f249c9e066"
-
-PR = "r2"
-SRC_URI += "\
-        file://0001-dso-link-change.patch \
-        file://0002-Fix-elf_cvt_gunhash-if-dest-and-src-are-same.patch \
-        file://0003-fixheadercheck.patch \
-        file://0004-Disable-the-test-to-convert-euc-jp.patch \
-        file://0005-fix-a-stack-usage-warning.patch \
-        file://0006-Fix-build-on-aarch64-musl.patch \
-        file://0007-Fix-control-path-where-we-have-str-as-uninitialized-.patch \
-        file://0001-libasm-may-link-with-libbz2-if-found.patch \
-        file://CVE-2018-8769.patch \
-        file://0001-libelf-Sync-elf.h-from-glibc.patch \
-"
+# The Debian patches below are from:
+# http://ftp.de.debian.org/debian/pool/main/e/elfutils/elfutils_0.175-1.debian.tar.xz
+SRC_URI = "https://sourceware.org/elfutils/ftp/${PV}/${BP}.tar.bz2 \
+           file://0001-dso-link-change.patch \
+           file://0002-Fix-elf_cvt_gunhash-if-dest-and-src-are-same.patch \
+           file://0003-fixheadercheck.patch \
+           file://0004-Disable-the-test-to-convert-euc-jp.patch \
+           file://0006-Fix-build-on-aarch64-musl.patch \
+           file://0007-Fix-control-path-where-we-have-str-as-uninitialized-.patch \
+           file://0001-libasm-may-link-with-libbz2-if-found.patch \
+           file://0001-libelf-elf_end.c-check-data_list.data.d.d_buf-before.patch \
+           file://debian/hppa_backend.diff \
+           file://debian/arm_backend.diff \
+           file://debian/mips_backend.diff \
+           file://debian/mips_readelf_w.patch \
+           file://debian/kfreebsd_path.patch \
+           file://debian/0001-Ignore-differences-between-mips-machine-identifiers.patch \
+           file://debian/0002-Add-support-for-mips64-abis-in-mips_retval.c.patch \
+           file://debian/0003-Add-mips-n64-relocation-format-hack.patch \
+           file://debian/hurd_path.patch \
+           file://debian/ignore_strmerge.diff \
+           file://debian/disable_werror.patch \
+           "
 SRC_URI_append_libc-musl = " file://0008-build-Provide-alternatives-for-glibc-assumptions-hel.patch"
 
-# Pick patches from debian
-# http://ftp.de.debian.org/debian/pool/main/e/elfutils/elfutils_0.168-0.2.debian.tar.xz
-SRC_URI += "\
-        file://debian/hppa_backend.diff \
-        file://debian/arm_backend.diff \
-        file://debian/mips_backend.patch \
-        file://debian/mips_readelf_w.patch \
-        file://debian/0001-Ignore-differences-between-mips-machine-identifiers.patch \
-        file://debian/0002-Add-support-for-mips64-abis-in-mips_retval.c.patch \
-        file://debian/0003-Add-mips-n64-relocation-format-hack.patch \
-"
-# Fix the patches from Debian with GCC7
-SRC_URI += "file://debian/fallthrough.patch"
-
-# The buildsystem wants to generate 2 .h files from source using a binary it just built,
-# which can not pass the cross compiling, so let's work around it by adding 2 .h files
-# along with the do_configure_prepend()
+SRC_URI[md5sum] = "9a02b0382b78cc2d515fb950275d4c02"
+SRC_URI[sha256sum] = "f7ef925541ee32c6d15ae5cb27da5f119e01a5ccdbe9fe57bf836730d7b7a65b"
 
 inherit autotools gettext
 
