@@ -43,7 +43,10 @@ SRC_URI = "${GLIBC_GIT_URI};branch=${SRCBRANCH};name=glibc \
            file://0027-glibc-reset-dl-load-write-lock-after-forking.patch \
            file://0028-Bug-4578-add-ld.so-lock-while-fork.patch \
            file://0029-bits-siginfo-consts.h-enum-definition-for-TRAP_HWBKP.patch \
+           file://CVE-2018-19591.patch \
 "
+
+PR = "r1"
 
 NATIVESDKFIXES ?= ""
 NATIVESDKFIXES_class-nativesdk = "\
