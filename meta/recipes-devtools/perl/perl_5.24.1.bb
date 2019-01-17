@@ -73,6 +73,8 @@ SRC_URI += " \
         file://CVE-2018-6797.patch \
         file://CVE-2018-6913.patch \
         file://CVE-2018-12015.patch \
+        file://CVE-2018-18311.patch \
+        file://CVE-2018-18313.patch \
 "
 
 # Fix test case issues
