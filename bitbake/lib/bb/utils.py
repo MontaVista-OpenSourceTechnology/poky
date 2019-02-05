@@ -1345,6 +1345,7 @@ def edit_bblayers_conf(bblayers_conf, add, remove):
     def handle_bblayers(varname, origvalue, op, newlines):
         updated = False
         bblayers = [remove_trailing_sep(x) for x in origvalue.split()]
+        bblayersabs = [os.path.abspath(x) for x in bblayers]
         if removelayers:
             for removelayer in removelayers:
                 for layer in bblayers:
@@ -1355,7 +1356,7 @@ def edit_bblayers_conf(bblayers_conf, add, remove):
                         break
         if addlayers and not plusequals:
             for addlayer in addlayers:
-                if addlayer not in bblayers:
+                if addlayer not in bblayers and os.path.abspath(addlayer) not in bblayersabs:
                     updated = True
                     bblayers.append(addlayer)
             del addlayers[:]
