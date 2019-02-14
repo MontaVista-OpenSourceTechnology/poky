@@ -17,7 +17,9 @@ SRC_URI = "http://ftp.gnu.org/gnu/gdb/gdb-${PV}.tar.xz \
            file://0010-resolve-restrict-keyword-conflict.patch \
            file://package_devel_gdb_patches_120-sigprocmask-invalid-call.patch \
            file://gdb-Fix-ia64-defining-TRAP_HWBKPT-before-including-g.patch \
+           file://PR22047_CVE-2018-17358_01.patch \
+           file://PR23686_CVE-2018-17358_02.patch \
 "
 SRC_URI[md5sum] = "c3d35cd949084be53b92cc1e03485f88"
 SRC_URI[sha256sum] = "f6a24ffe4917e67014ef9273eb8b547cb96a13e5ca74895b06d683b391f3f4ee"
-
+PR .= ".1"
