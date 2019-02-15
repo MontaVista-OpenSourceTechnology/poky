@@ -45,6 +45,8 @@ SRC_URI = "git://github.com/rpm-software-management/rpm \
            file://0004-build-pack.c-remove-static-local-variables-from-buil.patch \
            file://0001-perl-disable-auto-reqs.patch \
            file://CVE-2017-7501.patch \
+           file://CVE-2017-7500_p1.patch \
+           file://CVE-2017-7500_p2.patch \
            "
 UPSTREAM_VERSION_UNKNOWN = "1"
 
