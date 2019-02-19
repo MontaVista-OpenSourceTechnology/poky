@@ -20,7 +20,8 @@ SRC_URI = "http://ftp.gnu.org/gnu/gdb/gdb-${PV}.tar.xz \
            file://PR22047_CVE-2018-17358_01.patch \
            file://PR23686_CVE-2018-17358_02.patch \
            file://CVE-2018-17360.patch \
+           file://CVE-2018-18606.patch \
 "
 SRC_URI[md5sum] = "c3d35cd949084be53b92cc1e03485f88"
 SRC_URI[sha256sum] = "f6a24ffe4917e67014ef9273eb8b547cb96a13e5ca74895b06d683b391f3f4ee"
-PR .= ".2"
+PR .= ".3"
