@@ -75,11 +75,14 @@ SRC_URI = "\
            file://fix-segmentation-fault-precompiled-hdr.patch \
            file://0050-RISC-V-Handle-non-legitimate-address-in-riscv_legiti.patch \
            file://no-sse-fix-test-case-failures.patch \
+           file://CVE-2018-18700.patch \
            ${BACKPORTS} \
 "
 BACKPORTS = "\
            file://0001-Fix-internal-compiler-error-in-testcase.patch \
 "
+
+PR .= ".1"
 
 SRC_URI[md5sum] = "be2da21680f27624f3a87055c4ba5af2"
 SRC_URI[sha256sum] = "832ca6ae04636adbb430e865a1451adf6979ab44ca1c8374f61fba65645ce15c"
