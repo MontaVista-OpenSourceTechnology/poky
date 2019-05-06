@@ -8,8 +8,14 @@ SECTION = "libs"
 LICENSE = "GPLv3+ & LGPL-2.1+"
 LIC_FILES_CHKSUM = "file://COPYING;md5=d32239bcb673463ab874e80d47fae504"
 
-DEPENDS = "gettext-native virtual/libiconv expat"
-DEPENDS_class-native = "gettext-minimal-native"
+PR .= ".1"
+
+# Because po-gram-gen.y has been modified by fix-CVE-2018-18751.patch,
+# it requires yacc which provided by bison-native
+# Please remove bison-native from DEPENDS* when next upgrade
+
+DEPENDS = "bison-native gettext-native virtual/libiconv expat"
+DEPENDS_class-native = "bison-native gettext-minimal-native"
 PROVIDES = "virtual/libintl virtual/gettext"
 PROVIDES_class-native = "virtual/gettext-native"
 RCONFLICTS_${PN} = "proxy-libintl"
@@ -17,6 +23,7 @@ SRC_URI = "${GNU_MIRROR}/gettext/gettext-${PV}.tar.gz \
 	   file://parallel.patch \
 	   file://add-with-bisonlocaledir.patch \
 	   file://cr-statement.c-timsort.h-fix-formatting-issues.patch \
+           file://CVE-2018-18751.patch \
 "
 
 SRC_URI[md5sum] = "97e034cf8ce5ba73a28ff6c3c0638092"
