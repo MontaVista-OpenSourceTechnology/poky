@@ -1,6 +1,6 @@
 require python.inc
 DEPENDS = "python-native libffi bzip2 gdbm openssl readline sqlite3 zlib"
-PR = "${INC_PR}"
+PR = "${INC_PR}.1"
 
 DISTRO_SRC_URI ?= "file://sitecustomize.py"
 DISTRO_SRC_URI_linuxstdbase = ""
@@ -29,6 +29,8 @@ SRC_URI += "\
   file://pass-missing-libraries-to-Extension-for-mul.patch \
   file://support_SOURCE_DATE_EPOCH_in_py_compile_2.7.patch \
   file://float-endian.patch \
+  file://CVE-2019-9636_1.patch \
+  file://CVE-2019-9636_2.patch \
 "
 
 S = "${WORKDIR}/Python-${PV}"
