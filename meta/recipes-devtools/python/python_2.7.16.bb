@@ -1,6 +1,6 @@
 require python.inc
 DEPENDS = "python-native libffi bzip2 gdbm openssl readline sqlite3 zlib"
-PR = "${INC_PR}.2"
+PR = "${INC_PR}.3"
 
 DISTRO_SRC_URI ?= "file://sitecustomize.py"
 DISTRO_SRC_URI_linuxstdbase = ""
@@ -33,6 +33,8 @@ SRC_URI += "\
   file://CVE-2019-9636_2.patch \
   file://CVE-2018-20852.patch \
   file://CVE-2019-10160.patch \
+  file://bpo-35907-cve-2019-9948.patch \
+  file://bpo-35907-cve-2019-9948-fix.patch \
 "
 
 S = "${WORKDIR}/Python-${PV}"
