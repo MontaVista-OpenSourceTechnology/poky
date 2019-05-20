@@ -11,6 +11,7 @@ RDEPENDS_${PN} = "lighttpd-module-dirlisting \
                   lighttpd-module-staticfile"
 RRECOMMENDS_${PN} = "lighttpd-module-access \
                      lighttpd-module-accesslog"
+PR = "r1"
 
 SRC_URI = "http://download.lighttpd.net/lighttpd/releases-1.4.x/lighttpd-${PV}.tar.xz \
         file://index.html.lighttpd \
@@ -18,6 +19,7 @@ SRC_URI = "http://download.lighttpd.net/lighttpd/releases-1.4.x/lighttpd-${PV}.t
         file://lighttpd \
         file://lighttpd.service \
         file://0001-Use-pkg-config-for-pcre-dependency-instead-of-config.patch \
+        file://CVE-2018-19052.patch \
         "
 
 SRC_URI[md5sum] = "a128e1eda76899ce3fd115efae5fe631"
