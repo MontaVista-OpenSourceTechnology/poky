@@ -4,6 +4,8 @@ GO_BASEVERSION = "1.9"
 GO_MINOR = ".4"
 PV .= "${GO_MINOR}"
 
+PR .= ".1"
+
 FILESEXTRAPATHS_prepend := "${FILE_DIRNAME}/go-${GO_BASEVERSION}:"
 
 LIC_FILES_CHKSUM = "file://LICENSE;md5=5d4950ecb7b26d2c5e4e7b4e0dd74707"
@@ -19,6 +21,7 @@ SRC_URI += "\
         file://0008-make.bash-add-GOHOSTxx-indirection-for-cross-canadia.patch \
         file://0009-cmd-go-buildmode-pie-forces-external-linking-mode-on.patch \
         file://0010-make.bash-override-CC-when-building-dist-and-go_boot.patch \
+        file://CVE-2018-16873.patch \
 "
 SRC_URI_append_libc-musl = " file://set-external-linker.patch"
 
