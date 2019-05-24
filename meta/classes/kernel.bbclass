@@ -381,6 +381,7 @@ kernel_do_install() {
 	install -d ${D}${sysconfdir}/modprobe.d
 }
 do_install[prefuncs] += "package_get_auto_pr"
+do_install[lockfiles] = "${TMPDIR}/kernel-scripts.lock"
 
 # Must be ran no earlier than after do_kernel_checkout or else Makefile won't be in ${S}/Makefile
 do_kernel_version_sanity_check() {
