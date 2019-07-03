@@ -222,6 +222,11 @@ do_bundle_initramfs () {
 		kernel_do_compile
 		# Restoring kernel image
 		for tp in $tmp_path ; do
+			if [ "x${KERNEL_IMAGETYPE}" = "xfitImage" ] ; then
+				if [ -f "${KERNEL_OUTPUT_DIR}/${KERNEL_IMAGETYPE}-${INITRAMFS_IMAGE}" ] ; then
+					cp -f ${KERNEL_OUTPUT_DIR}/${KERNEL_IMAGETYPE}-${INITRAMFS_IMAGE} ${KERNEL_OUTPUT_DIR}/${KERNEL_IMAGETYPE}
+				fi
+			fi
 			type=`echo $tp|cut -d "#" -f 1`
 			linkpath=`echo $tp|cut -d "#" -f 2`
 			realpath=`echo $tp|cut -d "#" -f 3`
