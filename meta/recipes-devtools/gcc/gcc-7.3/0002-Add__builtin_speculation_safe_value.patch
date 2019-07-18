@@ -1,0 +1,886 @@
+From 123081efd41261af8830d6c796a9b12435806bac Mon Sep 17 00:00:00 2001
+From: rearnsha <rearnsha@138bc75d-0d04-0410-961f-82ee72b054a4>
+Date: Tue, 31 Jul 2018 17:35:32 +0000
+Subject: [PATCH] Add __builtin_speculation_safe_value
+
+This patch defines a new intrinsic function
+__builtin_speculation_safe_value.  A generic default implementation is
+defined which will attempt to use the backend pattern
+"speculation_safe_barrier".  If this pattern is not defined, or if it
+is not available, then the compiler will emit a warning, but
+compilation will continue.
+
+Note that the test spec-barrier-1.c will currently fail on all
+targets.  This is deliberate, the failure will go away when
+appropriate action is taken for each target backend.
+
+gcc:
+	* builtin-types.def (BT_FN_PTR_PTR_VAR): New function type.
+	(BT_FN_I1_I1_VAR, BT_FN_I2_I2_VAR, BT_FN_I4_I4_VAR): Likewise.
+	(BT_FN_I8_I8_VAR, BT_FN_I16_I16_VAR): Likewise.
+	* builtin-attrs.def (ATTR_NOVOPS_NOTHROW_LEAF_LIST): New attribute
+	list.
+	* builtins.def (BUILT_IN_SPECULATION_SAFE_VALUE_N): New builtin.
+	(BUILT_IN_SPECULATION_SAFE_VALUE_PTR): New internal builtin.
+	(BUILT_IN_SPECULATION_SAFE_VALUE_1): Likewise.
+	(BUILT_IN_SPECULATION_SAFE_VALUE_2): Likewise.
+	(BUILT_IN_SPECULATION_SAFE_VALUE_4): Likewise.
+	(BUILT_IN_SPECULATION_SAFE_VALUE_8): Likewise.
+	(BUILT_IN_SPECULATION_SAFE_VALUE_16): Likewise.
+	* builtins.c (expand_speculation_safe_value): New function.
+	(expand_builtin): Call it.
+	* doc/cpp.texi: Document predefine __HAVE_SPECULATION_SAFE_VALUE.
+	* doc/extend.texi: Document __builtin_speculation_safe_value.
+	* doc/md.texi: Document "speculation_barrier" pattern.
+	* doc/tm.texi.in: Pull in TARGET_SPECULATION_SAFE_VALUE and
+	TARGET_HAVE_SPECULATION_SAFE_VALUE.
+	* doc/tm.texi: Regenerated.
+	* target.def (have_speculation_safe_value, speculation_safe_value): New
+	hooks.
+	* targhooks.c (default_have_speculation_safe_value): New function.
+	(default_speculation_safe_value): New function.
+	* targhooks.h (default_have_speculation_safe_value): Add prototype.
+	(default_speculation_safe_value): Add prototype.
+
+c-family:
+	* c-common.c (speculation_safe_resolve_call): New function.
+	(speculation_safe_resolve_params): New function.
+	(speculation_safe_resolve_return): New function.
+	(resolve_overloaded_builtin): Handle __builtin_speculation_safe_value.
+	* c-cppbuiltin.c (c_cpp_builtins): Add pre-define for
+	__HAVE_SPECULATION_SAFE_VALUE.
+
+testsuite:
+	* c-c++-common/spec-barrier-1.c: New test.
+	* c-c++-common/spec-barrier-2.c: New test.
+	* gcc.dg/spec-barrier-3.c: New test.
+
+git-svn-id: svn+ssh://gcc.gnu.org/svn/gcc/trunk@263168 138bc75d-0d04-0410-961f-82ee72b054a4
+---
+ gcc/ChangeLog                               |  29 +++++
+ gcc/builtin-attrs.def                       |   2 +
+ gcc/builtin-types.def                       |   6 +
+ gcc/builtins.c                              |  60 ++++++++++
+ gcc/builtins.def                            |  22 ++++
+ gcc/c-family/ChangeLog                      |   9 ++
+ gcc/c-family/c-common.c                     | 164 ++++++++++++++++++++++++++++
+ gcc/c-family/c-cppbuiltin.c                 |   7 +-
+ gcc/doc/cpp.texi                            |   4 +
+ gcc/doc/extend.texi                         |  91 +++++++++++++++
+ gcc/doc/md.texi                             |  15 +++
+ gcc/doc/tm.texi                             |  31 ++++++
+ gcc/doc/tm.texi.in                          |   4 +
+ gcc/target.def                              |  35 ++++++
+ gcc/targhooks.c                             |  32 ++++++
+ gcc/targhooks.h                             |   3 +
+ gcc/testsuite/ChangeLog                     |   6 +
+ gcc/testsuite/c-c++-common/spec-barrier-1.c |  38 +++++++
+ gcc/testsuite/c-c++-common/spec-barrier-2.c |  17 +++
+ gcc/testsuite/gcc.dg/spec-barrier-3.c       |  13 +++
+ 20 files changed, 587 insertions(+), 1 deletion(-)
+ create mode 100644 gcc/testsuite/c-c++-common/spec-barrier-1.c
+ create mode 100644 gcc/testsuite/c-c++-common/spec-barrier-2.c
+ create mode 100644 gcc/testsuite/gcc.dg/spec-barrier-3.c
+
+diff --git a/gcc/ChangeLog b/gcc/ChangeLog
+index f92db3a..de37f1f 100644
+--- a/gcc/ChangeLog	2019-05-09 16:01:48.955113692 +0530
++++ b/gcc/ChangeLog	2019-05-09 16:15:05.921680971 +0530
+@@ -1,3 +1,32 @@
++2018-07-31  Richard Earnshaw  <rearnsha@arm.com>
++
++	* builtin-types.def (BT_FN_PTR_PTR_VAR): New function type.
++	(BT_FN_I1_I1_VAR, BT_FN_I2_I2_VAR, BT_FN_I4_I4_VAR): Likewise.
++	(BT_FN_I8_I8_VAR, BT_FN_I16_I16_VAR): Likewise.
++	* builtin-attrs.def (ATTR_NOVOPS_NOTHROW_LEAF_LIST): New attribute
++	list.
++	* builtins.def (BUILT_IN_SPECULATION_SAFE_VALUE_N): New builtin.
++	(BUILT_IN_SPECULATION_SAFE_VALUE_PTR): New internal builtin.
++	(BUILT_IN_SPECULATION_SAFE_VALUE_1): Likewise.
++	(BUILT_IN_SPECULATION_SAFE_VALUE_2): Likewise.
++	(BUILT_IN_SPECULATION_SAFE_VALUE_4): Likewise.
++	(BUILT_IN_SPECULATION_SAFE_VALUE_8): Likewise.
++	(BUILT_IN_SPECULATION_SAFE_VALUE_16): Likewise.
++	* builtins.c (expand_speculation_safe_value): New function.
++	(expand_builtin): Call it.
++	* doc/cpp.texi: Document predefine __HAVE_SPECULATION_SAFE_VALUE.
++	* doc/extend.texi: Document __builtin_speculation_safe_value.
++	* doc/md.texi: Document "speculation_barrier" pattern.
++	* doc/tm.texi.in: Pull in TARGET_SPECULATION_SAFE_VALUE and
++	TARGET_HAVE_SPECULATION_SAFE_VALUE.
++	* doc/tm.texi: Regenerated.
++	* target.def (have_speculation_safe_value, speculation_safe_value):New
++	hooks.
++	* targhooks.c (default_have_speculation_safe_value): New function.
++	(default_speculation_safe_value): New function.
++	* targhooks.h (default_have_speculation_safe_value): Add prototype.
++	(default_speculation_safe_value): Add prototype.
++
+ 2018-01-25  Release Manager
+ 
+ 	* GCC 7.3.0 released.
+diff --git a/gcc/builtin-attrs.def b/gcc/builtin-attrs.def
+index 300ba65..e245e4d 100644
+--- a/gcc/builtin-attrs.def
++++ b/gcc/builtin-attrs.def
+@@ -129,6 +129,8 @@ DEF_ATTR_TREE_LIST (ATTR_NOTHROW_LIST, ATTR_NOTHROW, ATTR_NULL, ATTR_NULL)
+ 
+ DEF_ATTR_TREE_LIST (ATTR_NOTHROW_LEAF_LIST, ATTR_LEAF, ATTR_NULL, ATTR_NOTHROW_LIST)
+ 
++DEF_ATTR_TREE_LIST (ATTR_NOVOPS_NOTHROW_LEAF_LIST, ATTR_NOVOPS, \
++		        ATTR_NULL, ATTR_NOTHROW_LEAF_LIST)
+ DEF_ATTR_TREE_LIST (ATTR_CONST_NOTHROW_LIST, ATTR_CONST,	\
+ 			ATTR_NULL, ATTR_NOTHROW_LIST)
+ DEF_ATTR_TREE_LIST (ATTR_CONST_NOTHROW_LEAF_LIST, ATTR_CONST,	\
+diff --git a/gcc/builtin-types.def b/gcc/builtin-types.def
+index b01095c..70fae35 100644
+--- a/gcc/builtin-types.def
++++ b/gcc/builtin-types.def
+@@ -763,6 +763,12 @@ DEF_FUNCTION_TYPE_VAR_1 (BT_FN_VOID_LONG_VAR,
+ 			 BT_VOID, BT_LONG)
+ DEF_FUNCTION_TYPE_VAR_1 (BT_FN_VOID_ULL_VAR,
+ 			 BT_VOID, BT_ULONGLONG)
++DEF_FUNCTION_TYPE_VAR_1 (BT_FN_PTR_PTR_VAR, BT_PTR, BT_PTR)
++DEF_FUNCTION_TYPE_VAR_1 (BT_FN_I1_I1_VAR, BT_I1, BT_I1)
++DEF_FUNCTION_TYPE_VAR_1 (BT_FN_I2_I2_VAR, BT_I2, BT_I2)
++DEF_FUNCTION_TYPE_VAR_1 (BT_FN_I4_I4_VAR, BT_I4, BT_I4)
++DEF_FUNCTION_TYPE_VAR_1 (BT_FN_I8_I8_VAR, BT_I8, BT_I8)
++DEF_FUNCTION_TYPE_VAR_1 (BT_FN_I16_I16_VAR, BT_I16, BT_I16)
+ 
+ DEF_FUNCTION_TYPE_VAR_2 (BT_FN_INT_FILEPTR_CONST_STRING_VAR,
+ 			 BT_INT, BT_FILEPTR, BT_CONST_STRING)
+diff --git a/gcc/builtins.c b/gcc/builtins.c
+index c659611..39611de 100644
+--- a/gcc/builtins.c
++++ b/gcc/builtins.c
+@@ -6918,6 +6918,55 @@ inline_expand_builtin_string_cmp (tree exp, rtx target)
+ 			    const_str_n, mode);
+ }
+ 
++/* Expand a call to __builtin_speculation_safe_value_<N>.  MODE
++   represents the size of the first argument to that call, or VOIDmode
++   if the argument is a pointer.  IGNORE will be true if the result
++   isn't used.  */
++static rtx
++expand_speculation_safe_value (machine_mode mode, tree exp, rtx target,
++			       bool ignore)
++{
++  rtx val, failsafe;
++  unsigned nargs = call_expr_nargs (exp);
++
++  tree arg0 = CALL_EXPR_ARG (exp, 0);
++
++  if (mode == VOIDmode)
++    {
++      mode = TYPE_MODE (TREE_TYPE (arg0));
++      gcc_assert (GET_MODE_CLASS (mode) == MODE_INT);
++    }
++
++  val = expand_expr (arg0, NULL_RTX, mode, EXPAND_NORMAL);
++
++  /* An optional second argument can be used as a failsafe value on
++     some machines.  If it isn't present, then the failsafe value is
++     assumed to be 0.  */
++  if (nargs > 1)
++    {
++      tree arg1 = CALL_EXPR_ARG (exp, 1);
++      failsafe = expand_expr (arg1, NULL_RTX, mode, EXPAND_NORMAL);
++    }
++  else
++    failsafe = const0_rtx;
++
++  /* If the result isn't used, the behavior is undefined.  It would be
++     nice to emit a warning here, but path splitting means this might
++     happen with legitimate code.  So simply drop the builtin
++     expansion in that case; we've handled any side-effects above.  */
++  if (ignore)
++    return const0_rtx;
++
++  /* If we don't have a suitable target, create one to hold the result.  */
++  if (target == NULL || GET_MODE (target) != mode)
++    target = gen_reg_rtx (mode);
++
++  if (GET_MODE (val) != mode && GET_MODE (val) != VOIDmode)
++    val = convert_modes (mode, VOIDmode, val, false);
++
++  return targetm.speculation_safe_value (mode, target, val, failsafe);
++}
++
+ /* Expand an expression EXP that calls a built-in function,
+    with result going to TARGET if that's convenient
+    (and in mode MODE if that's convenient).
+@@ -8029,6 +8078,17 @@ expand_builtin (tree exp, rtx target, rtx subtarget, machine_mode mode,
+     case BUILT_IN_GOACC_PARLEVEL_SIZE:
+       return expand_builtin_goacc_parlevel_id_size (exp, target, ignore);
+ 
++    case BUILT_IN_SPECULATION_SAFE_VALUE_PTR:
++      return expand_speculation_safe_value (VOIDmode, exp, target, ignore);
++
++    case BUILT_IN_SPECULATION_SAFE_VALUE_1:
++    case BUILT_IN_SPECULATION_SAFE_VALUE_2:
++    case BUILT_IN_SPECULATION_SAFE_VALUE_4:
++    case BUILT_IN_SPECULATION_SAFE_VALUE_8:
++    case BUILT_IN_SPECULATION_SAFE_VALUE_16:
++      mode = get_builtin_sync_mode (fcode - BUILT_IN_SPECULATION_SAFE_VALUE_1);
++      return expand_speculation_safe_value (mode, exp, target, ignore);
++
+     default:	/* just do library call, if unknown builtin */
+       break;
+     }
+diff --git a/gcc/builtins.def b/gcc/builtins.def
+index aacbd51..ad90d44 100644
+--- a/gcc/builtins.def
++++ b/gcc/builtins.def
+@@ -1003,6 +1003,28 @@ DEF_BUILTIN (BUILT_IN_EMUTLS_REGISTER_COMMON,
+ 	     true, true, true, ATTR_NOTHROW_LEAF_LIST, false,
+ 	     !targetm.have_tls)
+ 
++/* Suppressing speculation.  Users are expected to use the first (N)
++   variant, which will be translated internally into one of the other
++   types.  */
++
++DEF_GCC_BUILTIN (BUILT_IN_SPECULATION_SAFE_VALUE_N, "speculation_safe_value",
++		 BT_FN_VOID_VAR, ATTR_NOVOPS_NOTHROW_LEAF_LIST)
++
++DEF_GCC_BUILTIN (BUILT_IN_SPECULATION_SAFE_VALUE_PTR,
++		 "speculation_safe_value_ptr", BT_FN_PTR_PTR_VAR,
++		 ATTR_NOVOPS_NOTHROW_LEAF_LIST)
++DEF_GCC_BUILTIN (BUILT_IN_SPECULATION_SAFE_VALUE_1, "speculation_safe_value_1",
++		 BT_FN_I1_I1_VAR, ATTR_NOVOPS_NOTHROW_LEAF_LIST)
++DEF_GCC_BUILTIN (BUILT_IN_SPECULATION_SAFE_VALUE_2, "speculation_safe_value_2",
++		 BT_FN_I2_I2_VAR, ATTR_NOVOPS_NOTHROW_LEAF_LIST)
++DEF_GCC_BUILTIN (BUILT_IN_SPECULATION_SAFE_VALUE_4, "speculation_safe_value_4",
++		 BT_FN_I4_I4_VAR, ATTR_NOVOPS_NOTHROW_LEAF_LIST)
++DEF_GCC_BUILTIN (BUILT_IN_SPECULATION_SAFE_VALUE_8, "speculation_safe_value_8",
++		 BT_FN_I8_I8_VAR, ATTR_NOVOPS_NOTHROW_LEAF_LIST)
++DEF_GCC_BUILTIN (BUILT_IN_SPECULATION_SAFE_VALUE_16,
++		 "speculation_safe_value_16", BT_FN_I16_I16_VAR,
++		 ATTR_NOVOPS_NOTHROW_LEAF_LIST)
++
+ /* Exception support.  */
+ DEF_BUILTIN_STUB (BUILT_IN_UNWIND_RESUME, "__builtin_unwind_resume")
+ DEF_BUILTIN_STUB (BUILT_IN_CXA_END_CLEANUP, "__builtin_cxa_end_cleanup")
+diff --git a/gcc/c-family/ChangeLog b/gcc/c-family/ChangeLog
+index 0ae008b..bf1232e 100644
+--- a/gcc/c-family/ChangeLog	2019-05-09 16:30:21.479563324 +0530
++++ b/gcc/c-family/ChangeLog	2019-05-09 16:27:07.955647878 +0530
+@@ -1,3 +1,12 @@
++2018-07-31  Richard Earnshaw  <rearnsha@arm.com>
++
++	* c-common.c (speculation_safe_resolve_call): New function.
++	(speculation_safe_resolve_params): New function.
++	(speculation_safe_resolve_return): New function.
++	(resolve_overloaded_builtin): Handle __builtin_speculation_safe_value.
++	* c-cppbuiltin.c (c_cpp_builtins): Add pre-define for
++	__HAVE_SPECULATION_SAFE_VALUE.
++
+ 2018-01-25  Release Manager
+ 
+ 	* GCC 7.3.0 released.
+diff --git a/gcc/c-family/c-common.c b/gcc/c-family/c-common.c
+index 422d668..d919605 100644
+--- a/gcc/c-family/c-common.c
++++ b/gcc/c-family/c-common.c
+@@ -6457,6 +6457,122 @@ builtin_type_for_size (int size, bool unsignedp)
+   return type ? type : error_mark_node;
+ }
+ 
++/* Work out the size of the first argument of a call to
++   __builtin_speculation_safe_value.  Only pointers and integral types
++   are permitted.  Return -1 if the argument type is not supported or
++   the size is too large; 0 if the argument type is a pointer or the
++   size if it is integral.  */
++static enum built_in_function
++speculation_safe_value_resolve_call (tree function, vec<tree, va_gc> *params)
++{
++  /* Type of the argument.  */
++  tree type;
++  int size;
++
++  if (vec_safe_is_empty (params))
++    {
++      error ("too few arguments to function %qE", function);
++      return BUILT_IN_NONE;
++    }
++
++  type = TREE_TYPE ((*params)[0]);
++  if (TREE_CODE (type) == ARRAY_TYPE && c_dialect_cxx ())
++    {
++      /* Force array-to-pointer decay for C++.   */
++      (*params)[0] = default_conversion ((*params)[0]);
++      type = TREE_TYPE ((*params)[0]);
++    }
++
++  if (POINTER_TYPE_P (type))
++    return BUILT_IN_SPECULATION_SAFE_VALUE_PTR;
++
++  if (!INTEGRAL_TYPE_P (type))
++    goto incompatible;
++
++  if (!COMPLETE_TYPE_P (type))
++    goto incompatible;
++
++  size = tree_to_uhwi (TYPE_SIZE_UNIT (type));
++  if (size == 1 || size == 2 || size == 4 || size == 8 || size == 16)
++    return ((enum built_in_function)
++	    ((int) BUILT_IN_SPECULATION_SAFE_VALUE_1 + exact_log2 (size)));
++
++ incompatible:
++  /* Issue the diagnostic only if the argument is valid, otherwise
++     it would be redundant at best and could be misleading.  */
++  if (type != error_mark_node)
++    error ("operand type %qT is incompatible with argument %d of %qE",
++	   type, 1, function);
++
++  return BUILT_IN_NONE;
++}
++
++/* Validate and coerce PARAMS, the arguments to ORIG_FUNCTION to fit
++   the prototype for FUNCTION.  The first argument is mandatory, a second
++   argument, if present, must be type compatible with the first.  */
++static bool
++speculation_safe_value_resolve_params (location_t loc, tree orig_function,
++				       vec<tree, va_gc> *params)
++{
++  tree val;
++
++  if (params->length () == 0)
++    {
++      error_at (loc, "too few arguments to function %qE", orig_function);
++      return false;
++    }
++
++  else if (params->length () > 2)
++    {
++      error_at (loc, "too many arguments to function %qE", orig_function);
++      return false;
++    }
++
++  val = (*params)[0];
++  if (TREE_CODE (TREE_TYPE (val)) == ARRAY_TYPE)
++    val = default_conversion (val);
++  if (!(TREE_CODE (TREE_TYPE (val)) == POINTER_TYPE
++	|| TREE_CODE (TREE_TYPE (val)) == INTEGER_TYPE))
++    {
++      error_at (loc,
++		"expecting argument of type pointer or of type integer "
++		"for argument 1");
++      return false;
++    }
++  (*params)[0] = val;
++
++  if (params->length () == 2)
++    {
++      tree val2 = (*params)[1];
++      if (TREE_CODE (TREE_TYPE (val2)) == ARRAY_TYPE)
++	val2 = default_conversion (val2);
++      if (!(TREE_TYPE (val) == TREE_TYPE (val2)
++	    || useless_type_conversion_p (TREE_TYPE (val), TREE_TYPE (val2))))
++	{
++	  error_at (loc, "both arguments must be compatible");
++	  return false;
++	}
++      (*params)[1] = val2;
++    }
++
++  return true;
++}
++
++/* Cast the result of the builtin back to the type of the first argument,
++   preserving any qualifiers that it might have.  */
++static tree
++speculation_safe_value_resolve_return (tree first_param, tree result)
++{
++  tree ptype = TREE_TYPE (first_param);
++  tree rtype = TREE_TYPE (result);
++  ptype = TYPE_MAIN_VARIANT (ptype);
++
++  if (tree_int_cst_equal (TYPE_SIZE (ptype), TYPE_SIZE (rtype)))
++    return convert (ptype, result);
++
++  return result;
++}
++
+ /* A helper function for resolve_overloaded_builtin in resolving the
+    overloaded __sync_ builtins.  Returns a positive power of 2 if the
+    first operand of PARAMS is a pointer to a supported data type.
+@@ -7111,6 +7227,54 @@ resolve_overloaded_builtin (location_t loc, tree function,
+   /* Handle BUILT_IN_NORMAL here.  */
+   switch (orig_code)
+     {
++    case BUILT_IN_SPECULATION_SAFE_VALUE_N:
++      {
++	tree new_function, first_param, result;
++	enum built_in_function fncode
++	  = speculation_safe_value_resolve_call (function, params);;
++
++	first_param = (*params)[0];
++	if (fncode == BUILT_IN_NONE
++	    || !speculation_safe_value_resolve_params (loc, function, params))
++	  return error_mark_node;
++
++	if (targetm.have_speculation_safe_value (true))
++	  {
++	    new_function = builtin_decl_explicit (fncode);
++	    result = build_function_call_vec (loc, vNULL, new_function, params,
++					      NULL);
++
++	    if (result == error_mark_node)
++	      return result;
++
++	    return speculation_safe_value_resolve_return (first_param, result);
++	  }
++	else
++	  {
++	    /* This target doesn't have, or doesn't need, active mitigation
++	       against incorrect speculative execution.  Simply return the
++	       first parameter to the builtin.  */
++	    if (!targetm.have_speculation_safe_value (false))
++	      /* The user has invoked __builtin_speculation_safe_value
++		 even though __HAVE_SPECULATION_SAFE_VALUE is not
++		 defined: emit a warning.  */
++	      warning_at (input_location, 0,
++			  "this target does not define a speculation barrier; "
++			  "your program will still execute correctly, "
++			  "but incorrect speculation may not be be "
++			  "restricted");
++
++	    /* If the optional second argument is present, handle any side
++	       effects now.  */
++	    if (params->length () == 2
++		&& TREE_SIDE_EFFECTS ((*params)[1]))
++	      return build2 (COMPOUND_EXPR, TREE_TYPE (first_param),
++			     (*params)[1], first_param);
++
++	    return first_param;
++	  }
++      }
++
+     case BUILT_IN_ATOMIC_EXCHANGE:
+     case BUILT_IN_ATOMIC_COMPARE_EXCHANGE:
+     case BUILT_IN_ATOMIC_LOAD:
+diff --git a/gcc/c-family/c-cppbuiltin.c b/gcc/c-family/c-cppbuiltin.c
+index bdb5691..4fcf3a6 100644
+--- a/gcc/c-family/c-cppbuiltin.c
++++ b/gcc/c-family/c-cppbuiltin.c
+@@ -1361,7 +1361,12 @@ c_cpp_builtins (cpp_reader *pfile)
+     cpp_define (pfile, "__WCHAR_UNSIGNED__");
+ 
+   cpp_atomic_builtins (pfile);
+-    
++
++  /* Show support for __builtin_speculation_safe_value () if the target
++     has been updated to fully support it.  */
++  if (targetm.have_speculation_safe_value (false))
++    cpp_define (pfile, "__HAVE_SPECULATION_SAFE_VALUE");
++
+ #ifdef DWARF2_UNWIND_INFO
+   if (dwarf2out_do_cfi_asm ())
+     cpp_define (pfile, "__GCC_HAVE_DWARF2_CFI_ASM");
+diff --git a/gcc/doc/cpp.texi b/gcc/doc/cpp.texi
+index 3f7a8fc..efad2c8 100644
+--- a/gcc/doc/cpp.texi
++++ b/gcc/doc/cpp.texi
+@@ -2381,6 +2381,10 @@ If GCC cannot determine the current date, it will emit a warning message
+ These macros are defined when the target processor supports atomic compare
+ and swap operations on operands 1, 2, 4, 8 or 16 bytes in length, respectively.
+ 
++@item __HAVE_SPECULATION_SAFE_VALUE
++This macro is defined with the value 1 to show that this version of GCC
++supports @code{__builtin_speculation_safe_value}.
++
+ @item __GCC_HAVE_DWARF2_CFI_ASM
+ This macro is defined when the compiler is emitting DWARF CFI directives
+ to the assembler.  When this is defined, it is possible to emit those same
+diff --git a/gcc/doc/extend.texi b/gcc/doc/extend.texi
+index 63ef39a..bf465d7 100644
+--- a/gcc/doc/extend.texi
++++ b/gcc/doc/extend.texi
+@@ -10960,6 +10960,7 @@ is called and the @var{flag} argument passed to it.
+ @findex __builtin_powi
+ @findex __builtin_powif
+ @findex __builtin_powil
++@findex __builtin_speculation_safe_value
+ @findex _Exit
+ @findex _exit
+ @findex abort
+@@ -11604,6 +11605,96 @@ check its compatibility with @var{size}.
+ 
+ @end deftypefn
+ 
++@deftypefn {Built-in Function} @var{type} __builtin_speculation_safe_value (@var{type} val, @var{type} failval)
++
++This built-in function can be used to help mitigate against unsafe
++speculative execution.  @var{type} may be any integral type or any
++pointer type.
++
++@enumerate
++@item
++If the CPU is not speculatively executing the code, then @var{val}
++is returned.
++@item
++If the CPU is executing speculatively then either:
++@itemize
++@item
++The function may cause execution to pause until it is known that the
++code is no-longer being executed speculatively (in which case
++@var{val} can be returned, as above); or
++@item
++The function may use target-dependent speculation tracking state to cause
++@var{failval} to be returned when it is known that speculative
++execution has incorrectly predicted a conditional branch operation.
++@end itemize
++@end enumerate
++
++The second argument, @var{failval}, is optional and defaults to zero
++if omitted.
++
++GCC defines the preprocessor macro
++@code{__HAVE_BUILTIN_SPECULATION_SAFE_VALUE} for targets that have been
++updated to support this builtin.
++
++The built-in function can be used where a variable appears to be used in a
++safe way, but the CPU, due to speculative execution may temporarily ignore
++the bounds checks.  Consider, for example, the following function:
++
++@smallexample
++int array[500];
++int f (unsigned untrusted_index)
++@{
++  if (untrusted_index < 500)
++    return array[untrusted_index];
++  return 0;
++@}
++@end smallexample
++
++If the function is called repeatedly with @code{untrusted_index} less
++than the limit of 500, then a branch predictor will learn that the
++block of code that returns a value stored in @code{array} will be
++executed.  If the function is subsequently called with an
++out-of-range value it will still try to execute that block of code
++first until the CPU determines that the prediction was incorrect
++(the CPU will unwind any incorrect operations at that point).
++However, depending on how the result of the function is used, it might be
++possible to leave traces in the cache that can reveal what was stored
++at the out-of-bounds location.  The built-in function can be used to
++provide some protection against leaking data in this way by changing
++the code to:
++
++@smallexample
++int array[500];
++int f (unsigned untrusted_index)
++@{
++  if (untrusted_index < 500)
++    return array[__builtin_speculation_safe_value (untrusted_index)];
++  return 0;
++@}
++@end smallexample
++
++The built-in function will either cause execution to stall until the
++conditional branch has been fully resolved, or it may permit
++speculative execution to continue, but using 0 instead of
++@code{untrusted_value} if that exceeds the limit.
++
++If accessing any memory location is potentially unsafe when speculative
++execution is incorrect, then the code can be rewritten as
++
++@smallexample
++int array[500];
++int f (unsigned untrusted_index)
++@{
++  if (untrusted_index < 500)
++    return *__builtin_speculation_safe_value (&array[untrusted_index], NULL);
++  return 0;
++@}
++@end smallexample
++
++which will cause a @code{NULL} pointer to be used for the unsafe case.
++
++@end deftypefn
++
+ @deftypefn {Built-in Function} int __builtin_types_compatible_p (@var{type1}, @var{type2})
+ 
+ You can use the built-in function @code{__builtin_types_compatible_p} to
+diff --git a/gcc/doc/md.texi b/gcc/doc/md.texi
+index 734bc76..00c1239 100644
+--- a/gcc/doc/md.texi
++++ b/gcc/doc/md.texi
+@@ -7032,6 +7032,21 @@ should be defined to an instruction that orders both loads and stores
+ before the instruction with respect to loads and stores after the instruction.
+ This pattern has no operands.
+ 
++@cindex @code{speculation_barrier} instruction pattern
++@item @samp{speculation_barrier}
++If the target can support speculative execution, then this pattern should
++be defined to an instruction that will block subsequent execution until
++any prior speculation conditions has been resolved.  The pattern must also
++ensure that the compiler cannot move memory operations past the barrier,
++so it needs to be an UNSPEC_VOLATILE pattern.  The pattern has no
++operands.
++
++If this pattern is not defined then the default expansion of
++@code{__builtin_speculation_safe_value} will emit a warning.  You can
++suppress this warning by defining this pattern with a final condition
++of @code{0} (zero), which tells the compiler that a speculation
++barrier is not needed for this target.
++
+ @cindex @code{sync_compare_and_swap@var{mode}} instruction pattern
+ @item @samp{sync_compare_and_swap@var{mode}}
+ This pattern, if defined, emits code for an atomic compare-and-swap
+diff --git a/gcc/doc/tm.texi b/gcc/doc/tm.texi
+index 0ddcd1a..351f0b3 100644
+--- a/gcc/doc/tm.texi
++++ b/gcc/doc/tm.texi
+@@ -11924,6 +11924,37 @@ maintainer is familiar with.
+ 
+ @end defmac
+ 
++@deftypefn {Target Hook} bool TARGET_HAVE_SPECULATION_SAFE_VALUE (bool @var{active})
++This hook is used to determine the level of target support for
++ @code{__builtin_speculation_safe_value}.  If called with an argument
++ of false, it returns true if the target has been modified to support
++ this builtin.  If called with an argument of true, it returns true
++ if the target requires active mitigation execution might be speculative.
++ 
++ The default implementation returns false if the target does not define
++ a pattern named @code{speculation_barrier}.  Else it returns true
++ for the first case and whether the pattern is enabled for the current
++ compilation for the second case.
++@end deftypefn
++
++@deftypefn {Target Hook} rtx TARGET_SPECULATION_SAFE_VALUE (machine_mode @var{mode}, rtx @var{result}, rtx @var{val}, rtx @var{failval})
++This target hook can be used to generate a target-specific code
++ sequence that implements the @code{__builtin_speculation_safe_value}
++ built-in function.  The function must always return @var{val} in
++ @var{result} in mode @var{mode} when the cpu is not executing
++ speculatively, but must never return that when speculating until it
++ is known that the speculation will not be unwound.  The hook supports
++ two primary mechanisms for implementing the requirements.  The first
++ is to emit a speculation barrier which forces the processor to wait
++ until all prior speculative operations have been resolved; the second
++ is to use a target-specific mechanism that can track the speculation
++ state and to return @var{failval} if it can determine that
++ speculation must be unwound at a later time.
++ 
++ The default implementation simply copies @var{val} to @var{result} and
++ emits a @code{speculation_barrier} instruction if that is defined.
++@end deftypefn
++
+ @deftypefn {Target Hook} void TARGET_RUN_TARGET_SELFTESTS (void)
+ If selftests are enabled, run any selftests for this target.
+ @end deftypefn
+diff --git a/gcc/doc/tm.texi.in b/gcc/doc/tm.texi.in
+index e275aca..39a214e 100644
+--- a/gcc/doc/tm.texi.in
++++ b/gcc/doc/tm.texi.in
+@@ -8101,4 +8101,8 @@ maintainer is familiar with.
+ 
+ @end defmac
+ 
++@hook TARGET_HAVE_SPECULATION_SAFE_VALUE
++
++@hook TARGET_SPECULATION_SAFE_VALUE
++
+ @hook TARGET_RUN_TARGET_SELFTESTS
+diff --git a/gcc/target.def b/gcc/target.def
+index 2598d3c..dc8d7de 100644
+--- a/gcc/target.def
++++ b/gcc/target.def
+@@ -4156,6 +4156,41 @@ DEFHOOK
+  hook_bool_void_true)
+ 
+ DEFHOOK
++(have_speculation_safe_value,
++"This hook is used to determine the level of target support for\n\
++ @code{__builtin_speculation_safe_value}.  If called with an argument\n\
++ of false, it returns true if the target has been modified to support\n\
++ this builtin.  If called with an argument of true, it returns true\n\
++ if the target requires active mitigation execution might be speculative.\n\
++ \n\
++ The default implementation returns false if the target does not define\n\
++ a pattern named @code{speculation_barrier}.  Else it returns true\n\
++ for the first case and whether the pattern is enabled for the current\n\
++ compilation for the second case.",
++bool, (bool active), default_have_speculation_safe_value)
++
++DEFHOOK
++(speculation_safe_value,
++"This target hook can be used to generate a target-specific code\n\
++ sequence that implements the @code{__builtin_speculation_safe_value}\n\
++ built-in function.  The function must always return @var{val} in\n\
++ @var{result} in mode @var{mode} when the cpu is not executing\n\
++ speculatively, but must never return that when speculating until it\n\
++ is known that the speculation will not be unwound.  The hook supports\n\
++ two primary mechanisms for implementing the requirements.  The first\n\
++ is to emit a speculation barrier which forces the processor to wait\n\
++ until all prior speculative operations have been resolved; the second\n\
++ is to use a target-specific mechanism that can track the speculation\n\
++ state and to return @var{failval} if it can determine that\n\
++ speculation must be unwound at a later time.\n\
++ \n\
++ The default implementation simply copies @var{val} to @var{result} and\n\
++ emits a @code{speculation_barrier} instruction if that is defined.",
++rtx, (machine_mode mode, rtx result, rtx val, rtx failval),
++ default_speculation_safe_value)
++ 
++
++DEFHOOK
+ (can_use_doloop_p,
+  "Return true if it is possible to use low-overhead loops (@code{doloop_end}\n\
+ and @code{doloop_begin}) for a particular loop.  @var{iterations} gives the\n\
+diff --git a/gcc/targhooks.c b/gcc/targhooks.c
+index 9b06d7a..06de1e3 100644
+--- a/gcc/targhooks.c
++++ b/gcc/targhooks.c
+@@ -2314,4 +2314,36 @@ default_preferred_else_value (unsigned, tree type, unsigned, tree *)
+   return build_zero_cst (type);
+ }
+ 
++/* Default implementation of TARGET_HAVE_SPECULATION_SAFE_VALUE.  */
++bool
++default_have_speculation_safe_value (bool active)
++{
++#ifdef HAVE_speculation_barrier
++  return active ? HAVE_speculation_barrier : true;
++#else
++  return false;
++#endif
++}
++
++/* Default implementation of the speculation-safe-load builtin.  This
++   implementation simply copies val to result and generates a
++   speculation_barrier insn, if such a pattern is defined.  */
++rtx
++default_speculation_safe_value (machine_mode mode ATTRIBUTE_UNUSED,
++				rtx result, rtx val,
++				rtx failval ATTRIBUTE_UNUSED)
++{
++  emit_move_insn (result, val);
++
++#ifdef HAVE_speculation_barrier
++  /* Assume the target knows what it is doing: if it defines a
++     speculation barrier, but it is not enabled, then assume that one
++     isn't needed.  */
++  if (HAVE_speculation_barrier)
++    emit_insn (gen_speculation_barrier ());
++#endif
++
++  return result;
++}
++
+ #include "gt-targhooks.h"
+diff --git a/gcc/targhooks.h b/gcc/targhooks.h
+index 76fcec8..ba53778 100644
+--- a/gcc/targhooks.h
++++ b/gcc/targhooks.h
+@@ -281,4 +281,7 @@ extern bool default_stack_clash_protection_final_dynamic_probe (rtx);
+ extern void default_select_early_remat_modes (sbitmap);
+ extern tree default_preferred_else_value (unsigned, tree, unsigned, tree *);
+ 
++extern bool default_have_speculation_safe_value (bool);
++extern rtx default_speculation_safe_value (machine_mode, rtx, rtx, rtx);
++
+ #endif /* GCC_TARGHOOKS_H */
+diff --git a/gcc/testsuite/ChangeLog b/gcc/testsuite/ChangeLog
+index a6a13b3..f0d258e 100644
+--- a/gcc/testsuite/ChangeLog	2019-05-09 16:29:30.598644398 +0530
++++ b/gcc/testsuite/ChangeLog	2019-05-09 16:28:24.737343798 +0530
+@@ -1,3 +1,9 @@
++2018-07-31  Richard Earnshaw  <rearnsha@arm.com>
++
++	* c-c++-common/spec-barrier-1.c: New test.
++	* c-c++-common/spec-barrier-2.c: New test.
++	* gcc.dg/spec-barrier-3.c: New test.
++
+ 2018-01-25  Release Manager
+ 
+ 	* GCC 7.3.0 released.
+diff --git a/gcc/testsuite/c-c++-common/spec-barrier-1.c b/gcc/testsuite/c-c++-common/spec-barrier-1.c
+new file mode 100644
+index 0000000..e4b44f2
+--- /dev/null
++++ b/gcc/testsuite/c-c++-common/spec-barrier-1.c
+@@ -0,0 +1,38 @@
++/* { dg-do run } */
++/* { dg-options "-O" } */
++
++/* Test that __builtin_speculation_safe_value returns the correct value.  */
++/* This test will cause an unfiltered warning to be emitted on targets
++   that have not implemented support for speculative execution
++   barriers.  They should fix that rather than disabling this
++   test.  */
++char a = 1;
++short b = 2;
++int c = 3;
++long d = 4;
++long long e = 5;
++int *f = (int*) &c;
++#ifdef __SIZEOF_INT128__
++__int128 g = 9;
++#endif
++
++int main ()
++{
++  if (__builtin_speculation_safe_value (a) != 1)
++    __builtin_abort ();
++  if (__builtin_speculation_safe_value (b) != 2)
++    __builtin_abort ();
++  if (__builtin_speculation_safe_value (c) != 3)
++    __builtin_abort ();
++  if (__builtin_speculation_safe_value (d) != 4)
++    __builtin_abort ();
++  if (__builtin_speculation_safe_value (e) != 5)
++    __builtin_abort ();
++  if (__builtin_speculation_safe_value (f) != &c)
++    __builtin_abort ();
++#ifdef __SIZEOF_INT128__
++  if (__builtin_speculation_safe_value (g) != 9)
++    __builtin_abort ();
++#endif
++  return 0;
++}
+diff --git a/gcc/testsuite/c-c++-common/spec-barrier-2.c b/gcc/testsuite/c-c++-common/spec-barrier-2.c
+new file mode 100644
+index 0000000..b09567e
+--- /dev/null
++++ b/gcc/testsuite/c-c++-common/spec-barrier-2.c
+@@ -0,0 +1,17 @@
++/* { dg-do run } */
++
++/* Even on targets that don't need the optional failval parameter,
++   side-effects on the operand should still be calculated.  */
++
++int x = 3;
++volatile int y = 9;
++
++int main ()
++{
++  int z = __builtin_speculation_safe_value (x, y++);
++  if (z != 3 || y != 10)
++    __builtin_abort ();
++  return 0;
++}
++
++/* { dg-prune-output "this target does not define a speculation barrier;" } */
+diff --git a/gcc/testsuite/gcc.dg/spec-barrier-3.c b/gcc/testsuite/gcc.dg/spec-barrier-3.c
+new file mode 100644
+index 0000000..3ed4d39
+--- /dev/null
++++ b/gcc/testsuite/gcc.dg/spec-barrier-3.c
+@@ -0,0 +1,13 @@
++/* { dg-do compile } */
++/* { dg-options "-Wpedantic" } */
++
++/* __builtin_speculation_safe_value returns a value with the same type
++   as its first argument.  There should be a warning if that isn't
++   type-compatible with the use.  */
++int *
++f (int x)
++{
++  return __builtin_speculation_safe_value (x);  /* { dg-warning "returning 'int' from a function with return type 'int \\*' makes pointer from integer without a cast" } */
++}
++
++/* { dg-prune-output "this target does not define a speculation barrier;" } */
+-- 
+2.9.3
+

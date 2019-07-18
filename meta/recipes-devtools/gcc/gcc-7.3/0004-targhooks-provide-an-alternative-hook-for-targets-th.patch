@@ -1,0 +1,113 @@
+From 3e3448a9ae57194db317a72e68a3266a4cbdb39d Mon Sep 17 00:00:00 2001
+From: rearnsha <rearnsha@138bc75d-0d04-0410-961f-82ee72b054a4>
+Date: Tue, 31 Jul 2018 17:36:36 +0000
+Subject: [PATCH] targhooks - provide an alternative hook for targets that
+ never execute speculatively
+
+This hook adds an alternative implementation for the target hook
+TARGET_HAVE_SPECULATION_SAFE_VALUE; it can be used by targets that have no
+CPU implementations that execute code speculatively.  All that is needed for
+such targets now is to add:
+
+ #undef TARGET_HAVE_SPECULATION_SAFE_VALUE
+ #define TARGET_HAVE_SPECULATION_SAFE_VALUE speculation_safe_value_not_needed.
+
+to where you have your other target hooks and you're done.
+
+gcc:
+	* targhooks.h (speculation_safe_value_not_needed): New prototype.
+	* targhooks.c (speculation_safe_value_not_needed): New function.
+	* target.def (have_speculation_safe_value): Update documentation.
+	* doc/tm.texi: Regenerated.
+
+git-svn-id: svn+ssh://gcc.gnu.org/svn/gcc/trunk@263175 138bc75d-0d04-0410-961f-82ee72b054a4
+---
+ gcc/ChangeLog   | 7 +++++++
+ gcc/doc/tm.texi | 5 +++++
+ gcc/target.def  | 7 ++++++-
+ gcc/targhooks.c | 7 +++++++
+ gcc/targhooks.h | 1 +
+ 5 files changed, 26 insertions(+), 1 deletion(-)
+
+diff --git a/gcc/ChangeLog b/gcc/ChangeLog
+index 48a2002cfd7..f6328f4d856 100644
+--- a/gcc/ChangeLog
++++ b/gcc/ChangeLog
+@@ -1,3 +1,10 @@
++2018-07-31  Richard Earnshaw  <rearnsha@arm.com>
++
++       * targhooks.h (speculation_safe_value_not_needed): New prototype.
++       * targhooks.c (speculation_safe_value_not_needed): New function.
++       * target.def (have_speculation_safe_value): Update documentation.
++       * doc/tm.texi: Regenerated.
++
+ 2018-07-31  Richard Earnshaw  <rearnsha@arm.com>
+
+        * config/aarch64/iterators.md (ALLI_TI): New iterator.
+diff --git a/gcc/doc/tm.texi b/gcc/doc/tm.texi
+index 351f0b38b0e..a40f45ade07 100644
+--- a/gcc/doc/tm.texi
++++ b/gcc/doc/tm.texi
+@@ -11935,6 +11935,11 @@ This hook is used to determine the level of target support for
+  a pattern named @code{speculation_barrier}.  Else it returns true
+  for the first case and whether the pattern is enabled for the current
+  compilation for the second case.
++ 
++ For targets that have no processors that can execute instructions
++ speculatively an alternative implemenation of this hook is available:
++ simply redefine this hook to @code{speculation_safe_value_not_needed}
++ along with your other target hooks.
+ @end deftypefn
+ 
+ @deftypefn {Target Hook} rtx TARGET_SPECULATION_SAFE_VALUE (machine_mode @var{mode}, rtx @var{result}, rtx @var{val}, rtx @var{failval})
+diff --git a/gcc/target.def b/gcc/target.def
+index dc8d7deba2e..c570f3825a5 100644
+--- a/gcc/target.def
++++ b/gcc/target.def
+@@ -4166,7 +4166,12 @@ DEFHOOK
+  The default implementation returns false if the target does not define\n\
+  a pattern named @code{speculation_barrier}.  Else it returns true\n\
+  for the first case and whether the pattern is enabled for the current\n\
+- compilation for the second case.",
++ compilation for the second case.\n\
++ \n\
++ For targets that have no processors that can execute instructions\n\
++ speculatively an alternative implemenation of this hook is available:\n\
++ simply redefine this hook to @code{speculation_safe_value_not_needed}\n\
++ along with your other target hooks.",
+ bool, (bool active), default_have_speculation_safe_value)
+ 
+ DEFHOOK
+diff --git a/gcc/targhooks.c b/gcc/targhooks.c
+index 06de1e3fa86..62051a98e98 100644
+--- a/gcc/targhooks.c
++++ b/gcc/targhooks.c
+@@ -2324,6 +2324,13 @@ default_have_speculation_safe_value (bool active)
+   return false;
+ #endif
+ }
++/* Alternative implementation of TARGET_HAVE_SPECULATION_SAFE_VALUE
++   that can be used on targets that never have speculative execution.  */
++bool
++speculation_safe_value_not_needed (bool active)
++{
++  return !active;
++}
+ 
+ /* Default implementation of the speculation-safe-load builtin.  This
+    implementation simply copies val to result and generates a
+diff --git a/gcc/targhooks.h b/gcc/targhooks.h
+index ba53778d468..f92ca5ca997 100644
+--- a/gcc/targhooks.h
++++ b/gcc/targhooks.h
+@@ -282,6 +282,7 @@ extern void default_select_early_remat_modes (sbitmap);
+ extern tree default_preferred_else_value (unsigned, tree, unsigned, tree *);
+ 
+ extern bool default_have_speculation_safe_value (bool);
++extern bool speculation_safe_value_not_needed (bool);
+ extern rtx default_speculation_safe_value (machine_mode, rtx, rtx, rtx);
+ 
+ #endif /* GCC_TARGHOOKS_H */
+-- 
+2.17.1
+
