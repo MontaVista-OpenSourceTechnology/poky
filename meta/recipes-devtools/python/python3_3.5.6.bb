@@ -17,6 +17,8 @@ file://support_SOURCE_DATE_EPOCH_in_py_compile.patch \
 ${DISTRO_SRC_URI} \
 "
 
+PR .= ".1"
+
 SRC_URI += "\
             file://03-fix-tkinter-detection.patch \
             file://avoid_warning_about_tkinter.patch \
@@ -43,6 +45,7 @@ SRC_URI += "\
             file://0004-bpo-33570-TLS-1.3-ciphers-for-OpenSSL-1.1.1-GH-6976.patch \
             file://0005-bpo-30714-ALPN-changes-for-OpenSSL-1.1.0f-2305.patch \
             file://run-ptest \
+            file://CVE-2019-9740.patch \
            "
 
 inherit multilib_header python3native update-alternatives qemu ptest
