@@ -1,7 +1,7 @@
 require glib.inc
 
 PE = "1"
-PR = "r1"
+PR = "r2"
 
 SHRT_VER = "${@oe.utils.trim_version("${PV}", 2)}"
 
@@ -18,6 +18,7 @@ SRC_URI = "${GNOME_MIRROR}/glib/${SHRT_VER}/glib-${PV}.tar.xz \
            file://0001-Test-for-pthread_getname_np-before-using-it.patch \
            file://CVE-2018-16429.patch \
            file://CVE-2018-16428.patch \
+           file://CVE-2019-12450.patch \
            "
 
 SRC_URI_append_class-native = " file://relocate-modules.patch"
