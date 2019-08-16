@@ -12,7 +12,7 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=27818cd7fd83877a8e3ef82b82798ef4"
 
 PROVIDES = "virtual/libsdl"
 
-PR = "r3.1"
+PR = "r3.2"
 
 SRC_URI = "http://www.libsdl.org/release/SDL-${PV}.tar.gz \
            file://libsdl-1.2.15-xdata32.patch \
@@ -68,6 +68,8 @@ PACKAGECONFIG[stdio-redirect] = "--enable-stdio-redirect,--disable-stdio-redirec
 PACKAGECONFIG[directx] = "--enable-directx,--disable-directx"
 
 EXTRA_AUTORECONF += "--include=acinclude --exclude=autoheader"
+
+CFLAGS_append  = " -std=c99 "
 
 do_configure_prepend() {
         # Remove old libtool macros.
