@@ -11,9 +11,10 @@ SRC_URI[sha256sum] = "16cdaeb62eb3e6dfab2435f7d7bccd2f37438d21c5218ec4e58efa9157
 
 inherit autotools gettext
 
-PR.=".1"
+PR.=".2"
 SRC_URI += "file://CVE-2018-20030_dep.patch \
             file://CVE-2018-20030.patch \
+            file://CVE-2016-6328.patch \
            "
 do_configure_append() {
 	sed -i s:doc\ binary:binary:g Makefile
