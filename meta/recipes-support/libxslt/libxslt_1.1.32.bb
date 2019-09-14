@@ -8,10 +8,14 @@ LIC_FILES_CHKSUM = "file://Copyright;md5=0cd9a07afbeb24026c9b03aecfeba458"
 SECTION = "libs"
 DEPENDS = "libxml2"
 
+PR .= ".1"
+
 SRC_URI = "http://xmlsoft.org/sources/libxslt-${PV}.tar.gz \
            file://fix-rvts-handling.patch \
            file://CVE-2019-11068.patch \
-           "
+           file://CVE-2019-13117.patch \
+           file://CVE-2019-13118.patch \
+"
 
 SRC_URI[md5sum] = "1fc72f98e98bf4443f1651165f3aa146"
 SRC_URI[sha256sum] = "526ecd0abaf4a7789041622c3950c0e7f2c4c8835471515fd77eec684a355460"
