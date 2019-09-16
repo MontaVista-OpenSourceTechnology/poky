@@ -7,7 +7,7 @@ LIC_FILES_CHKSUM = "file://Copyright;md5=0cd9a07afbeb24026c9b03aecfeba458"
 
 SECTION = "libs"
 DEPENDS = "libxml2"
-PR .= ".1"
+PR .= ".2"
 
 SRC_URI = "http://xmlsoft.org/sources/libxslt-${PV}.tar.gz \
            file://pkgconfig_fix.patch \
@@ -15,6 +15,7 @@ SRC_URI = "http://xmlsoft.org/sources/libxslt-${PV}.tar.gz \
            file://0001-Link-libraries-with-libm.patch \
            file://0001-Check-for-integer-overflow-in-xsltAddTextString.patch \
            file://CVE-2019-11068.patch \
+           file://CVE-2019-13117.patch \
            "
 
 SRC_URI[md5sum] = "a129d3c44c022de3b9dcf6d6f288d72e"
