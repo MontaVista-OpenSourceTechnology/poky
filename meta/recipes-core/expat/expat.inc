@@ -3,10 +3,12 @@ DESCRIPTION = "Expat is an XML parser library written in C. It is a stream-orien
 HOMEPAGE = "http://expat.sourceforge.net/"
 SECTION = "libs"
 LICENSE = "MIT"
+PR = "r1"
 
 SRC_URI = "${SOURCEFORGE_MIRROR}/expat/expat-${PV}.tar.bz2 \
            file://autotools.patch \
            file://libtool-tag.patch \
+           file://CVE-2018-20843.patch \
 	  "
 
 SRC_URI[md5sum] = "789e297f547980fc9ecc036f9a070d49"
