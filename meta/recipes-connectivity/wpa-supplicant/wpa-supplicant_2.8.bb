@@ -8,6 +8,7 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=279b4f5abb9c153c285221855ddb78cc \
                     file://wpa_supplicant/wpa_supplicant.c;beginline=1;endline=12;md5=0a8b56d3543498b742b9c0e94cc2d18b"
 DEPENDS = "dbus libnl"
 RRECOMMENDS_${PN} = "wpa-supplicant-passphrase wpa-supplicant-cli"
+PR = "r1"
 
 PACKAGECONFIG ??= "gnutls"
 PACKAGECONFIG[gnutls] = ",,gnutls libgcrypt"
@@ -25,6 +26,7 @@ SRC_URI = "http://w1.fi/releases/wpa_supplicant-${PV}.tar.gz  \
            file://wpa_supplicant.conf-sane \
            file://99_wpa_supplicant \
            file://0001-replace-systemd-install-Alias-with-WantedBy.patch \
+	   file://CVE-2019-16275.patch \
           "
 SRC_URI[md5sum] = "0af5998c5d924e985cab16b9a1c77904"
 SRC_URI[sha256sum] = "a689336a12a99151b9de5e25bfccadb88438f4f4438eb8db331cd94346fd3d96"
