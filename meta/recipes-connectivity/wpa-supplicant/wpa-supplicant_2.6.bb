@@ -18,7 +18,7 @@ inherit pkgconfig systemd
 SYSTEMD_SERVICE_${PN} = "wpa_supplicant.service wpa_supplicant-nl80211@.service wpa_supplicant-wired@.service"
 SYSTEMD_AUTO_ENABLE = "disable"
 
-PR .= ".1"
+PR .= ".2"
 
 SRC_URI = "http://w1.fi/releases/wpa_supplicant-${PV}.tar.gz  \
            file://defconfig \
@@ -30,6 +30,7 @@ SRC_URI = "http://w1.fi/releases/wpa_supplicant-${PV}.tar.gz  \
            file://CVE-2018-14526.patch \
            file://CVE-2019-11555-p1.patch \
            file://CVE-2019-11555-p2.patch \
+           file://CVE-2019-16275.patch \
           "
 SRC_URI[md5sum] = "091569eb4440b7d7f2b4276dbfc03c3c"
 SRC_URI[sha256sum] = "b4936d34c4e6cdd44954beba74296d964bc2c9668ecaa5255e499636fe2b1450"
