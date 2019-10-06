@@ -42,6 +42,8 @@ SRC_URI = "https://download.qemu.org/${BPN}-${PV}.tar.xz \
            file://CVE-2019-6778.patch \
            file://CVE-2019-8934.patch \
            file://0014-linux-user-fix-to-handle-variably-sized-SIOCGSTAMP-w.patch \
+           file://0001-linux-user-assume-__NR_gettid-always-exists.patch \
+           file://0001-linux-user-rename-gettid-to-sys_gettid-to-avoid-clas.patch \
            "
 UPSTREAM_CHECK_REGEX = "qemu-(?P<pver>\d+(\.\d+)+)\.tar"
 
