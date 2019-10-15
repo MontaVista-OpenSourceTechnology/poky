@@ -1,0 +1,33 @@
+From 88a49b72e8c843ecdbf74719f0a56fbfe3129e89 Mon Sep 17 00:00:00 2001
+From: Sebastien GODARD <sysstat@users.noreply.github.com>
+Date: Sun, 2 Dec 2018 17:41:26 +0100
+Subject: [PATCH 09/11] Remove remap_struct() prototype from sa.h
+
+This function is not used outside sa_common.c where it is defined.
+So remove it from sa.h.
+
+Upstream status: backport(https://github.com/sysstat/sysstat/commit/42cd44688172116a38aa59a45aeb2157b971530c)
+CVE: CVE-2019-16167 patch #9
+
+Signed-off-by: Sebastien GODARD <sysstat@users.noreply.github.com>
+Signed-off-by: Anand Je Sypureddy <anandje@mvista.com>
+---
+ sa.h | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/sa.h b/sa.h
+index fcf5f38..79be3ca 100644
+--- a/sa.h
++++ b/sa.h
+@@ -1311,8 +1311,6 @@ int read_record_hdr
+ 	 int, size_t);
+ void reallocate_all_buffers
+ 	(struct activity *, __nr_t);
+-void remap_struct
+-	(unsigned int [], unsigned int [], void *, unsigned int, unsigned int, size_t);
+ void replace_nonprintable_char
+ 	(int, char *);
+ int sa_fread
+-- 
+2.17.1
+

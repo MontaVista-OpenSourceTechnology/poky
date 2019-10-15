@@ -1,0 +1,49 @@
+From ec8e2cd070643379692367d3eba384fcd9293ea4 Mon Sep 17 00:00:00 2001
+From: Sebastien GODARD <sysstat@users.noreply.github.com>
+Date: Mon, 9 Jul 2018 17:21:21 +0200
+Subject: [PATCH 02/11] Remove int-in-bool-context warnings
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Recent gcc versions think the code used in SREALLOC() macro might be
+wrong because we use the result of a multiplication as a boolean value:
+
+In file included from sa.h:11,
+                 from sadc.c:37:
+sadc.c: In function ‘sa_sys_init’:
+sadc.c:336:55: warning: ‘*’ in boolean context, suggest ‘&&’ instead [-Wint-in-bool-context]
+      (size_t) act[i]->msize * (size_t) act[i]->nr_ini * (size_t) act[i]->nr2);
+      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~
+common.h:125:16: note: in definition of macro ‘SREALLOC’
+            if (SIZE) {       \
+                ^~~~
+
+Add a comparison to zero to make clear to gcc that the code is actually
+fine.
+
+Upstream status: backport(https://github.com/sysstat/sysstat/commit/9f63e987503a6435c3fffae2be5f6f6b3da76fc3)
+CVE: CVE-2019-16167 patch #2
+
+Signed-off-by: Sebastien GODARD <sysstat@users.noreply.github.com>
+Signed-off-by: Anand Je Sypureddy <anandje@mvista.com>
+---
+ common.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/common.h b/common.h
+index e9136fa..09b64ab 100644
+--- a/common.h
++++ b/common.h
+@@ -122,7 +122,7 @@
+ /* Allocate and init structure */
+ #define SREALLOC(S, TYPE, SIZE)	do {								 \
+ 					TYPE *_p_ = S;						 \
+-   				   	if (SIZE) {						 \
++					if ((SIZE) != 0) {					 \
+ 						if ((S = (TYPE *) realloc(S, (SIZE))) == NULL) { \
+ 				         		perror("realloc");			 \
+ 				         		exit(4);				 \
+-- 
+2.17.1
+

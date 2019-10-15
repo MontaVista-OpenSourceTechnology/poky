@@ -1,0 +1,98 @@
+From 434915fddb1dd284a680e4bcce9a3a02ac0df3e1 Mon Sep 17 00:00:00 2001
+From: Sebastien GODARD <sysstat@users.noreply.github.com>
+Date: Tue, 13 Aug 2019 14:53:29 +0200
+Subject: [PATCH 10/11] Fix #230: Memory corruption bug due to Integer Overflow
+ in remap_struct()
+
+(See problem description in issue #230.)
+Check that the number of fields (long long integers, long integers or
+integers) as read from a system activity binary datafile multiplied by
+its alignment width doesn't overflow, i.e. the result must not be
+smaller than the number of fields.
+
+Upstream status: backport(https://github.com/sysstat/sysstat/commit/edbf507678bf10914e9804ff8a06737fdcb2e781)
+CVE: CVE-2019-16167 patch #10
+
+Reported-by: Ren Kimura
+Signed-off-by: Sebastien GODARD <sysstat@users.noreply.github.com>
+Signed-off-by: Anand Je Sypureddy <anandje@mvista.com>
+---
+ sa_common.c | 21 +++++++++++++++++++--
+ 1 file changed, 19 insertions(+), 2 deletions(-)
+
+diff --git a/sa_common.c b/sa_common.c
+index 8ec6a5a..e961000 100644
+--- a/sa_common.c
++++ b/sa_common.c
+@@ -1306,12 +1306,17 @@ void remap_struct(unsigned int gtypes_nr[], unsigned int ftypes_nr[],
+ 	/* Remap [unsigned] long fields */
+ 	d = gtypes_nr[0] - ftypes_nr[0];
+ 	if (d) {
++		if (ftypes_nr[0] * ULL_ALIGNMENT_WIDTH < ftypes_nr[0])
++			/* Overflow */
++			return -1;
++
+ 		n = MINIMUM(f_size - ftypes_nr[0] * ULL_ALIGNMENT_WIDTH,
+ 			    g_size - gtypes_nr[0] * ULL_ALIGNMENT_WIDTH);
+ 		if ((ftypes_nr[0] * ULL_ALIGNMENT_WIDTH >= b_size) ||
+ 		    (gtypes_nr[0] * ULL_ALIGNMENT_WIDTH + n > b_size) ||
+ 		    (ftypes_nr[0] * ULL_ALIGNMENT_WIDTH + n > b_size))
+ 			return;
++
+ 		memmove(((char *) ps) + gtypes_nr[0] * ULL_ALIGNMENT_WIDTH,
+ 			((char *) ps) + ftypes_nr[0] * ULL_ALIGNMENT_WIDTH, n);
+ 		if (d > 0) {
+@@ -1322,6 +1327,10 @@ void remap_struct(unsigned int gtypes_nr[], unsigned int ftypes_nr[],
+ 	/* Remap [unsigned] int fields */
+ 	d = gtypes_nr[1] - ftypes_nr[1];
+ 	if (d) {
++		if (ftypes_nr[1] * UL_ALIGNMENT_WIDTH < ftypes_nr[1])
++			/* Overflow */
++			return -1;
++
+ 		n = MINIMUM(f_size - ftypes_nr[0] * ULL_ALIGNMENT_WIDTH
+ 				   - ftypes_nr[1] * UL_ALIGNMENT_WIDTH,
+ 			    g_size - gtypes_nr[0] * ULL_ALIGNMENT_WIDTH
+@@ -1333,6 +1342,7 @@ void remap_struct(unsigned int gtypes_nr[], unsigned int ftypes_nr[],
+ 		    (gtypes_nr[0] * ULL_ALIGNMENT_WIDTH +
+ 		     ftypes_nr[1] * UL_ALIGNMENT_WIDTH + n > b_size))
+ 			return;
++
+ 		memmove(((char *) ps) + gtypes_nr[0] * ULL_ALIGNMENT_WIDTH
+ 				      + gtypes_nr[1] * UL_ALIGNMENT_WIDTH,
+ 			((char *) ps) + gtypes_nr[0] * ULL_ALIGNMENT_WIDTH
+@@ -1346,6 +1356,10 @@ void remap_struct(unsigned int gtypes_nr[], unsigned int ftypes_nr[],
+ 	/* Remap possible fields (like strings of chars) following int fields */
+ 	d = gtypes_nr[2] - ftypes_nr[2];
+ 	if (d) {
++		if (ftypes_nr[2] * U_ALIGNMENT_WIDTH < ftypes_nr[2])
++			/* Overflow */
++			return -1;
++
+ 		n = MINIMUM(f_size - ftypes_nr[0] * ULL_ALIGNMENT_WIDTH
+ 				   - ftypes_nr[1] * UL_ALIGNMENT_WIDTH
+ 				   - ftypes_nr[2] * U_ALIGNMENT_WIDTH,
+@@ -1362,6 +1376,7 @@ void remap_struct(unsigned int gtypes_nr[], unsigned int ftypes_nr[],
+ 		     gtypes_nr[1] * UL_ALIGNMENT_WIDTH +
+ 		     ftypes_nr[2] * U_ALIGNMENT_WIDTH + n > b_size))
+ 			return;
++
+ 		memmove(((char *) ps) + gtypes_nr[0] * ULL_ALIGNMENT_WIDTH
+ 				      + gtypes_nr[1] * UL_ALIGNMENT_WIDTH
+ 				      + gtypes_nr[2] * U_ALIGNMENT_WIDTH,
+@@ -1866,8 +1881,10 @@ void check_file_actlst(int *ifd, char *dfile, struct activity *act[],
+ 	 * smaller than FILE_HEADER_SIZE. Remap the fields of the file header
+ 	 * then copy its contents to the expected  structure.
+ 	 */
+-	remap_struct(hdr_types_nr, file_magic->hdr_types_nr, buffer,
+-		     file_magic->header_size, FILE_HEADER_SIZE, file_magic->header_size);
++	if (remap_struct(hdr_types_nr, file_magic->hdr_types_nr, buffer,
++			 file_magic->header_size, FILE_HEADER_SIZE, file_magic->header_size) < 0)
++		goto format_error;
++
+ 	memcpy(file_hdr, buffer, FILE_HEADER_SIZE);
+ 	free(buffer);
+ 	buffer = NULL;
+-- 
+2.17.1
+

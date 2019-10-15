@@ -1,0 +1,140 @@
+From e7192c26a40aed5d45651258d3b833767446a553 Mon Sep 17 00:00:00 2001
+From: Sebastien GODARD <sysstat@users.noreply.github.com>
+Date: Tue, 10 Jul 2018 21:28:48 +0200
+Subject: [PATCH 03/11] Remove some format-truncation= warnings
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Check return code of some snprintf() functions to quiet gcc about
+possible truncated output, e.g.:
+
+12,18d11
+< common.c: In function ‘get_dev_part_nr’:
+< common.c:341:35: warning: ‘%s’ directive output may be truncated writing up to 255 bytes into a region of size between 0 and 1023 [-Wformat-truncation=]
+<    snprintf(line, MAX_PF_NAME, "%s/%s/%s", dfile, drd->d_name, S_STAT);
+<                                    ^~
+< common.c:341:3: note: ‘snprintf’ output between 7 and 1285 bytes into a destination of size 1024
+<    snprintf(line, MAX_PF_NAME, "%s/%s/%s", dfile, drd->d_name, S_STAT);
+<    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Upstream status: backport(https://github.com/sysstat/sysstat/commit/97912938cd476645b267280069e83b1c8dc0e1c7)
+CVE: CVE-2019-16167 patch #3
+
+Signed-off-by: Sebastien GODARD <sysstat@users.noreply.github.com>
+Signed-off-by: Anand Je Sypureddy <anandje@mvista.com>
+---
+ common.c    |  7 ++++---
+ common.h    |  2 +-
+ sa.h        |  2 +-
+ sa_common.c | 25 ++++++++++++++++---------
+ 4 files changed, 22 insertions(+), 14 deletions(-)
+
+diff --git a/common.c b/common.c
+index dd63410..5140e60 100644
+--- a/common.c
++++ b/common.c
+@@ -326,7 +326,7 @@ int get_dev_part_nr(char *dev_name)
+ 	DIR *dir;
+ 	struct dirent *drd;
+ 	char dfile[MAX_PF_NAME], line[MAX_PF_NAME];
+-	int part = 0;
++	int part = 0, err;
+ 
+ 	snprintf(dfile, MAX_PF_NAME, "%s/%s", SYSFS_BLOCK, dev_name);
+ 	dfile[MAX_PF_NAME - 1] = '\0';
+@@ -339,8 +339,9 @@ int get_dev_part_nr(char *dev_name)
+ 	while ((drd = readdir(dir)) != NULL) {
+ 		if (!strcmp(drd->d_name, ".") || !strcmp(drd->d_name, ".."))
+ 			continue;
+-		snprintf(line, MAX_PF_NAME, "%s/%s/%s", dfile, drd->d_name, S_STAT);
+-		line[MAX_PF_NAME - 1] = '\0';
++		err = snprintf(line, MAX_PF_NAME, "%s/%s/%s", dfile, drd->d_name, S_STAT);
++		if ((err < 0) || (err >= MAX_PF_NAME))
++			continue;
+ 
+ 		/* Try to guess if current entry is a directory containing a stat file */
+ 		if (!access(line, R_OK)) {
+diff --git a/common.h b/common.h
+index 09b64ab..050fb6c 100644
+--- a/common.h
++++ b/common.h
+@@ -88,7 +88,7 @@
+ #define SYSFS_PRODUCT		"product"
+ #define SYSFS_FCHOST		"/sys/class/fc_host"
+ 
+-#define MAX_FILE_LEN		256
++#define MAX_FILE_LEN		512
+ #define MAX_PF_NAME		1024
+ #define MAX_NAME_LEN		128
+ 
+diff --git a/sa.h b/sa.h
+index 37bfc84..356ed9f 100644
+--- a/sa.h
++++ b/sa.h
+@@ -1227,7 +1227,7 @@ int get_activity_nr
+ 	(struct activity * [], unsigned int, int);
+ int get_activity_position
+ 	(struct activity * [], unsigned int, int);
+-void set_default_file
++int set_default_file
+ 	(char *, int, int);
+ void handle_invalid_sa_file
+ 	(int, struct file_magic *, char *, int);
+diff --git a/sa_common.c b/sa_common.c
+index 8bb89bd..23180b2 100644
+--- a/sa_common.c
++++ b/sa_common.c
+@@ -240,12 +240,17 @@ void guess_sa_name(char *sa_dir, struct tm *rectime, int *sa_name)
+  *
+  * OUT:
+  * @datafile	Name of daily data file.
++ *
++ * RETURNS:
++ * 1 if an output error has been encountered or if datafile name has been
++ * truncated, or 0 otherwise.
+  ***************************************************************************
+  */
+-void set_default_file(char *datafile, int d_off, int sa_name)
++int set_default_file(char *datafile, int d_off, int sa_name)
+ {
+ 	char sa_dir[MAX_FILE_LEN];
+ 	struct tm rectime = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL};
++	int err = 0;
+ 
+ 	/* Set directory where daily data files will be saved */
+ 	if (datafile[0]) {
+@@ -267,20 +272,22 @@ void set_default_file(char *datafile, int d_off, int sa_name)
+ 	}
+ 	if (sa_name) {
+ 		/* Using saYYYYMMDD data files */
+-		snprintf(datafile, MAX_FILE_LEN,
+-			 "%s/sa%04d%02d%02d", sa_dir,
+-			 rectime.tm_year + 1900,
+-			 rectime.tm_mon + 1,
+-			 rectime.tm_mday);
++		err = snprintf(datafile, MAX_FILE_LEN,
++			       "%s/sa%04d%02d%02d", sa_dir,
++			       rectime.tm_year + 1900,
++			       rectime.tm_mon + 1,
++			       rectime.tm_mday);
+ 	}
+ 	else {
+ 		/* Using saDD data files */
+-		snprintf(datafile, MAX_FILE_LEN,
+-			 "%s/sa%02d", sa_dir,
+-			 rectime.tm_mday);
++		err = snprintf(datafile, MAX_FILE_LEN,
++			       "%s/sa%02d", sa_dir,
++			       rectime.tm_mday);
+ 	}
+ 	datafile[MAX_FILE_LEN - 1] = '\0';
+ 	default_file_used = TRUE;
++
++	return ((err < 0) || (err >= MAX_FILE_LEN));
+ }
+ 
+ /*
+-- 
+2.17.1
+

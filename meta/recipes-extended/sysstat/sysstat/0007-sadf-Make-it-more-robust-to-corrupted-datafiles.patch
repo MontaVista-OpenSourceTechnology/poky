@@ -1,0 +1,546 @@
+From 54d4b9f3485e305eed30141c6a63306dc85beda9 Mon Sep 17 00:00:00 2001
+From: Sebastien GODARD <sysstat@users.noreply.github.com>
+Date: Fri, 21 Sep 2018 11:51:14 +0200
+Subject: [PATCH 07/11] sadf: Make it more robust to corrupted datafiles
+
+When a system activity datafile has been corrupted, sadf may not be able
+to do its job completely. For example reaching the end of file
+unexpectedly will make sadf stop, preventing it from, e.g. displaying
+its SVG output (sadf -g) or terminating its JSON or XML file properly
+(sadf -j or sadf -x).
+This patch tells sadf to keep on working even if the end of file has
+been reached unexpectedly, enabling it to finish its job.
+
+Note: sar is not really concerned by this problem because you can tell
+it to stop before the problem occurs using its option -e.
+
+Upstream status: backport(https://github.com/sysstat/sysstat/commit/131ff13e5eb90e544c6d42c309adeb9e8947db88)
+CVE: CVE-2019-16167 patch #7
+
+Signed-off-by: Sebastien GODARD <sysstat@users.noreply.github.com>
+Signed-off-by: Anand Je Sypureddy <anandje@mvista.com>
+---
+ sa.h        | 11 ++++++----
+ sa_common.c | 63 ++++++++++++++++++++++++++++++++++++++---------------
+ sa_conv.c   | 14 ++++++------
+ sadf.c      | 52 +++++++++++++++++++++++++------------------
+ sar.c       | 12 +++++-----
+ 5 files changed, 97 insertions(+), 55 deletions(-)
+
+diff --git a/sa.h b/sa.h
+index e94686d..eca8e71 100644
+--- a/sa.h
++++ b/sa.h
+@@ -287,6 +287,9 @@
+ #define END_OF_DATA_UNEXPECTED	1
+ #define INCONSISTENT_INPUT_DATA	2
+ 
++#define UEOF_STOP	0
++#define UEOF_CONT	1
++
+ #define CLOSE_XML_MARKUP	0
+ #define OPEN_XML_MARKUP		1
+ 
+@@ -1298,13 +1301,13 @@ int print_special_record
+ 	(struct record_header *, unsigned int, struct tstamp *, struct tstamp *,
+ 	 int, int, struct tm *, struct tm *, char *, int, struct file_magic *,
+ 	 struct file_header *, struct activity * [], struct report_format *, int, int);
+-void read_file_stat_bunch
++int read_file_stat_bunch
+ 	(struct activity * [], int, int, int, struct file_activity *, int, int,
+-	 char *, struct file_magic *);
++	 char *, struct file_magic *, int);
+ __nr_t read_nr_value
+ 	(int, char *, struct file_magic *, int, int, int);
+ int read_record_hdr
+-	(int, void *, struct record_header *, struct file_header *, int, int);
++	(int, void *, struct record_header *, struct file_header *, int, int, int);
+ void reallocate_all_buffers
+ 	(struct activity *, __nr_t);
+ void remap_struct
+@@ -1312,7 +1315,7 @@ void remap_struct
+ void replace_nonprintable_char
+ 	(int, char *);
+ int sa_fread
+-	(int, void *, size_t, int);
++	(int, void *, size_t, int, int);
+ int sa_get_record_timestamp_struct
+ 	(unsigned int, struct record_header *, struct tm *, struct tm *);
+ int sa_open_read_magic
+diff --git a/sa_common.c b/sa_common.c
+index 23180b2..ad4ef42 100644
+--- a/sa_common.c
++++ b/sa_common.c
+@@ -1364,12 +1364,16 @@ void remap_struct(unsigned int gtypes_nr[], unsigned int ftypes_nr[],
+  * @size	Number of bytes to read.
+  * @mode	If set to HARD_SIZE, indicate that an EOF should be considered
+  * 		as an error.
++ * @oneof	Set to UEOF_CONT if an unexpected end of file should not make
++ *		sadf stop. Default behavior is to stop on unexpected EOF.
+  *
+  * RETURNS:
+- * 1 if EOF has been reached, 0 otherwise.
++ * 1 if EOF has been reached,
++ * 2 if an unexpected EOF has been reached (and sadf was told to continue),
++ * 0 otherwise.
+  ***************************************************************************
+  */
+-int sa_fread(int ifd, void *buffer, size_t size, int mode)
++int sa_fread(int ifd, void *buffer, size_t size, int mode, int oneof)
+ {
+ 	ssize_t n;
+ 
+@@ -1385,6 +1389,8 @@ int sa_fread(int ifd, void *buffer, size_t size, int mode)
+ 
+ 	if (n < size) {
+ 		fprintf(stderr, _("End of system activity file unexpected\n"));
++		if (oneof == UEOF_CONT)
++			return 2;
+ 		close(ifd);
+ 		exit(2);
+ 	}
+@@ -1406,20 +1412,27 @@ int sa_fread(int ifd, void *buffer, size_t size, int mode)
+  * @endian_mismatch
+  *		TRUE if data read from file don't match current machine's
+  *		endianness.
++ * @oneof	Set to EOF_CONT if an unexpected end of file should not make
++ *		sadf stop. Default behavior is to stop on unexpected EOF.
+  *
+  * OUT:
+  * @record_hdr	Record header for current sample.
+  *
+  * RETURNS:
+- * 1 if EOF has been reached, 0 otherwise.
++ * 1 if EOF has been reached,
++ * 2 if an unexpected EOF has been reached,
++ * 0 otherwise.
+  ***************************************************************************
+  */
+ int read_record_hdr(int ifd, void *buffer, struct record_header *record_hdr,
+-		    struct file_header *file_hdr, int arch_64, int endian_mismatch)
++		    struct file_header *file_hdr, int arch_64, int endian_mismatch,
++		    int oneof)
+ {
+-	if (sa_fread(ifd, buffer, (size_t) file_hdr->rec_size, SOFT_SIZE))
++	int rc;
++
++	if ((rc = sa_fread(ifd, buffer, (size_t) file_hdr->rec_size, SOFT_SIZE, oneof)) != 0)
+ 		/* End of sa data file */
+-		return 1;
++		return rc;
+ 
+ 	/* Remap record header structure to that expected by current version */
+ 	remap_struct(rec_types_nr, file_hdr->rec_types_nr, buffer,
+@@ -1491,7 +1504,7 @@ __nr_t read_nr_value(int ifd, char *file, struct file_magic *file_magic,
+ {
+ 	__nr_t value;
+ 
+-	sa_fread(ifd, &value, sizeof(__nr_t), HARD_SIZE);
++	sa_fread(ifd, &value, sizeof(__nr_t), HARD_SIZE, UEOF_STOP);
+ 
+ 	/* Normalize endianness for file_activity structures */
+ 	if (endian_mismatch) {
+@@ -1527,11 +1540,18 @@ __nr_t read_nr_value(int ifd, char *file, struct file_magic *file_magic,
+  * @dfile	Name of system activity data file.
+  * @file_magic	file_magic structure containing data read from file magic
+  *		header.
++ * @oneof	Set to UEOF_CONT if an unexpected end of file should not make
++ *		sadf stop. Default behavior is to stop on unexpected EOF.
++ *
++ * RETURNS:
++ * 2 if an unexpected EOF has been reached,
++ * 0 otherwise.
+  ***************************************************************************
+  */
+-void read_file_stat_bunch(struct activity *act[], int curr, int ifd, int act_nr,
+-			  struct file_activity *file_actlst, int endian_mismatch,
+-			  int arch_64, char *dfile, struct file_magic *file_magic)
++int read_file_stat_bunch(struct activity *act[], int curr, int ifd, int act_nr,
++			 struct file_activity *file_actlst, int endian_mismatch,
++			 int arch_64, char *dfile, struct file_magic *file_magic,
++			 int oneof)
+ {
+ 	int i, j, p;
+ 	struct file_activity *fal = file_actlst;
+@@ -1567,6 +1587,8 @@ void read_file_stat_bunch(struct activity *act[], int curr, int ifd, int act_nr,
+ 				if (lseek(ifd, offset, SEEK_CUR) < offset) {
+ 					close(ifd);
+ 					perror("lseek");
++					if (oneof == UEOF_CONT)
++						return 2;
+ 					exit(2);
+ 				}
+ 			}
+@@ -1603,8 +1625,10 @@ void read_file_stat_bunch(struct activity *act[], int curr, int ifd, int act_nr,
+ 		    (act[p]->msize > act[p]->fsize)) {
+ 
+ 			for (j = 0; j < (nr_value * act[p]->nr2); j++) {
+-				sa_fread(ifd, (char *) act[p]->buf[curr] + j * act[p]->msize,
+-					 (size_t) act[p]->fsize, HARD_SIZE);
++				if (sa_fread(ifd, (char *) act[p]->buf[curr] + j * act[p]->msize,
++					 (size_t) act[p]->fsize, HARD_SIZE, oneof) > 0)
++					/* Unexpected EOF */
++					return 2;
+ 			}
+ 		}
+ 		else if (nr_value > 0) {
+@@ -1612,8 +1636,11 @@ void read_file_stat_bunch(struct activity *act[], int curr, int ifd, int act_nr,
+ 			 * Note: If msize was smaller than fsize,
+ 			 * then it has been set to fsize in check_file_actlst().
+ 			 */
+-			sa_fread(ifd, act[p]->buf[curr],
+-				 (size_t) act[p]->fsize * (size_t) nr_value * (size_t) act[p]->nr2, HARD_SIZE);
++			if (sa_fread(ifd, act[p]->buf[curr],
++				 (size_t) act[p]->fsize * (size_t) nr_value * (size_t) act[p]->nr2,
++				 HARD_SIZE, oneof) > 0)
++				/* Unexpected EOF */
++				return 2;
+ 		}
+ 		else {
+ 			/* nr_value == 0: Nothing to read */
+@@ -1635,6 +1662,8 @@ void read_file_stat_bunch(struct activity *act[], int curr, int ifd, int act_nr,
+ 				     act[p]->fsize, act[p]->msize);
+ 		}
+ 	}
++
++	return 0;
+ }
+ 
+ /*
+@@ -1807,7 +1836,7 @@ void check_file_actlst(int *ifd, char *dfile, struct activity *act[],
+ 	SREALLOC(buffer, char, file_magic->header_size);
+ 
+ 	/* Read sa data file standard header and allocate activity list */
+-	sa_fread(*ifd, buffer, (size_t) file_magic->header_size, HARD_SIZE);
++	sa_fread(*ifd, buffer, (size_t) file_magic->header_size, HARD_SIZE, UEOF_STOP);
+ 	/*
+ 	 * Data file header size (file_magic->header_size) may be greater or
+ 	 * smaller than FILE_HEADER_SIZE. Remap the fields of the file header
+@@ -1856,7 +1885,7 @@ void check_file_actlst(int *ifd, char *dfile, struct activity *act[],
+ 	for (i = 0; i < file_hdr->sa_act_nr; i++, fal++) {
+ 
+ 		/* Read current file_activity structure from file */
+-		sa_fread(*ifd, buffer, (size_t) file_hdr->act_size, HARD_SIZE);
++		sa_fread(*ifd, buffer, (size_t) file_hdr->act_size, HARD_SIZE, UEOF_STOP);
+ 		/*
+ 		* Data file_activity size (file_hdr->act_size) may be greater or
+ 		* smaller than FILE_ACTIVITY_SIZE. Remap the fields of the file's structure
+@@ -2564,7 +2593,7 @@ void replace_nonprintable_char(int ifd, char *comment)
+ 	int i;
+ 
+ 	/* Read comment */
+-	sa_fread(ifd, comment, MAX_COMMENT_LEN, HARD_SIZE);
++	sa_fread(ifd, comment, MAX_COMMENT_LEN, HARD_SIZE, UEOF_STOP);
+ 	comment[MAX_COMMENT_LEN - 1] = '\0';
+ 
+ 	/* Replace non printable chars */
+diff --git a/sa_conv.c b/sa_conv.c
+index 2ccc4d5..560a8db 100644
+--- a/sa_conv.c
++++ b/sa_conv.c
+@@ -287,7 +287,7 @@ int upgrade_header_section(char dfile[], int fd, int stdfd, struct activity *act
+ 	n = (previous_format == FORMAT_MAGIC_2171 ? FILE_HEADER_SIZE_2171
+ 						  : hdr_size);
+ 	SREALLOC(buffer, char, n);
+-	sa_fread(fd, buffer, (size_t) n, HARD_SIZE);
++	sa_fread(fd, buffer, (size_t) n, HARD_SIZE, UEOF_STOP);
+ 
+ 	/* Upgrade file_header structure */
+ 	upgrade_file_header(buffer, file_hdr, previous_format,
+@@ -305,7 +305,7 @@ int upgrade_header_section(char dfile[], int fd, int stdfd, struct activity *act
+ 
+ 	for (i = 0; i < file_hdr->sa_act_nr; i++, ofal++) {
+ 
+-		sa_fread(fd, ofal, OLD_FILE_ACTIVITY_SIZE, HARD_SIZE);
++		sa_fread(fd, ofal, OLD_FILE_ACTIVITY_SIZE, HARD_SIZE, UEOF_STOP);
+ 
+ 		/* Normalize endianness for file_activity structures */
+ 		if (endian_mismatch) {
+@@ -1499,7 +1499,7 @@ int upgrade_comment_record(int fd, int stdfd)
+ 	char file_comment[MAX_COMMENT_LEN];
+ 
+ 	/* Read the COMMENT record */
+-	sa_fread(fd, file_comment, MAX_COMMENT_LEN, HARD_SIZE);
++	sa_fread(fd, file_comment, MAX_COMMENT_LEN, HARD_SIZE, UEOF_STOP);
+ 	file_comment[MAX_COMMENT_LEN - 1] = '\0';
+ 
+ 	/* Then write it. No changes at this time */
+@@ -1552,7 +1552,7 @@ int upgrade_restart_record(int fd, int stdfd, struct activity *act[],
+ 		 * of volatile activity structures. Among them is A_CPU activity.
+ 		 */
+ 		for (i = 0; i < vol_act_nr; i++) {
+-			sa_fread(fd, &ofile_act, OLD_FILE_ACTIVITY_SIZE, HARD_SIZE);
++			sa_fread(fd, &ofile_act, OLD_FILE_ACTIVITY_SIZE, HARD_SIZE, UEOF_STOP);
+ 
+ 			/* Normalize endianness for file_activity structures */
+ 			if (endian_mismatch) {
+@@ -1636,14 +1636,14 @@ int upgrade_common_record(int fd, int stdfd, struct activity *act[], struct file
+ 				for (k = 0; k < act[p]->nr2; k++) {
+ 					sa_fread(fd,
+ 						 (char *) act[p]->buf[0] + (j * act[p]->nr2 + k) * act[p]->msize,
+-						 (size_t) ofal->size, HARD_SIZE);
++						 (size_t) ofal->size, HARD_SIZE, UEOF_STOP);
+ 				}
+ 			}
+ 		}
+ 		else if (act[p]->nr_ini > 0) {
+ 			sa_fread(fd, act[p]->buf[0],
+ 				 (size_t) ofal->size * (size_t) act[p]->nr_ini * (size_t) act[p]->nr2,
+-				 HARD_SIZE);
++				 HARD_SIZE, UEOF_STOP);
+ 		}
+ 
+ 		nr_struct = act[p]->nr_ini;
+@@ -1863,7 +1863,7 @@ int upgrade_stat_records(int fd, int stdfd, struct activity *act[], struct file_
+ 	fprintf(stderr, _("Statistics:\n"));
+ 
+ 	do {
+-		eosaf = sa_fread(fd, &orec_hdr, OLD_RECORD_HEADER_SIZE, SOFT_SIZE);
++		eosaf = sa_fread(fd, &orec_hdr, OLD_RECORD_HEADER_SIZE, SOFT_SIZE, UEOF_STOP);
+ 
+ 		/* Normalize endianness */
+ 		if (endian_mismatch) {
+diff --git a/sadf.c b/sadf.c
+index fdba3a7..46ed201 100644
+--- a/sadf.c
++++ b/sadf.c
+@@ -213,6 +213,8 @@ void check_format_options(void)
+  *		be saved for current record.
+  * @loctime	Structure where timestamp (expressed in local time) can be
+  *		saved for current record.
++ * @oneof	Set to UEOF_CONT if an unexpected end of file should not make
++ *		sadf stop. Default behavior is to stop on unexpected EOF.
+  *
+  * OUT:
+  * @rtype	Type of record read (R_RESTART, R_COMMENT, etc.)
+@@ -228,20 +230,23 @@ void check_format_options(void)
+  *		explicitly told to do so with the SET_TIMESTAMPS action flag.
+  *
+  * RETURNS:
+- * TRUE if end of file has been reached.
++ * 1 if EOF has been reached,
++ * 2 if an unexpected EOF has been reached,
++ * 0 otherwise.
+  ***************************************************************************
+  */
+ int read_next_sample(int ifd, int action, int curr, char *file, int *rtype, int tab,
+ 		     struct file_magic *file_magic, struct file_activity *file_actlst,
+-		     struct tm *rectime, struct tm *loctime)
++		     struct tm *rectime, struct tm *loctime, int oneof)
+ {
++	int rc;
+ 	char rec_hdr_tmp[MAX_RECORD_HEADER_SIZE];
+ 
+ 	/* Read current record */
+-	if (read_record_hdr(ifd, rec_hdr_tmp, &record_hdr[curr], &file_hdr,
+-			    arch_64, endian_mismatch))
++	if ((rc = read_record_hdr(ifd, rec_hdr_tmp, &record_hdr[curr], &file_hdr,
++			    arch_64, endian_mismatch, oneof)) != 0)
+ 		/* End of sa file */
+-		return TRUE;
++		return rc;
+ 
+ 	*rtype = record_hdr[curr].record_type;
+ 
+@@ -250,6 +255,10 @@ int read_next_sample(int ifd, int action, int curr, char *file, int *rtype, int
+ 			/* Ignore COMMENT record */
+ 			if (lseek(ifd, MAX_COMMENT_LEN, SEEK_CUR) < MAX_COMMENT_LEN) {
+ 				perror("lseek");
++				if (oneof == UEOF_CONT)
++					return 2;
++				close(ifd);
++				exit(2);
+ 			}
+ 			if (action & SET_TIMESTAMPS) {
+ 				sa_get_record_timestamp_struct(flags, &record_hdr[curr],
+@@ -293,12 +302,13 @@ int read_next_sample(int ifd, int action, int curr, char *file, int *rtype, int
+ 		 * OK: Previous record was not a special one.
+ 		 * So read now the extra fields.
+ 		 */
+-		read_file_stat_bunch(act, curr, ifd, file_hdr.sa_act_nr,
+-				     file_actlst, endian_mismatch, arch_64, file, file_magic);
++		if (read_file_stat_bunch(act, curr, ifd, file_hdr.sa_act_nr, file_actlst,
++					 endian_mismatch, arch_64, file, file_magic, oneof) > 0)
++			return 2;
+ 		sa_get_record_timestamp_struct(flags, &record_hdr[curr], rectime, loctime);
+ 	}
+ 
+-	return FALSE;
++	return 0;
+ }
+ 
+ /*
+@@ -476,7 +486,7 @@ int get_svg_graph_nr(int ifd, char *file, struct file_magic *file_magic,
+ 	do {
+ 		eosaf = read_next_sample(ifd, IGNORE_RESTART | IGNORE_COMMENT | SET_TIMESTAMPS,
+ 					 0, file, &rtype, 0, file_magic, file_actlst,
+-					 rectime, loctime);
++					 rectime, loctime, UEOF_CONT);
+ 		if (eosaf)
+ 			/* No record to display => no graph too */
+ 			return 0;
+@@ -498,7 +508,7 @@ int get_svg_graph_nr(int ifd, char *file, struct file_magic *file_magic,
+ 		do {
+ 			eosaf = read_next_sample(ifd, IGNORE_RESTART | IGNORE_COMMENT | SET_TIMESTAMPS,
+ 						 0, file, &rtype, 0, file_magic, file_actlst,
+-						 rectime, loctime);
++						 rectime, loctime, UEOF_CONT);
+ 			if (eosaf ||
+ 			    (tm_end.use && (datecmp(loctime, &tm_end) >= 0)))
+ 				/* End of data file or end time exceeded */
+@@ -784,7 +794,7 @@ void rw_curr_act_stats(int ifd, int *curr, long *cnt, int *eosaf,
+ 		/* Display <count> lines of stats */
+ 		*eosaf = read_next_sample(ifd, IGNORE_RESTART | DONT_READ_CPU_NR,
+ 					  *curr, file, &rtype, 0, file_magic,
+-					  file_actlst, rectime, loctime);
++					  file_actlst, rectime, loctime, UEOF_STOP);
+ 
+ 		if (!*eosaf && (rtype != R_RESTART) && (rtype != R_COMMENT)) {
+ 			next = generic_write_stats(*curr, tm_start.use, tm_end.use, *reset, cnt,
+@@ -871,7 +881,7 @@ void display_curr_act_graphs(int ifd, int *curr, long *cnt, int *eosaf,
+ 	do {
+ 		*eosaf = read_next_sample(ifd, IGNORE_RESTART | IGNORE_COMMENT | SET_TIMESTAMPS,
+ 					  *curr, file, &rtype, 0, file_magic,
+-					  file_actlst, rectime, loctime);
++					  file_actlst, rectime, loctime, UEOF_CONT);
+ 
+ 		if (!*eosaf && (rtype != R_COMMENT) && (rtype != R_RESTART)) {
+ 
+@@ -900,7 +910,7 @@ void display_curr_act_graphs(int ifd, int *curr, long *cnt, int *eosaf,
+ 			do {
+ 				*eosaf = read_next_sample(ifd, IGNORE_RESTART | IGNORE_COMMENT | SET_TIMESTAMPS,
+ 							  *curr, file, &rtype, 0, file_magic,
+-							  file_actlst, rectime, loctime);
++							  file_actlst, rectime, loctime, UEOF_CONT);
+ 			}
+ 			while (!*eosaf && ((rtype == R_RESTART) || (rtype == R_COMMENT)));
+ 
+@@ -977,7 +987,7 @@ void logic1_display_loop(int ifd, struct file_activity *file_actlst, char *file,
+ 		do {
+ 			eosaf = read_next_sample(ifd, IGNORE_COMMENT | IGNORE_RESTART, 0,
+ 						 file, &rtype, tab, file_magic, file_actlst,
+-						 rectime, loctime);
++						 rectime, loctime, UEOF_STOP);
+ 		}
+ 		while (!eosaf && ((rtype == R_RESTART) || (rtype == R_COMMENT) ||
+ 			(tm_start.use && (datecmp(loctime, &tm_start) < 0)) ||
+@@ -994,7 +1004,7 @@ void logic1_display_loop(int ifd, struct file_activity *file_actlst, char *file,
+ 			do {
+ 				eosaf = read_next_sample(ifd, IGNORE_COMMENT | IGNORE_RESTART, curr,
+ 							 file, &rtype, tab, file_magic, file_actlst,
+-							 rectime, loctime);
++							 rectime, loctime, UEOF_CONT);
+ 
+ 				if (!eosaf && (rtype != R_COMMENT) && (rtype != R_RESTART)) {
+ 					if (*fmt[f_position]->f_statistics) {
+@@ -1022,7 +1032,7 @@ void logic1_display_loop(int ifd, struct file_activity *file_actlst, char *file,
+ 				do {
+ 					eosaf = read_next_sample(ifd, IGNORE_COMMENT | IGNORE_RESTART, curr,
+ 								 file, &rtype, tab, file_magic, file_actlst,
+-								 rectime, loctime);
++								 rectime, loctime, UEOF_CONT);
+ 				}
+ 				while (!eosaf && (rtype != R_RESTART));
+ 			}
+@@ -1047,7 +1057,7 @@ void logic1_display_loop(int ifd, struct file_activity *file_actlst, char *file,
+ 	do {
+ 		eosaf = read_next_sample(ifd, IGNORE_COMMENT, 0,
+ 					 file, &rtype, tab, file_magic, file_actlst,
+-					 rectime, loctime);
++					 rectime, loctime, UEOF_CONT);
+ 	}
+ 	while (!eosaf);
+ 
+@@ -1067,7 +1077,7 @@ void logic1_display_loop(int ifd, struct file_activity *file_actlst, char *file,
+ 		do {
+ 			eosaf = read_next_sample(ifd, IGNORE_RESTART, 0,
+ 						 file, &rtype, tab, file_magic, file_actlst,
+-						 rectime, loctime);
++						 rectime, loctime, UEOF_CONT);
+ 		}
+ 		while (!eosaf);
+ 
+@@ -1121,7 +1131,7 @@ void logic2_display_loop(int ifd, struct file_activity *file_actlst,
+ 		do {
+ 			if (read_next_sample(ifd, IGNORE_NOTHING, 0,
+ 					     file, &rtype, 0, file_magic, file_actlst,
+-					     rectime, loctime))
++					     rectime, loctime, UEOF_STOP))
+ 				/* End of sa data file */
+ 				return;
+ 		}
+@@ -1190,7 +1200,7 @@ void logic2_display_loop(int ifd, struct file_activity *file_actlst,
+ 			do {
+ 				eosaf = read_next_sample(ifd, IGNORE_RESTART | DONT_READ_CPU_NR,
+ 							 curr, file, &rtype, 0, file_magic,
+-							 file_actlst, rectime, loctime);
++							 file_actlst, rectime, loctime, UEOF_STOP);
+ 			}
+ 			while (!eosaf && (rtype != R_RESTART));
+ 		}
+@@ -1274,7 +1284,7 @@ void logic3_display_loop(int ifd, struct file_activity *file_actlst,
+ 	do {
+ 		if (read_next_sample(ifd, IGNORE_RESTART | IGNORE_COMMENT, 0,
+ 				     file, &rtype, 0, file_magic, file_actlst,
+-				     rectime, loctime))
++				     rectime, loctime, UEOF_CONT))
+ 		{
+ 			/* End of sa data file: No views displayed */
+ 			parm.graph_nr = 0;
+diff --git a/sar.c b/sar.c
+index 3885d79..2aa01fa 100644
+--- a/sar.c
++++ b/sar.c
+@@ -781,13 +781,13 @@ void handle_curr_act_stats(int ifd, off_t fpos, int *curr, long *cnt, int *eosaf
+ 		 * Start with reading current sample's record header.
+ 		 */
+ 		*eosaf = read_record_hdr(ifd, rec_hdr_tmp, &record_hdr[*curr],
+-					 &file_hdr, arch_64, endian_mismatch);
++					 &file_hdr, arch_64, endian_mismatch, UEOF_STOP);
+ 		rtype = record_hdr[*curr].record_type;
+ 
+ 		if (!*eosaf && (rtype != R_RESTART) && (rtype != R_COMMENT)) {
+ 			/* Read the extra fields since it's not a special record */
+ 			read_file_stat_bunch(act, *curr, ifd, file_hdr.sa_act_nr, file_actlst,
+-					     endian_mismatch, arch_64, file, file_magic);
++					     endian_mismatch, arch_64, file, file_magic, UEOF_STOP);
+ 		}
+ 
+ 		if ((lines >= rows) || !lines) {
+@@ -1005,7 +1005,7 @@ void read_stats_from_file(char from_file[])
+ 		 */
+ 		do {
+ 			if (read_record_hdr(ifd, rec_hdr_tmp, &record_hdr[0], &file_hdr,
+-					    arch_64, endian_mismatch)) {
++					    arch_64, endian_mismatch, UEOF_STOP)) {
+ 				/* End of sa data file */
+ 				return;
+ 			}
+@@ -1024,7 +1024,7 @@ void read_stats_from_file(char from_file[])
+ 				 */
+ 				read_file_stat_bunch(act, 0, ifd, file_hdr.sa_act_nr,
+ 						     file_actlst, endian_mismatch, arch_64,
+-						     from_file, &file_magic);
++						     from_file, &file_magic, UEOF_STOP);
+ 				if (sa_get_record_timestamp_struct(flags + S_F_LOCAL_TIME,
+ 								   &record_hdr[0],
+ 								   &rectime, NULL))
+@@ -1097,13 +1097,13 @@ void read_stats_from_file(char from_file[])
+ 			do {
+ 				/* Read next record header */
+ 				eosaf = read_record_hdr(ifd, rec_hdr_tmp, &record_hdr[curr],
+-							&file_hdr, arch_64, endian_mismatch);
++							&file_hdr, arch_64, endian_mismatch, UEOF_STOP);
+ 				rtype = record_hdr[curr].record_type;
+ 
+ 				if (!eosaf && (rtype != R_RESTART) && (rtype != R_COMMENT)) {
+ 					read_file_stat_bunch(act, curr, ifd, file_hdr.sa_act_nr,
+ 							     file_actlst, endian_mismatch, arch_64,
+-							     from_file, &file_magic);
++							     from_file, &file_magic, UEOF_STOP);
+ 				}
+ 				else if (!eosaf && (rtype == R_COMMENT)) {
+ 					/* This was a COMMENT record: print it */
+-- 
+2.17.1
+

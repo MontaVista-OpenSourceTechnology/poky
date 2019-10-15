@@ -1,0 +1,30 @@
+From 4834fa9f870bec7931da6d0a1c365fce80eccaa4 Mon Sep 17 00:00:00 2001
+From: stevekay <stevekay@gmail.com>
+Date: Thu, 22 Nov 2018 17:38:45 -0500
+Subject: [PATCH 05/11] Use memcpy rather than strncpy, in order to avoid
+ truncation warning
+
+Upstream status: backport(https://github.com/sysstat/sysstat/commit/e3b00fb056d2d844e2001d66e878b2f4ae2ca71c)
+CVE: CVE-2019-16167 patch #5
+
+Signed-off-by: Anand Je Sypureddy <anandje@mvista.com>
+---
+ rd_stats.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/rd_stats.c b/rd_stats.c
+index cd6cab5..3c397b4 100644
+--- a/rd_stats.c
++++ b/rd_stats.c
+@@ -2587,7 +2587,7 @@ __nr_t read_fchost(struct stats_fchost *st_fc, __nr_t nr_alloc)
+ 			st_fc_i->f_txframes = tx_frames;
+ 			st_fc_i->f_rxwords  = rx_words;
+ 			st_fc_i->f_txwords  = tx_words;
+-			strncpy(st_fc_i->fchost_name, drd->d_name, MAX_FCH_LEN);
++			memcpy(st_fc_i->fchost_name, drd->d_name, MAX_FCH_LEN);
+ 			st_fc_i->fchost_name[MAX_FCH_LEN - 1] = '\0';
+ 		}
+ 	}
+-- 
+2.17.1
+

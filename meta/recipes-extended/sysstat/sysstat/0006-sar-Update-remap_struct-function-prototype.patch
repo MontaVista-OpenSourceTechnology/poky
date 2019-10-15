@@ -1,0 +1,32 @@
+From 77b6919277537a1b443aec8436a7102e19a0ed9e Mon Sep 17 00:00:00 2001
+From: Sebastien GODARD <sysstat@users.noreply.github.com>
+Date: Sun, 26 Aug 2018 16:15:10 +0200
+Subject: [PATCH 06/11] sar: Update remap_struct() function prototype
+
+This commit should have been part of cb7f009.
+
+Upstream status: backport(https://github.com/sysstat/sysstat/commit/0effabd5810075d1010f3d14ca3d96339b0bb840)
+CVE: CVE-2019-16167 patch #6
+
+Signed-off-by: Sebastien GODARD <sysstat@users.noreply.github.com>
+Signed-off-by: Anand Je Sypureddy <anandje@mvista.com>
+---
+ sa.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/sa.h b/sa.h
+index 356ed9f..e94686d 100644
+--- a/sa.h
++++ b/sa.h
+@@ -1308,7 +1308,7 @@ int read_record_hdr
+ void reallocate_all_buffers
+ 	(struct activity *, __nr_t);
+ void remap_struct
+-	(unsigned int [], unsigned int [], void *, unsigned int);
++	(unsigned int [], unsigned int [], void *, unsigned int, unsigned int);
+ void replace_nonprintable_char
+ 	(int, char *);
+ int sa_fread
+-- 
+2.17.1
+

@@ -1,0 +1,39 @@
+From 76416cfdd886bf65e7b3690a692222d45e332c79 Mon Sep 17 00:00:00 2001
+From: Sebastien GODARD <sysstat@users.noreply.github.com>
+Date: Fri, 20 Jul 2018 17:20:36 +0200
+Subject: [PATCH 04/11] sar.c: Fix gcc warning about possible variables overlap
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Fix gcc warning:
+sar.c: In function ‘write_stats_avg’:
+sar.c:372:2: warning: ‘strcpy’ accessing 1 byte at offsets [0, 64] and [0, 128] may overlap 1 byte at offset 0 [-Wrestrict]
+  strcpy(timestamp[!curr], timestamp[curr]);
+  ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Upstream status: backport(https://github.com/sysstat/sysstat/commit/be209c0a4e4d93c24e6374e798c3a1abf0685be4)
+CVE: CVE-2019-16167 patch #4
+
+Signed-off-by: Sebastien GODARD <sysstat@users.noreply.github.com>
+Signed-off-by: Anand Je Sypureddy <anandje@mvista.com>
+---
+ sar.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/sar.c b/sar.c
+index 589c6c6..3885d79 100644
+--- a/sar.c
++++ b/sar.c
+@@ -373,7 +373,7 @@ void write_stats_avg(int curr, int read_from_file, unsigned int act_id)
+ 
+ 	strncpy(timestamp[curr], _("Average:"), TIMESTAMP_LEN);
+ 	timestamp[curr][TIMESTAMP_LEN - 1] = '\0';
+-	strcpy(timestamp[!curr], timestamp[curr]);
++	memcpy(timestamp[!curr], timestamp[curr], TIMESTAMP_LEN);
+ 
+ 	/* Test stdout */
+ 	TEST_STDOUT(STDOUT_FILENO);
+-- 
+2.17.1
+
