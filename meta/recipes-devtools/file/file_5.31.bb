@@ -14,11 +14,12 @@ DEPENDS_class-native = "zlib-native"
 # Blacklist a bogus tag in upstream check
 UPSTREAM_CHECK_GITTAGREGEX = "FILE(?P<pver>(?!6_23).+)"
 
-PR .= ".1"
+PR .= ".2"
 SRC_URI = "git://github.com/file/file.git \
         file://debian-742262.patch \
         file://0001-Add-P-prompt-into-Usage-info.patch \
         file://CVE-2019-8906.patch \
+        file://CVE-2019-8907_CVE-2019-8905.patch \
         "
 
 SRCREV = "70c5f15060c7ad81150177de83a3e64500a54c9f"
