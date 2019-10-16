@@ -7,10 +7,13 @@ LIC_FILES_CHKSUM = "file://LICENSE;md5=83206f39819e7a4dfca2ff7c190f6ce0"
 DEPENDS = "apr-util serf sqlite3 file lz4"
 DEPENDS_append_class-native = " file-replacement-native"
 
+PR .= ".1"
+
 SRC_URI = "${APACHE_MIRROR}/${BPN}/${BPN}-${PV}.tar.bz2 \
            file://disable_macos.patch \
            file://0001-Fix-libtool-name-in-configure.ac.patch \
            file://serfmacro.patch \
+	   file://0001-In-svnserve-consistently-handle-errors-in-opening-a-.patch \
            "
 
 SRC_URI[md5sum] = "0126847f9e8cb8ed0b90a6a18b203309"
