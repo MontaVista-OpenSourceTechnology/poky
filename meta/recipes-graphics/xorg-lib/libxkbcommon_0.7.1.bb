@@ -7,11 +7,12 @@ LICENSE = "MIT & MIT-style"
 
 DEPENDS = "util-macros flex-native bison-native"
 
-PR .= ".2"
+PR .= ".3"
 
 SRC_URI = "http://xkbcommon.org/download/${BPN}-${PV}.tar.xz \
            file://CVE-2018-15853.patch \
            file://CVE-2018-15857.patch \
+           file://CVE-2018-15858.patch \
 "
 
 SRC_URI[md5sum] = "947ba609cb0239b9462127d5cf8908ee"
