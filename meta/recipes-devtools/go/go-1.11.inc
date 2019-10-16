@@ -7,6 +7,8 @@ FILESEXTRAPATHS_prepend := "${FILE_DIRNAME}/go-${GO_BASEVERSION}:"
 
 LIC_FILES_CHKSUM = "file://LICENSE;md5=5d4950ecb7b26d2c5e4e7b4e0dd74707"
 
+PR .= ".1"
+
 SRC_URI += "\
     file://0001-allow-CC-and-CXX-to-have-multiple-words.patch \
     file://0002-cmd-go-make-content-based-hash-generation-less-pedan.patch \
@@ -16,6 +18,7 @@ SRC_URI += "\
     file://0006-cmd-dist-separate-host-and-target-builds.patch \
     file://0007-cmd-go-make-GOROOT-precious-by-default.patch \
     file://0008-use-GOBUILDMODE-to-set-buildmode.patch \
+    file://0001-net-textproto-don-t-normalize-headers-with-spaces-be.patch \
 "
 SRC_URI_append_libc-musl = " file://0009-ld-replace-glibc-dynamic-linker-with-musl.patch"
 
