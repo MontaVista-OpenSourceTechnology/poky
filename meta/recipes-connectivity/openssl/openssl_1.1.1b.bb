@@ -11,6 +11,8 @@ LIC_FILES_CHKSUM = "file://LICENSE;md5=d343e62fc9c833710bbbed25f27364c8"
 
 DEPENDS = "hostperl-runtime-native"
 
+PR .= ".1"
+
 SRC_URI = "http://www.openssl.org/source/openssl-${PV}.tar.gz \
            file://run-ptest \
            file://openssl-c_rehash.sh \
@@ -18,6 +20,7 @@ SRC_URI = "http://www.openssl.org/source/openssl-${PV}.tar.gz \
            file://0001-buildinfo-strip-sysroot-and-debug-prefix-map-from-co.patch \
            file://afalg.patch \
            file://CVE-2019-1543.patch \
+	   file://0001-drbg-ensure-fork-safety-without-using-a-pthread_atfo.patch \
            "
 
 SRC_URI_append_class-nativesdk = " \
