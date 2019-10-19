@@ -19,10 +19,6 @@ SHRT_VER = "${@d.getVar('PV').split('.')[0]}.${@d.getVar('PV').split('.')[1]}"
 
 SRC_URI = "https://www.gnupg.org/ftp/gcrypt/gnutls/v${SHRT_VER}/gnutls-${PV}.tar.xz \
            file://arm_eabi.patch \
-           file://CVE-2019-3829_p1.patch \
-           file://CVE-2019-3829_p2.patch \
-           file://CVE-2019-3829_p3.patch \
-           file://CVE-2019-3836.patch \
 "
 
 SRC_URI[md5sum] = "c4ac669c500df939d4fbfea722367929"
