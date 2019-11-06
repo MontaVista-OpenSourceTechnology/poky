@@ -4,7 +4,7 @@ GO_BASEVERSION = "1.9"
 GO_MINOR = ".4"
 PV .= "${GO_MINOR}"
 
-PR .= ".2"
+PR .= ".6"
 
 FILESEXTRAPATHS_prepend := "${FILE_DIRNAME}/go-${GO_BASEVERSION}:"
 
@@ -23,6 +23,10 @@ SRC_URI += "\
         file://0010-make.bash-override-CC-when-building-dist-and-go_boot.patch \
         file://CVE-2018-16873.patch \
         file://CVE-2018-16875.patch \
+	file://CVE-2019-16276_dep_p1.patch \
+	file://CVE-2019-16276_dep_p2.patch \
+	file://CVE-2019-16276_dep_p3.patch \
+	file://CVE-2019-16276_p4.patch \
 "
 SRC_URI_append_libc-musl = " file://set-external-linker.patch"
 
