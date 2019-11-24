@@ -1,40 +1,33 @@
 require python.inc
 DEPENDS = "python-native libffi bzip2 gdbm openssl readline sqlite3 zlib"
-PR = "${INC_PR}.3"
 
 DISTRO_SRC_URI ?= "file://sitecustomize.py"
 DISTRO_SRC_URI_linuxstdbase = ""
-SRC_URI += "\
-  file://01-use-proper-tools-for-cross-build.patch \
-  file://03-fix-tkinter-detection.patch \
-  file://06-avoid_usr_lib_termcap_path_in_linking.patch \
-  ${DISTRO_SRC_URI} \
-  file://multilib.patch \
-  file://cgi_py.patch \
-  file://setup_py_skip_cross_import_check.patch \
-  file://add-md5module-support.patch \
-  file://host_include_contamination.patch \
-  file://fix_for_using_different_libdir.patch \
-  file://setuptweaks.patch \
-  file://check-if-target-is-64b-not-host.patch \
-  file://search_db_h_in_inc_dirs_and_avoid_warning.patch \
-  file://avoid_warning_about_tkinter.patch \
-  file://avoid_warning_for_sunos_specific_module.patch \
-  file://python-2.7.3-remove-bsdb-rpath.patch \
-  file://fix-makefile-for-ptest.patch \
-  file://run-ptest \
-  file://parallel-makeinst-create-bindir.patch \
-  file://use_sysroot_ncurses_instead_of_host.patch \
-  file://add-CROSSPYTHONPATH-for-PYTHON_FOR_BUILD.patch \
-  file://pass-missing-libraries-to-Extension-for-mul.patch \
-  file://support_SOURCE_DATE_EPOCH_in_py_compile_2.7.patch \
-  file://float-endian.patch \
-  file://CVE-2019-9636_1.patch \
-  file://CVE-2019-9636_2.patch \
-  file://CVE-2018-20852.patch \
-  file://CVE-2019-10160.patch \
-  file://bpo-35907-cve-2019-9948.patch \
-  file://bpo-35907-cve-2019-9948-fix.patch \
+SRC_URI += " \
+           file://01-use-proper-tools-for-cross-build.patch \
+           file://03-fix-tkinter-detection.patch \
+           file://06-avoid_usr_lib_termcap_path_in_linking.patch \
+           ${DISTRO_SRC_URI} \
+           file://multilib.patch \
+           file://cgi_py.patch \
+           file://setup_py_skip_cross_import_check.patch \
+           file://add-md5module-support.patch \
+           file://host_include_contamination.patch \
+           file://fix_for_using_different_libdir.patch \
+           file://setuptweaks.patch \
+           file://check-if-target-is-64b-not-host.patch \
+           file://search_db_h_in_inc_dirs_and_avoid_warning.patch \
+           ${@bb.utils.contains('PACKAGECONFIG', 'tk', '', 'file://avoid_warning_about_tkinter.patch', d)} \
+           file://avoid_warning_for_sunos_specific_module.patch \
+           file://python-2.7.3-remove-bsdb-rpath.patch \
+           file://run-ptest \
+           file://parallel-makeinst-create-bindir.patch \
+           file://use_sysroot_ncurses_instead_of_host.patch \
+           file://add-CROSSPYTHONPATH-for-PYTHON_FOR_BUILD.patch \
+           file://pass-missing-libraries-to-Extension-for-mul.patch \
+           file://support_SOURCE_DATE_EPOCH_in_py_compile_2.7.patch \
+           file://float-endian.patch \
+           file://0001-python2-use-cc_basename-to-replace-CC-for-checking-c.patch \
 "
 
 S = "${WORKDIR}/Python-${PV}"
