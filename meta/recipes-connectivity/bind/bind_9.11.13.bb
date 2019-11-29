@@ -6,7 +6,6 @@ LICENSE = "ISC & BSD"
 LIC_FILES_CHKSUM = "file://COPYRIGHT;md5=8f17f64e47e83b60cd920a1e4b54419e"
 
 DEPENDS = "openssl libcap zlib"
-PR .= ".2"
 SRC_URI = "https://ftp.isc.org/isc/bind9/${PV}/${BPN}-${PV}.tar.gz \
            file://conf.patch \
            file://named.service \
@@ -15,22 +14,13 @@ SRC_URI = "https://ftp.isc.org/isc/bind9/${PV}/${BPN}-${PV}.tar.gz \
            file://make-etc-initd-bind-stop-work.patch \
            file://init.d-add-support-for-read-only-rootfs.patch \
            file://bind-ensure-searching-for-json-headers-searches-sysr.patch \
-           file://0001-gen.c-extend-DIRNAMESIZE-from-256-to-512.patch \
-           file://0001-lib-dns-gen.c-fix-too-long-error.patch \
            file://0001-configure.in-remove-useless-L-use_openssl-lib.patch \
            file://0001-named-lwresd-V-and-start-log-hide-build-options.patch \
            file://0001-avoid-start-failure-with-bind-user.patch \
-           file://CVE-2020-8616.patch \
-           file://CVE-2020-8617.patch \
-           file://CVE-2018-5743.patch \
-           file://CVE-2020-8625.patch \
-           file://CVE-2021-25214.patch \
-           file://CVE-2021-25215.patch \
-           file://0001-Replace-atomic-operations-in-bin-named-client.c-with.patch \
-"
+           "
 
-SRC_URI[md5sum] = "8ddab4b61fa4516fe404679c74e37960"
-SRC_URI[sha256sum] = "7e8c08192bcbaeb6e9f2391a70e67583b027b90e8c4bc1605da6eb126edde434"
+SRC_URI[md5sum] = "17de0d024ab1eac377f1c2854dc25057"
+SRC_URI[sha256sum] = "fd3f3cc9fcfcdaa752db35eb24598afa1fdcc2509d3227fc90a8631b7b400f7d"
 
 UPSTREAM_CHECK_URI = "https://ftp.isc.org/isc/bind9/"
 UPSTREAM_CHECK_REGEX = "(?P<pver>9(\.\d+)+(-P\d+)*)/"
