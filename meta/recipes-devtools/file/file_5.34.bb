@@ -4,6 +4,7 @@ on their contents and prints a description if a match is found."
 HOMEPAGE = "http://www.darwinsys.com/file/"
 SECTION = "console/utils"
 
+PR = "r1"
 # two clause BSD
 LICENSE = "BSD"
 LIC_FILES_CHKSUM = "file://COPYING;beginline=2;md5=6a7382872edb68d33e1a9398b6e03188"
@@ -19,6 +20,7 @@ SRC_URI = "git://github.com/file/file.git \
         file://CVE-2019-8906.patch \
         file://CVE-2019-8904.patch \
         file://CVE-2019-8905_CVE-2019-8907.patch \
+        file://CVE-2019-18218.patch \
         "
 
 SRCREV = "315cef2f699da3c31a54bd3c6c6070680fbaf1f5"
