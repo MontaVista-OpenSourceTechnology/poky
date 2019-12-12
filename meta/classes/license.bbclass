@@ -183,6 +183,9 @@ def license_deployed_manifest(d):
 
     dep_dic = get_deployed_dependencies(d)
     for dep in dep_dic.keys():
+        if not os.path.exists(os.path.join(lic_dir, dep, "recipeinfo")):
+           bb.warn("%s does not appear to have exported a license for the manifest" % (dep))
+           continue
         man_dic[dep] = {}
         # It is necessary to mark this will be used for image manifest
         man_dic[dep]["IMAGE_MANIFEST"] = True
