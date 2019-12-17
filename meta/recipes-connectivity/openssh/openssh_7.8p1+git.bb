@@ -8,6 +8,8 @@ SECTION = "console/network"
 LICENSE = "BSD"
 LIC_FILES_CHKSUM = "file://LICENCE;md5=429658c6612f3a9b1293782366ab29d8"
 
+PR = "r1"
+
 DEPENDS = "zlib openssl"
 DEPENDS += "${@bb.utils.contains('DISTRO_FEATURES', 'pam', 'libpam', '', d)}"
 
@@ -24,6 +26,7 @@ SRC_URI = "git://github.com/openssh/openssh-portable;branch=master \
            file://fix-potential-signed-overflow-in-pointer-arithmatic.patch \
            file://sshd_check_keys \
            file://add-test-support-for-busybox.patch \
+		   file://CVE-2019-16905.patch \
            "
 
 PAM_SRC_URI = "file://sshd"
