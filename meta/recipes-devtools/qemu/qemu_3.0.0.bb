@@ -44,15 +44,16 @@ SRC_URI = "https://download.qemu.org/${BPN}-${PV}.tar.xz \
            file://0014-linux-user-fix-to-handle-variably-sized-SIOCGSTAMP-w.patch \
            file://0001-linux-user-assume-__NR_gettid-always-exists.patch \
            file://0001-linux-user-rename-gettid-to-sys_gettid-to-avoid-clas.patch \
-	   file://CVE-2019-13164.patch \
-	   file://CVE-2019-12068_p1.patch \
-	   file://CVE-2019-12068_p2.patch \
-	   file://CVE-2019-12068_p3.patch \
-	   file://CVE-2019-12068_p4.patch \
-	   file://CVE-2019-12068_p5.patch \
-	   file://CVE-2019-15890.patch \
+	       file://CVE-2019-13164.patch \
+	       file://CVE-2019-12068_p1.patch \
+	       file://CVE-2019-12068_p2.patch \
+	       file://CVE-2019-12068_p3.patch \
+	       file://CVE-2019-12068_p4.patch \
+	       file://CVE-2019-12068_p5.patch \
+	       file://CVE-2019-15890.patch \
            file://CVE-2019-20382.patch \
            file://CVE-2020-13765.patch \
+           file://0011-linux-user-remove-host-stime-syscall.patch \
            "
 UPSTREAM_CHECK_REGEX = "qemu-(?P<pver>\d+(\.\d+)+)\.tar"
 
