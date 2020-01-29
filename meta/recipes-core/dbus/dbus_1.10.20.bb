@@ -18,6 +18,7 @@ SRC_URI = "http://dbus.freedesktop.org/releases/dbus/dbus-${PV}.tar.gz \
            file://os-test.patch \
            file://clear-guid_from_server-if-send_negotiate_unix_f.patch \
            file://0001-configure.ac-explicitely-check-stdint.h.patch \
+	   file://CVE-2019-12749.patch \
 "
 
 SRC_URI[md5sum] = "94c991e763d4f9f13690416b2dcd9411"
