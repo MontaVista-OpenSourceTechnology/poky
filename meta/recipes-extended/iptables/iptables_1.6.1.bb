@@ -18,11 +18,21 @@ RRECOMMENDS_${PN} = "kernel-module-x-tables \
                      kernel-module-ipt-masquerade"
 FILES_${PN} =+ "${libdir}/xtables/ ${datadir}/xtables"
 
+PR .= ".8"
+
 SRC_URI = "http://netfilter.org/projects/iptables/files/iptables-${PV}.tar.bz2 \
            file://types.h-add-defines-that-are-required-for-if_packet.patch \
            file://0001-configure-Add-option-to-enable-disable-libnfnetlink.patch \
            file://0002-configure.ac-only-check-conntrack-when-libnfnetlink-enabled.patch \
            file://0001-fix-build-with-musl.patch \
+	   file://CVE-2019-11360_p1.patch \
+	   file://CVE-2019-11360_p2.patch \
+	   file://CVE-2019-11360_p3.patch \
+	   file://CVE-2019-11360_p4.patch \
+	   file://CVE-2019-11360_p5.patch \
+	   file://CVE-2019-11360_p6.patch \
+	   file://CVE-2019-11360_p7.patch \
+	   file://CVE-2019-11360_p8.patch \
 "
 
 SRC_URI[md5sum] = "ab38a33806b6182c6f53d6afb4619add"
