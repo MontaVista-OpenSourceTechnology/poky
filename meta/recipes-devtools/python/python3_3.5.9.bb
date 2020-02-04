@@ -17,8 +17,6 @@ file://support_SOURCE_DATE_EPOCH_in_py_compile.patch \
 ${DISTRO_SRC_URI} \
 "
 
-PR .= ".1"
-
 SRC_URI += "\
             file://03-fix-tkinter-detection.patch \
             file://avoid_warning_about_tkinter.patch \
@@ -38,12 +36,7 @@ SRC_URI += "\
             file://0002-Makefile-add-target-to-split-profile-generation.patch \
             file://float-endian.patch \
             file://ftplib.patch \
-            file://signal.patch \
             file://0001-Issue-28043-SSLContext-has-improved-default-settings.patch \
-            file://0002-bpo-29136-Add-TLS-1.3-cipher-suites-and-OP_NO_TLSv1_.patch \
-            file://0003-bpo-32947-Fixes-for-TLS-1.3-and-OpenSSL-1.1.1-GH-876.patch \
-            file://0004-bpo-33570-TLS-1.3-ciphers-for-OpenSSL-1.1.1-GH-6976.patch \
-            file://0005-bpo-30714-ALPN-changes-for-OpenSSL-1.1.0f-2305.patch \
             file://run-ptest \
             file://CVE-2019-9740.patch \
             file://CVE-2018-14647.patch \

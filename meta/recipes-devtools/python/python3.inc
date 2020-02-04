@@ -7,11 +7,11 @@ SECTION = "devel/python"
 INC_PR = "r1"
 PR = "${INC_PR}.0"
 
-LIC_FILES_CHKSUM = "file://LICENSE;md5=b6ec515b22618f55fa07276b897bacea"
+LIC_FILES_CHKSUM = "file://LICENSE;md5=c07d26ca754e4aaef307411f8c604a79"
 
 # TODO consolidate patch set
-SRC_URI[md5sum] = "f5a99f765e765336a3ebbb2a24ca2be3"
-SRC_URI[sha256sum] = "f55cde04f521f273c7cba08912921cc5642cfc15ca7b22d5829f0aff4371155f"
+SRC_URI[md5sum] = "ef7f82485e83c7f8f8bcb920a9c2457b"
+SRC_URI[sha256sum] = "c24a37c63a67f53bdd09c5f287b5cff8e8b98f857bf348c577d454d3f74db049"
 
 # exclude pre-releases for both python 2.x and 3.x
 UPSTREAM_CHECK_REGEX = "[Pp]ython-(?P<pver>\d+(\.\d+)+).tar"
