@@ -40,8 +40,8 @@ SRC_URI += "\
             file://pass-missing-libraries-to-Extension-for-mul.patch \
            "
 
-SRC_URI[md5sum] = "b1b4949786732494f4d6675c184aa765"
-SRC_URI[sha256sum] = "285892899bf4d5737fd08482aa6171c6b2564a45b9102dfacfb72826aebdc7dc"
+SRC_URI[md5sum] = "ef7f82485e83c7f8f8bcb920a9c2457b"
+SRC_URI[sha256sum] = "c24a37c63a67f53bdd09c5f287b5cff8e8b98f857bf348c577d454d3f74db049"
 
 LIC_FILES_CHKSUM = "file://LICENSE;md5=c07d26ca754e4aaef307411f8c604a79"
 
