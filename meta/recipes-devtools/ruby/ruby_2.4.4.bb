@@ -9,9 +9,10 @@ SRC_URI += " \
            file://ruby-CVE-2018-16395.patch \
            file://CVE-2018-16396.patch \
            file://CVE-2019-15845.patch \
+           file://CVE-2019-16254.patch \
            "
 
-PR = "r4"
+PR = "r5"
 
 SRC_URI[md5sum] = "d50e00ccc1c9cf450f837b92d3ed3e88"
 SRC_URI[sha256sum] = "254f1c1a79e4cc814d1e7320bc5bdd995dc57e08727d30a767664619a9c8ae5a"
