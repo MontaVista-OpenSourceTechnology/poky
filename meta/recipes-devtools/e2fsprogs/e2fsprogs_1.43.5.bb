@@ -1,5 +1,7 @@
 require e2fsprogs.inc
 
+PR .= ".1"
+
 SRC_URI += "file://acinclude.m4 \
             file://remove.ldconfig.call.patch \
             file://quiet-debugfs.patch \
@@ -11,6 +13,8 @@ SRC_URI += "file://acinclude.m4 \
             file://reproducible-doc.patch \
             file://0001-misc-create_inode.c-set-dir-s-mode-correctly.patch \
             file://0001-misc-rename-copy_file_range-to-copy_file_chunk.patch \
+            file://CVE-2019-5188.patch \
+            file://CVE-2019-5094.patch \
 "
 
 SRC_URI_append_class-native = " file://e2fsprogs-fix-missing-check-for-permission-denied.patch"
