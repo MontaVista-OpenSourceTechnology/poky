@@ -1,8 +1,15 @@
 require sudo.inc
 
+PR .= ".5"
+
 SRC_URI = "http://ftp.sudo.ws/sudo/dist/sudo-${PV}.tar.gz \
            ${@bb.utils.contains('DISTRO_FEATURES', 'pam', '${PAM_SRC_URI}', '', d)} \
            file://0001-Include-sys-types.h-for-id_t-definition.patch \
+	   file://CVE-2019-14287_p1.patch \
+	   file://CVE-2019-14287_p2.patch \
+	   file://CVE-2019-14287_p3.patch \
+	   file://CVE-2019-19232.patch \
+	   file://CVE-2019-19234.patch \
            "
 
 PAM_SRC_URI = "file://sudo.pam"
