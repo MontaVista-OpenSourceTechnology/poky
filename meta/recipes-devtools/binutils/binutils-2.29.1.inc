@@ -88,10 +88,11 @@ SRC_URI = "\
      file://CVE-2018-19931.patch \
      file://CVE-2018-19932.patch \
      file://CVE-2018-20002.patch \
+     file://CVE-2018-20651.patch \
 "
 S  = "${WORKDIR}/git"
 
-PR .= ".10"
+PR .= ".11"
 
 do_configure_prepend () {
         rm -rf ${S}/gdb ${S}/libdecnumber ${S}/readline ${S}/sim
