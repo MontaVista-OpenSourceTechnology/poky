@@ -4,6 +4,7 @@ HOMEPAGE = "http://www.libarchive.org/"
 SECTION = "devel"
 LICENSE = "BSD"
 LIC_FILES_CHKSUM = "file://COPYING;md5=ed99aca006bc346974bb745a35336425"
+PR .= ".1" 
 
 DEPENDS = "e2fsprogs-native"
 
@@ -40,6 +41,7 @@ SRC_URI = "http://libarchive.org/downloads/libarchive-${PV}.tar.gz \
            file://CVE-2018-1000880.patch \
            file://CVE-2019-1000019.patch \
            file://CVE-2019-1000020.patch \
+           file://CVE-2019-18408.patch \
 "
 
 SRC_URI[md5sum] = "4038e366ca5b659dae3efcc744e72120"
