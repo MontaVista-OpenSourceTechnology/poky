@@ -10,8 +10,12 @@ SECTION = "devel"
 LICENSE = "BSD"
 LIC_FILES_CHKSUM = "file://LICENCE;md5=f5e4bde9fd0493d0967b4dba9899590f"
 
+PR .= "2"
+
 SRC_URI = "https://ftp.pcre.org/pub/pcre/pcre2-${PV}.tar.bz2 \
            file://pcre-cross.patch \
+	   file://CVE-2019-20454_p1.patch \
+	   file://CVE-2019-20454_p2.patch \
 "
 
 SRC_URI[md5sum] = "e0b91c891a3c49050f7fd15de33d0ba4"
