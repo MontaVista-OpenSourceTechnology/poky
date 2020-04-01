@@ -6,10 +6,13 @@ LICENSE = "MIT"
 
 LIC_FILES_CHKSUM = "file://COPYING;md5=5b8620d98e49772d95fc1d291c26aa79"
 
+PR = "r1"
+
 SRC_URI = "${SOURCEFORGE_MIRROR}/expat/expat-${PV}.tar.bz2 \
            file://autotools.patch \
            file://libtool-tag.patch \
            file://CVE-2018-20843.patch;striplevel=2 \
+           file://CVE-2019-15903.patch \
 	  "
 
 SRC_URI[md5sum] = "ca047ae951b40020ac831c28859161b2"
