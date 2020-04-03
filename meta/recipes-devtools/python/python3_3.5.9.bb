@@ -38,11 +38,6 @@ SRC_URI += "\
             file://ftplib.patch \
             file://0001-Issue-28043-SSLContext-has-improved-default-settings.patch \
             file://run-ptest \
-            file://CVE-2019-9740.patch \
-            file://CVE-2018-14647.patch \
-            file://CVE-2018-20406.patch \
-            file://CVE-2018-20852.patch \
-            file://CVE-2019-9636.patch \
            "
 
 inherit multilib_header python3native update-alternatives qemu ptest
