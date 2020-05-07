@@ -51,6 +51,10 @@ SRC_URI = "\
     file://0001-tests-add-a-target-for-building-tests-without-runnin.patch \
     file://0001-hciattach-bcm43xx-fix-the-delay-timer-for-firmware-d.patch \
     file://cve-2017-1000250.patch \
+    file://CVE-2020-0556_p1.patch \
+    file://CVE-2020-0556_p2.patch \
+    file://CVE-2018-10910_p1.patch \
+    file://CVE-2018-10910_p2.patch \
 "
 S = "${WORKDIR}/bluez-${PV}"
 
