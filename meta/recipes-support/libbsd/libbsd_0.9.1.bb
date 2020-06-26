@@ -30,11 +30,11 @@ HOMEPAGE = "http://libbsd.freedesktop.org/wiki/"
 LICENSE = "BSD-4-Clause & ISC & PD"
 LIC_FILES_CHKSUM = "file://COPYING;md5=b552602fda69e34c753d26de383f33c5"
 SECTION = "libs"
-
-SRC_URI = " \
-    http://libbsd.freedesktop.org/releases/${BPN}-${PV}.tar.xz \
-    file://0001-flopen-Add-missing-fcntl.h-include.patch \
-"
+PR .= ".1"
+SRC_URI = "http://libbsd.freedesktop.org/releases/${BPN}-${PV}.tar.xz \
+           file://0001-flopen-Add-missing-fcntl.h-include.patch \
+           file://CVE-2019-20367.patch \
+           "
 
 SRC_URI[md5sum] = "a74b80c4143afa032c90226a4518fffe"
 SRC_URI[sha256sum] = "56d835742327d69faccd16955a60b6dcf30684a8da518c4eca0ac713b9e0a7a4"
