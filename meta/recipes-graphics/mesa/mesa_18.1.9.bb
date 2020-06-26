@@ -1,5 +1,5 @@
 require ${BPN}.inc
-
+PR .= ".1"
 SRC_URI = "https://mesa.freedesktop.org/archive/mesa-${PV}.tar.xz \
            file://0001-Simplify-wayland-scanner-lookup.patch \
            file://0002-winsys-svga-drm-Include-sys-types.h.patch \
@@ -7,7 +7,8 @@ SRC_URI = "https://mesa.freedesktop.org/archive/mesa-${PV}.tar.xz \
            file://0004-Use-Python-3-to-execute-the-scripts.patch \
            file://0005-dri-i965-Add-missing-time.h-include.patch \
            file://0006-use-PKG_CHECK_VAR-for-defining-WAYLAND_PROTOCOLS_DAT.patch \
-"
+           file://CVE-2019-5068.patch \
+           "
 
 SRC_URI[md5sum] = "2f8d2098ab478bc3907e42130577b54a"
 SRC_URI[sha256sum] = "55f5778d58a710a63d6635f000535768faf7db9e8144dc0f4fd1989f936c1a83"
