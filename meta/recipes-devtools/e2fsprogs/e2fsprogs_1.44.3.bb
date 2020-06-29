@@ -1,5 +1,5 @@
 require e2fsprogs.inc
-
+PR .= ".1"
 SRC_URI += "file://remove.ldconfig.call.patch \
             file://run-ptest \
             file://ptest.patch \
@@ -7,6 +7,8 @@ SRC_URI += "file://remove.ldconfig.call.patch \
             file://mkdir_p.patch \
             file://0001-misc-create_inode.c-set-dir-s-mode-correctly.patch \
             file://0001-create_inode-fix-copying-large-files.patch \
+            file://CVE-2019-5094.patch \
+            file://CVE-2019-5188.patch \
             "
 
 SRC_URI_append_class-native = " file://e2fsprogs-fix-missing-check-for-permission-denied.patch \
