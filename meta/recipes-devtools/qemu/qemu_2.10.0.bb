@@ -7,7 +7,7 @@ RDEPENDS_${PN}-ptest = "bash make"
 LIC_FILES_CHKSUM = "file://COPYING;md5=441c28d2cf86e15a37fa47e15a72fbac \
                     file://COPYING.LIB;endline=24;md5=c04def7ae38850e7d3ef548588159913"
 
-PR = "r26"
+PR = "r27"
 
 SRC_URI = "http://wiki.qemu-project.org/download/${BP}.tar.bz2 \
            file://powerpc_rom.bin \
@@ -73,6 +73,23 @@ SRC_URI = "http://wiki.qemu-project.org/download/${BP}.tar.bz2 \
            file://CVE-2020-13754_p4.patch \
            file://CVE-2020-13754_p5.patch \
            file://CVE-2020-13765.patch \
+           file://CVE-2020-12829_pre1.patch \
+           file://CVE-2020-12829_pre2.patch \
+           file://CVE-2020-12829_pre3.patch \
+           file://CVE-2020-12829_pre4.patch \
+           file://CVE-2020-12829_pre5.patch \
+           file://CVE-2020-12829_pre6.patch \
+           file://CVE-2020-12829_pre7.patch \
+           file://CVE-2020-12829_pre8.patch \
+           file://CVE-2020-12829_pre9.patch \
+           file://CVE-2020-12829_pre10.patch \
+           file://CVE-2020-12829_p1.patch \
+           file://CVE-2020-12829_p2.patch \
+           file://CVE-2020-12829_p3.patch \
+           file://CVE-2020-12829_p4.patch \
+           file://CVE-2020-12829_p5.patch \
+           file://CVE-2020-12829_p6.patch \
+           file://CVE-2020-12829_p7.patch \
            "
 
 UPSTREAM_CHECK_REGEX = "qemu-(?P<pver>\d+\..*)\.tar"
