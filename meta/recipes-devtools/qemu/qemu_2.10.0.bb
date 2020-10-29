@@ -7,7 +7,7 @@ RDEPENDS_${PN}-ptest = "bash make"
 LIC_FILES_CHKSUM = "file://COPYING;md5=441c28d2cf86e15a37fa47e15a72fbac \
                     file://COPYING.LIB;endline=24;md5=c04def7ae38850e7d3ef548588159913"
 
-PR = "r25"
+PR = "r26"
 
 SRC_URI = "http://wiki.qemu-project.org/download/${BP}.tar.bz2 \
            file://powerpc_rom.bin \
@@ -62,6 +62,17 @@ SRC_URI = "http://wiki.qemu-project.org/download/${BP}.tar.bz2 \
            file://CVE-2019-12155.patch \
            file://CVE-2019-9824.patch \
            file://CVE-2019-20382.patch \
+           file://CVE-2020-13253.patch \
+           file://CVE-2020-13361.patch \
+           file://CVE-2020-13659.patch \
+           file://CVE-2020-16092.patch \
+           file://CVE-2020-15863.patch \
+           file://CVE-2020-13754_p1.patch \
+           file://CVE-2020-13754_p2.patch \
+           file://CVE-2020-13754_p3.patch \
+           file://CVE-2020-13754_p4.patch \
+           file://CVE-2020-13754_p5.patch \
+           file://CVE-2020-13765.patch \
            "
 
 UPSTREAM_CHECK_REGEX = "qemu-(?P<pver>\d+\..*)\.tar"
