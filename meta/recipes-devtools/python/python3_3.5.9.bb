@@ -1,7 +1,7 @@
 require recipes-devtools/python/python.inc
 
 DEPENDS = "python3-native libffi bzip2 db gdbm openssl readline sqlite3 zlib virtual/libintl xz"
-PR = "${INC_PR}.1"
+PR = "${INC_PR}.2"
 PYTHON_MAJMIN = "3.5"
 PYTHON_BINABI= "${PYTHON_MAJMIN}m"
 DISTRO_SRC_URI ?= "file://sitecustomize.py"
@@ -40,6 +40,9 @@ SRC_URI += "\
             file://pass-missing-libraries-to-Extension-for-mul.patch \
             file://CVE-2019-9674.patch \
             file://CVE-2020-8492.patch \
+	    file://CVE-2020-14422.patch \
+	    file://CVE-2020-26116.patch \
+	    file://CVE-2020-27619.patch \
            "
 
 SRC_URI[md5sum] = "ef7f82485e83c7f8f8bcb920a9c2457b"
