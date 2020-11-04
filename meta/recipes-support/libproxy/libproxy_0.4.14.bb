@@ -8,7 +8,10 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=4fbd65380cdd255951079008b364516c \
 
 DEPENDS = "glib-2.0"
 
-SRC_URI = "https://github.com/${BPN}/${BPN}/releases/download/${PV}/${BP}.tar.xz"
+PR .= ".1"
+SRC_URI = "https://github.com/${BPN}/${BPN}/releases/download/${PV}/${BP}.tar.xz \
+           file://CVE-2020-25219.patch \
+           "
 SRC_URI[md5sum] = "e7514f78f5432210e17a01b6b618dde2"
 SRC_URI[sha256sum] = "e25d046850346a505c0617646f1e68b660092efadf665548a89c280900262ea6"
 
