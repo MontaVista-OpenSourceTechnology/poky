@@ -3,9 +3,11 @@ DESCRIPTION = "JSON-C implements a reference counting object model that allows y
 HOMEPAGE = "https://github.com/json-c/json-c/wiki"
 LICENSE = "MIT"
 LIC_FILES_CHKSUM = "file://COPYING;md5=de54b60fbbc35123ba193fea8ee216f2"
-
+PR .= ".1"
 SRC_URI = "https://s3.amazonaws.com/json-c_releases/releases/${BP}.tar.gz \
            file://0001-Add-FALLTHRU-comment-to-handle-GCC7-warnings.patch \
+           file://CVE-2020-12762_p1.patch \
+           file://CVE-2020-12762_p2.patch \
            "
 SRC_URI[md5sum] = "55f7853f7d8cf664554ce3fa71bf1c7d"
 SRC_URI[sha256sum] = "2a136451a7932d80b7d197b10441e26e39428d67b1443ec43bbba824705e1123"
