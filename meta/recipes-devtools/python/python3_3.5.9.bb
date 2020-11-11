@@ -40,6 +40,7 @@ SRC_URI += "\
             file://run-ptest \
             file://CVE-2020-8492.patch \
             file://CVE-2019-9674.patch \
+            file://CVE-2020-27619.patch \
            "
 
 SRC_URI_append_class-nativesdk = " \
