@@ -45,5 +45,6 @@ SRC_URI = "\
      file://CVE-2020-0551.patch \
      file://CVE-2020-16592.patch \
      file://CVE-2020-16598.patch \
+     file://0001-gas-improve-reproducibility-for-stabs-debugging-data.patch \
 "
 S  = "${WORKDIR}/git"
