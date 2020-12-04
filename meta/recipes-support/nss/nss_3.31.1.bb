@@ -16,7 +16,7 @@ LIC_FILES_CHKSUM = "file://nss/COPYING;md5=3b1e88e1b9c0b5a4b2881d46cce06a18 \
 
 VERSION_DIR = "${@d.getVar('BP').upper().replace('-', '_').replace('.', '_') + '_RTM'}"
 
-PR .= ".1"
+PR .= ".2"
 SRC_URI = "http://ftp.mozilla.org/pub/mozilla.org/security/nss/releases/${VERSION_DIR}/src/${BP}.tar.gz \
            file://nss.pc.in \
            file://signlibs.sh \
@@ -29,6 +29,8 @@ SRC_URI = "http://ftp.mozilla.org/pub/mozilla.org/security/nss/releases/${VERSIO
            file://Fix-compilation-for-X32.patch \
            file://CVE-2018-18508_p1.patch \
            file://CVE-2018-18508_p2.patch \
+           file://CVE-2020-6829_12400.patch \
+           file://CVE-2020-6829_12400_2.patch \
            "
 
 SRC_URI[md5sum] = "ebb44f1394250d2cf6ec3c2e3d71fa20"
