@@ -8,8 +8,14 @@ DEPENDS = "libtasn1 libffi"
 
 SRC_URI = "git://github.com/p11-glue/p11-kit \
            file://0001-LINGUAS-drop-the-languages-for-which-upstream-does-n.patch \
+           file://CVE-2020-29362.patch \
+           file://CVE-2020-29363.patch \
+           file://CVE-2020-29361.patch \
+           file://CVE-2020-29361_2.patch \
            "
 SRCREV = "3770793f026e46a000d2d8816d56122598289d5c"
+PR .= ".1"
+
 S = "${WORKDIR}/git"
 
 AUTOTOOLS_AUXDIR = "${S}/build/litter"
