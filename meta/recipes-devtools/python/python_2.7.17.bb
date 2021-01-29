@@ -5,7 +5,7 @@ DEPENDS = "python-native libffi bzip2 gdbm openssl \
 
 PR = "${INC_PR}"
 
-PR .= ".1"
+PR .= ".2"
 
 DISTRO_SRC_URI ?= "file://sitecustomize.py"
 DISTRO_SRC_URI_linuxstdbase = ""
@@ -33,6 +33,7 @@ SRC_URI += "\
   file://pass-missing-libraries-to-Extension-for-mul.patch \
   file://support_SOURCE_DATE_EPOCH_in_py_compile_2.7.patch \
   file://float-endian.patch \
+  file://CVE-2020-26116.patch \
 "
 
 S = "${WORKDIR}/Python-${PV}"
