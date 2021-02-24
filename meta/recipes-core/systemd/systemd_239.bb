@@ -43,6 +43,7 @@ SRC_URI += "file://touchscreen.rules \
            file://0026-journal-fix-out-of-bounds-read-CVE-2018-16866.patch \
            file://CVE-2019-6454.patch \
            file://sd-bus-if-we-receive-an-invalid-dbus-message-ignore-.patch \
+           file://CVE-2020-13776.patch \
            "
 
 # patches made for musl are only applied on TCLIBC is musl
