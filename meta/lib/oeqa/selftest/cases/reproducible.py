@@ -40,7 +40,6 @@ exclude_packages = [
 	'gstreamer1.0-python',
 	'hwlatdetect',
         'kernel-devsrc',
-	'libaprutil',
 	'libcap-ng',
 	'libjson',
 	'libproxy',
