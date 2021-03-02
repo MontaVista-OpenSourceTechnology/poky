@@ -20,7 +20,7 @@ from oe.path import copyhardlinktree
 
 from wic import WicError
 from wic.pluginbase import SourcePlugin
-from wic.misc import get_bitbake_var
+from wic.misc import get_bitbake_var, exec_native_cmd
 
 logger = logging.getLogger('wic')
 
@@ -43,6 +43,15 @@ class RootfsPlugin(SourcePlugin):
                            (rootfs_dir, image_rootfs_dir))
 
         return os.path.realpath(image_rootfs_dir)
+
+    @staticmethod
+    def __get_pseudo(native_sysroot, rootfs, pseudo_dir):
+        pseudo = "export PSEUDO_PREFIX=%s/usr;" % native_sysroot
+        pseudo += "export PSEUDO_LOCALSTATEDIR=%s;" % pseudo_dir
+        pseudo += "export PSEUDO_PASSWD=%s;" % rootfs
+        pseudo += "export PSEUDO_NOSYMLINKEXP=1;"
+        pseudo += "%s " % get_bitbake_var("FAKEROOTCMD")
+        return pseudo
 
     @classmethod
     def do_prepare_partition(cls, part, source_params, cr, cr_workdir,
@@ -76,6 +85,7 @@ class RootfsPlugin(SourcePlugin):
             pseudo_dir = None
 
         new_rootfs = None
+        new_pseudo = None
         # Handle excluded paths.
         if part.exclude_path or part.include_path or part.change_directory or part.update_fstab_in_rootfs:
             # We need a new rootfs directory we can safely modify without
@@ -164,4 +174,5 @@ class RootfsPlugin(SourcePlugin):
                 exec_native_cmd(install_cmd, native_sysroot, pseudo)
 
         part.prepare_rootfs(cr_workdir, oe_builddir,
-                            new_rootfs or part.rootfs_dir, native_sysroot)
+                            new_rootfs or part.rootfs_dir, native_sysroot,
+                            pseudo_dir = new_pseudo or pseudo_dir)
