@@ -84,9 +84,10 @@ BACKPORTS = "\
            file://0003-Arm-add-speculation_barrier-pattern.patch \
            file://0004-targhooks-provide-an-alternative-hook-for-targets-th.patch \
            file://CVE-2019-14250.patch \
+           file://0005-libstdc-do-not-handle-exceptions-in-std-thread.patch \
 "
 
-PR .= ".3"
+PR .= ".4"
 
 SRC_URI[md5sum] = "be2da21680f27624f3a87055c4ba5af2"
 SRC_URI[sha256sum] = "832ca6ae04636adbb430e865a1451adf6979ab44ca1c8374f61fba65645ce15c"
