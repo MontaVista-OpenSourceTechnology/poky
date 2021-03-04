@@ -43,6 +43,7 @@ SRC_URI += "\
 	    file://CVE-2020-14422.patch \
 	    file://CVE-2020-26116.patch \
 	    file://CVE-2020-27619.patch \
+	    file://CVE-2021-3177.patch \
            "
 
 SRC_URI[md5sum] = "ef7f82485e83c7f8f8bcb920a9c2457b"
