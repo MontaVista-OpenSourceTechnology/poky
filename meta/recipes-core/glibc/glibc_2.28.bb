@@ -14,7 +14,7 @@ SRCBRANCH ?= "release/${PV}/master"
 GLIBC_GIT_URI ?= "git://sourceware.org/git/glibc.git"
 UPSTREAM_CHECK_GITTAGREGEX = "(?P<pver>\d+\.\d+(\.(?!90)\d+)*)"
 
-PR .= ".2"
+PR .= ".3"
 
 SRC_URI = "${GLIBC_GIT_URI};branch=${SRCBRANCH};name=glibc \
            file://etc/ld.so.conf \
@@ -55,6 +55,10 @@ SRC_URI = "${GLIBC_GIT_URI};branch=${SRCBRANCH};name=glibc \
            file://CVE-2019-6488.patch \
            file://CVE-2019-7309.patch \
            file://CVE-2020-6096.patch \
+           file://CVE-2020-10029.patch \
+           file://CVE-2020-1752.patch \
+           file://CVE-2016-10228.patch \
+           file://CVE-2021-3326.patch \
 "
 
 NATIVESDKFIXES ?= ""
