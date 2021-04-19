@@ -24,6 +24,7 @@ SRC_URI = "${GNU_MIRROR}/screen/screen-${PV}.tar.gz \
            file://0002-comm.h-now-depends-on-term.h.patch \
            file://0001-fix-for-multijob-build.patch \
            file://0001-configure.ac-fix-configure-failed-while-build-dir-ha.patch \
+           file://CVE-2021-26937.patch \
           "
 
 SRC_URI[md5sum] = "132c893aabfaf2020074790215c8cacd"
