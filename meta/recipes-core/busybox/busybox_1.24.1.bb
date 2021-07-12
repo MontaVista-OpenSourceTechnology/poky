@@ -1,6 +1,6 @@
 require busybox.inc
 
-PR = "r1.3"
+PR = "r1.4"
 
 SRC_URI = "http://www.busybox.net/downloads/busybox-${PV}.tar.bz2;name=tarball \
            file://busybox-udhcpc-no_deconfig.patch \
@@ -69,6 +69,12 @@ SRC_URI = "http://www.busybox.net/downloads/busybox-${PV}.tar.bz2;name=tarball \
            file://CVE-2018-20679-p1.patch \
            file://CVE-2018-20679-p2.patch \
            file://CVE-2019-5747.patch \
+	   file://CVE-2021-28831_dep1.patch \
+	   file://CVE-2021-28831_dep2.patch \
+	   file://CVE-2021-28831_dep3.patch \
+	   file://CVE-2021-28831_dep4.patch \
+	   file://CVE-2021-28831_dep5.patch \
+	   file://CVE-2021-28831.patch \
 "
 SRC_URI_append_libc-musl = " file://musl.cfg "
 
