@@ -15,7 +15,7 @@ def binutils_branch_version(d):
     return pvsplit[0] + "_" + pvsplit[1]
 
 BINUPV = "${@binutils_branch_version(d)}"
-PV .= ".2"
+PV .= ".3"
 
 UPSTREAM_CHECK_GITTAGREGEX = "binutils-(?P<pver>\d+_(\d_?)*)"
 
@@ -52,6 +52,9 @@ SRC_URI = "\
      file://CVE-2018-20651.patch \
      file://CVE-2018-20671.patch \
      file://CVE-2018-1000876.patch \
+     file://CVE-2019-17450.patch \
+     file://CVE-2019-17451.patch \
+     file://CVE-2018-20002.patch \
 "
 S  = "${WORKDIR}/git"
 
