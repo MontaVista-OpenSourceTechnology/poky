@@ -6,7 +6,7 @@ LICENSE = "ISC & BSD"
 LIC_FILES_CHKSUM = "file://COPYRIGHT;md5=8f17f64e47e83b60cd920a1e4b54419e"
 
 DEPENDS = "openssl libcap zlib"
-PR .= ".1"
+PR .= ".2"
 SRC_URI = "https://ftp.isc.org/isc/bind9/${PV}/${BPN}-${PV}.tar.gz \
            file://conf.patch \
            file://named.service \
@@ -22,6 +22,10 @@ SRC_URI = "https://ftp.isc.org/isc/bind9/${PV}/${BPN}-${PV}.tar.gz \
            file://0001-avoid-start-failure-with-bind-user.patch \
            file://CVE-2020-8616.patch \
            file://CVE-2020-8617.patch \
+           file://CVE-2018-5743.patch \
+           file://CVE-2020-8625.patch \
+           file://CVE-2021-25214.patch \
+           file://CVE-2021-25215.patch \
 "
 
 SRC_URI[md5sum] = "8ddab4b61fa4516fe404679c74e37960"
@@ -51,6 +55,9 @@ EXTRA_OECONF = " ${ENABLE_IPV6} --with-libtool --enable-threads \
                  --sysconfdir=${sysconfdir}/bind \
                  --with-openssl=${STAGING_DIR_HOST}${prefix} \
                "
+
+# Fixes CVE-2021-25216
+EXTRA_OECONF_append = " --disable-isc-spnego"
 
 inherit ${@bb.utils.contains('PACKAGECONFIG', 'python3', 'python3native distutils3-base', '', d)}
 
