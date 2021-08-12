@@ -12,7 +12,10 @@ SRC_URI = "https://ftp.pcre.org/pub/pcre/pcre-${PV}.tar.bz2 \
            file://fix-pcre-name-collision.patch \
            file://run-ptest \
            file://Makefile \
+           file://CVE-2019-20838_CVE-2020-14155.patch \
 "
+
+PR .= "1"
 
 SRC_URI[md5sum] = "085b6aa253e0f91cae70b3cdbe8c1ac2"
 SRC_URI[sha256sum] = "2cd04b7c887808be030254e8d77de11d3fe9d4505c39d4b15d2664ffe8bf9301"
