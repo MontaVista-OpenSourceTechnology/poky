@@ -5,7 +5,7 @@ SECTION = "console/network"
 LICENSE = "MIT"
 LIC_FILES_CHKSUM = "file://COPYING;md5=ef889a37a5a874490ac7ce116396f29a"
 
-PR .= ".1"
+PR .= ".2"
 
 SRC_URI = "http://curl.haxx.se/download/curl-${PV}.tar.bz2 \
            file://0001-replace-krb5-config-with-pkg-config.patch \
@@ -19,6 +19,9 @@ SRC_URI = "http://curl.haxx.se/download/curl-${PV}.tar.bz2 \
            file://CVE-2019-3822.patch \
            file://CVE-2019-3823.patch \
            file://CVE-2019-5482.patch \
+           file://CVE-2020-8177.patch \
+           file://CVE-2020-8231.patch \
+           file://CVE-2020-8286.patch \
 "
 
 SRC_URI[md5sum] = "31d0a9f48dc796a7db351898a1e5058a"
