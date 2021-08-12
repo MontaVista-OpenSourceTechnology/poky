@@ -1,5 +1,7 @@
 require busybox.inc
 
+PR .= "1"
+
 SRC_URI = "http://www.busybox.net/downloads/busybox-${PV}.tar.bz2;name=tarball \
            file://busybox-udhcpc-no_deconfig.patch \
            file://find-touchscreen.sh \
@@ -42,7 +44,8 @@ SRC_URI = "http://www.busybox.net/downloads/busybox-${PV}.tar.bz2;name=tarball \
            file://rcK \
            file://makefile-libbb-race.patch \
            file://CVE-2018-20679.patch \
-	   file://CVE-2019-5747.patch \
+           file://CVE-2019-5747.patch \
+           file://CVE-2018-1000500.patch \
 "
 SRC_URI_append_libc-musl = " file://musl.cfg "
 
