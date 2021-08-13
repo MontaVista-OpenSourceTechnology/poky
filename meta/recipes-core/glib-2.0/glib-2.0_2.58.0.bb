@@ -1,7 +1,7 @@
 require glib.inc
 
 PE = "1"
-PR .= ".1"
+PR .= ".2"
 
 SHRT_VER = "${@oe.utils.trim_version("${PV}", 2)}"
 
@@ -19,6 +19,16 @@ SRC_URI = "${GNOME_MIRROR}/glib/${SHRT_VER}/glib-${PV}.tar.xz \
            file://CVE-2019-9633_p1.patch \
            file://CVE-2019-9633_p2.patch \
            file://CVE-2019-13012.patch \
+           file://CVE-2021-27219.patch \
+           file://CVE-2021-27219_2.patch \
+           file://CVE-2021-27219_3.patch \
+           file://CVE-2021-27219_4.patch \
+           file://CVE-2021-27219_5.patch \
+           file://CVE-2021-27218.patch \
+           file://CVE-2021-28153_1.patch \
+           file://CVE-2021-28153_2.patch \
+           file://CVE-2021-28153_3.patch \
+           file://CVE-2021-28153_4.patch \
            "
 
 SRC_URI_append_class-native = " file://relocate-modules.patch"
