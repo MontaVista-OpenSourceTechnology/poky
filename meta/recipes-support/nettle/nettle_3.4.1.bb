@@ -10,10 +10,18 @@ LIC_FILES_CHKSUM = "file://COPYING.LESSERv3;md5=6a6a8e020838b23406c81b19c1d46df6
 
 DEPENDS += "gmp"
 
+PR .= ".1"
+
 SRC_URI = "${GNU_MIRROR}/${BPN}/${BP}.tar.gz \
            file://Add-target-to-only-build-tests-not-run-them.patch \
            file://run-ptest \
            file://check-header-files-of-openssl-only-if-enable_.patch \
+           file://CVE-2021-20305_1.patch \
+           file://CVE-2021-20305_2.patch \
+           file://CVE-2021-20305_3.patch \
+           file://CVE-2021-20305_4.patch \
+           file://CVE-2021-20305_5.patch \
+           file://CVE-2021-3580.patch \
            "
 
 SRC_URI_append_class-target = "\
