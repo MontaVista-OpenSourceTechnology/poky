@@ -11,7 +11,7 @@ LIC_FILES_CHKSUM = "file://Copyright;md5=2044417e2e5006b65a8b9067b683fcf1 \
 
 DEPENDS = "zlib virtual/libiconv"
 
-PR .= ".4"
+PR .= ".5"
 
 SRC_URI = "http://www.xmlsoft.org/sources/libxml2-${PV}.tar.gz;name=libtar \
            http://www.w3.org/XML/Test/xmlts20080827.tar.gz;subdir=${BP};name=testtar \
@@ -29,6 +29,10 @@ SRC_URI = "http://www.xmlsoft.org/sources/libxml2-${PV}.tar.gz;name=libtar \
            file://CVE-2020-7595.patch \
            file://CVE-2019-19956.patch \
            file://CVE-2020-24977.patch \
+           file://CVE-2021-3517.patch \
+           file://CVE-2021-3518.patch \
+           file://CVE-2021-3537.patch \
+           file://CVE-2021-3541.patch \
            "
 
 SRC_URI[libtar.md5sum] = "b786e353e2aa1b872d70d5d1ca0c740d"
