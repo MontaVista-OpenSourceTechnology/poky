@@ -26,6 +26,7 @@ SRC_URI = "https://ftp.isc.org/isc/bind9/${PV}/${BPN}-${PV}.tar.gz \
            file://CVE-2020-8625.patch \
            file://CVE-2021-25214.patch \
            file://CVE-2021-25215.patch \
+           file://0001-Replace-atomic-operations-in-bin-named-client.c-with.patch \
 "
 
 SRC_URI[md5sum] = "8ddab4b61fa4516fe404679c74e37960"
