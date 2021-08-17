@@ -5,7 +5,7 @@ HOMEPAGE = "http://www.gnu.org/software/cpio/"
 SECTION = "base"
 LICENSE = "GPLv3"
 LIC_FILES_CHKSUM = "file://COPYING;md5=f27defe1e96c2e1ecd4e0c9be8967949"
-PR .= ".1"
+PR .= ".2"
 
 SRC_URI = "${GNU_MIRROR}/cpio/cpio-${PV}.tar.gz \
            file://0001-Unset-need_charset_alias-when-building-for-musl.patch \
@@ -13,6 +13,7 @@ SRC_URI = "${GNU_MIRROR}/cpio/cpio-${PV}.tar.gz \
            file://0001-CVE-2016-2037-1-byte-out-of-bounds-write.patch \
            file://0001-Fix-segfault-with-append.patch \
            file://CVE-2019-14866.patch \
+           file://CVE-2021-38185.patch \
            "
 
 SRC_URI[md5sum] = "fc207561a86b63862eea4b8300313e86"
