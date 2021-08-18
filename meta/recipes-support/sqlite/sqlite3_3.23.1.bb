@@ -10,6 +10,9 @@ SRC_URI = "\
   file://CVE-2019-9936.patch \
   file://CVE-2019-9937.patch \
   file://CVE-2019-8457.patch \
+  file://CVE-2020-13435.patch \
   "
+PR .= ".2"
+
 SRC_URI[md5sum] = "99a51b40a66872872a91c92f6d0134fa"
 SRC_URI[sha256sum] = "92842b283e5e744eff5da29ed3c69391de7368fccc4d0ee6bf62490ce555ef25"
