@@ -1,35 +1,27 @@
 require sudo.inc
 
-PR .= ".7"
-
 SRC_URI = "http://ftp.sudo.ws/sudo/dist/sudo-${PV}.tar.gz \
            ${@bb.utils.contains('DISTRO_FEATURES', 'pam', '${PAM_SRC_URI}', '', d)} \
            file://0001-Include-sys-types.h-for-id_t-definition.patch \
-	   file://CVE-2019-14287_p1.patch \
-	   file://CVE-2019-14287_p2.patch \
-	   file://CVE-2019-14287_p3.patch \
-	   file://CVE-2019-19232.patch \
-	   file://CVE-2019-19234.patch \
-           file://CVE-2019-18634.patch \
-	   file://CVE-2021-3156-pre1.patch \
-	   file://CVE-2021-3156-pre2.patch \
-	   file://CVE-2021-3156-1.patch \
-	   file://CVE-2021-3156-2.patch \
-	   file://CVE-2021-3156-3.patch \
-	   file://CVE-2021-3156-4.patch \
-	   file://CVE-2021-3156-5.patch \
            "
 
 PAM_SRC_URI = "file://sudo.pam"
 
-SRC_URI[md5sum] = "03da8e711caca6fd93e57751bfb74adc"
-SRC_URI[sha256sum] = "bd42ae1059e935f795c69ea97b3de09fe9410a58a74b5d5e6836eb5067a445d9"
+SRC_URI[md5sum] = "a7318202ba391079a0e32933f0fb8bd6"
+SRC_URI[sha256sum] = "5ce3c18c5efbecd5437a0945f314f1822423eaf9a2d7eb7ecf80857bc32246c5"
 
 DEPENDS += " ${@bb.utils.contains('DISTRO_FEATURES', 'pam', 'libpam', '', d)}"
 RDEPENDS_${PN} += " ${@bb.utils.contains('DISTRO_FEATURES', 'pam', 'pam-plugin-limits pam-plugin-keyinit', '', d)}"
 
+CACHED_CONFIGUREVARS = " \
+        ac_cv_type_rsize_t=no \
+        ac_cv_path_MVPROG=${base_bindir}/mv \
+        ac_cv_path_BSHELLPROG=${base_bindir}/sh \
+        ac_cv_path_SENDMAILPROG=${sbindir}/sendmail \
+        ac_cv_path_VIPROG=${base_bindir}/vi \
+        "
+
 EXTRA_OECONF += " \
-             ac_cv_type_rsize_t=no \
              ${@bb.utils.contains('DISTRO_FEATURES', 'pam', '--with-pam', '--without-pam', d)} \
              ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', '--enable-tmpfiles.d=${libdir}/tmpfiles.d', '--disable-tmpfiles.d', d)} \
              "
@@ -42,8 +34,8 @@ do_install_append () {
 	chmod 4111 ${D}${bindir}/sudo
 	chmod 0440 ${D}${sysconfdir}/sudoers
 
-	# Explicitly remove the ${localstatedir}/run directory to avoid QA error
-	rmdir -p --ignore-fail-on-non-empty ${D}${localstatedir}/run/sudo
+    # Explicitly remove the /run directory to avoid QA error
+    rmdir -p --ignore-fail-on-non-empty ${D}/run/sudo
 }
 
 FILES_${PN} += "${libdir}/tmpfiles.d"

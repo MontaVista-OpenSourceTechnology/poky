@@ -4,15 +4,15 @@ HOMEPAGE = "http://www.sudo.ws"
 BUGTRACKER = "http://www.sudo.ws/bugs/"
 SECTION = "admin"
 LICENSE = "ISC & BSD & Zlib"
-LIC_FILES_CHKSUM = "file://doc/LICENSE;md5=652fb4334c13b511597d7940ef8b3323 \
-                    file://plugins/sudoers/redblack.c;beginline=1;endline=41;md5=cfe41112f96c19a074934d128f45c693 \
-                    file://lib/util/reallocarray.c;beginline=3;endline=16;md5=85b0905b795d4d58bf2e00635649eec6 \
-                    file://lib/util/fnmatch.c;beginline=3;endline=27;md5=67f83ee9bd456557397082f8f1be0efd \
-                    file://lib/util/getcwd.c;beginline=5;endline=27;md5=449af4cc57fc7d46f42090608ba3e681 \
-                    file://lib/util/glob.c;beginline=6;endline=31;md5=5872733146b9eb0deb79e1f664815b85 \
-                    file://lib/util/snprintf.c;beginline=6;endline=34;md5=c82c1b3a5c32e08545c9ec5d71e41e50 \
-                    file://include/sudo_queue.h;beginline=5;endline=27;md5=449af4cc57fc7d46f42090608ba3e681 \
-                    file://lib/util/inet_pton.c;beginline=3;endline=17;md5=3970ab0518ab79cbd0bafb697f10b33a"
+LIC_FILES_CHKSUM = "file://doc/LICENSE;md5=07966675feaddba70cc812895b248230 \
+                    file://plugins/sudoers/redblack.c;beginline=1;endline=41;md5=31c82350e79cab3b62235c42d4a5fed5 \
+                    file://lib/util/reallocarray.c;beginline=3;endline=16;md5=6b7f9e2ab2815d32dcbf4218241ba5fa \
+                    file://lib/util/fnmatch.c;beginline=3;endline=27;md5=004d7d2866ba1f5b41174906849d2e0f \
+                    file://lib/util/getcwd.c;beginline=5;endline=27;md5=9805c43187b7d4735d9df89e8b6359d1 \
+                    file://lib/util/glob.c;beginline=6;endline=31;md5=54994e5b5239e2663d2e345ed867d6a2 \
+                    file://lib/util/snprintf.c;beginline=6;endline=34;md5=bdbaa980a4169d1ed9df5dab55bb65c4 \
+                    file://include/sudo_queue.h;beginline=5;endline=27;md5=9805c43187b7d4735d9df89e8b6359d1 \
+                    file://lib/util/inet_pton.c;beginline=3;endline=17;md5=27785c9f5835093eda42aa0816a2d0b4"
 
 inherit autotools
 
@@ -21,7 +21,7 @@ PACKAGECONFIG[zlib] = "--enable-zlib,--disable-zlib,zlib"
 
 CONFFILES_${PN} = "${sysconfdir}/sudoers"
 
-EXTRA_OECONF = "--with-editor=/bin/vi --with-env-editor"
+EXTRA_OECONF = "--with-editor=${base_bindir}/vi --with-env-editor"
 
 EXTRA_OECONF_append_libc-musl = " --disable-hardening "
 
