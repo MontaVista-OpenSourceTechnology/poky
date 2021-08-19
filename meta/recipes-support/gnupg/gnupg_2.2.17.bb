@@ -8,19 +8,16 @@ DEPENDS = "npth libassuan libksba zlib bzip2 readline libgcrypt"
 
 inherit autotools gettext texinfo pkgconfig
 
-PR = "r2"
 UPSTREAM_CHECK_URI = "https://gnupg.org/download/index.html"
 SRC_URI = "${GNUPG_MIRROR}/${BPN}/${BPN}-${PV}.tar.bz2 \
            file://0001-Use-pkg-config-to-find-pth-instead-of-pth-config.patch \
            file://0002-use-pkgconfig-instead-of-npth-config.patch \
            file://0003-dirmngr-uses-libgpg-error.patch \
            file://0004-autogen.sh-fix-find-version-for-beta-checking.patch \
-           file://CVE-2018-9234.patch \
-           file://CVE-2018-12020.patch \
-          "
+           "
 
-SRC_URI[md5sum] = "789f16949fae2d003d387f49e9da4b74"
-SRC_URI[sha256sum] = "d4514a0be0f7a1ff263193330019eb4b53c82f0f5e230af3c14df371271a45e6"
+SRC_URI[md5sum] = "1ba2d9b70c377f8e967742064c27a19c"
+SRC_URI[sha256sum] = "afa262868e39b651a2db4c071fba90415154243e83a830ca00516f9a807fd514"
 
 EXTRA_OECONF = "--disable-ldap \
 		--disable-ccid-driver \
