@@ -1,0 +1,304 @@
+From e9acec3ba013743235cd533479f6430105e77e93 Mon Sep 17 00:00:00 2001
+From: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Date: Tue, 17 Jan 2017 15:13:36 +0000
+Subject: [PATCH 1/3] Only read one message at a time if there are fds pending
+
+systemd-logind's OpenSession() API call returns a fd. If there is a
+flood of new sessions, it is possible that by the time we finish reading
+message 1, message 2 will already be in our incoming buffer and so on.
+This results in systemd-logind consistently having one or more fds enqueued
+for an extended period, which we interpret as a denial of service
+attack, and handle by kicking it off the bus (at least until we worked
+around the resulting logind failure by making uid 0 immune to that
+particular anti-DoS mechanism, but that workaround doesn't work for
+other uids).
+
+To avoid this without the complexity of tracking multiple countdowns
+per connection (one for each message with fds), we can avoid reading
+any additional messages while we already have a message with a fd
+attached pending processing. To avoid stalling, we have to read the rest
+of any partial message we might have, but we stop after that.
+Assuming we are able to get rid of the pending fds within a reasonable
+time, we'll eventually drain the incoming queue to a level of 0 bytes
+and 0 fds, at which point the countdown stops.
+
+To make this actually work, we need fd.o #95619 to be fixed first, so
+that when we receive more fds and restart the countdown, it restarts
+with its correct time remaining.
+
+Upstream Status: Backport https://github.com/freedesktop/dbus/commit/892f084eeda0806aab6f91f5bccd8989a04ed3f6
+
+Bug: https://bugs.freedesktop.org/show_bug.cgi?id=95263
+Signed-off-by: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Tested-by: Kai-Heng Feng
+Signed-off-by: Anand Je Sypureddy <anandje@mvista.com>
+---
+ dbus/dbus-message-internal.h |  4 +-
+ dbus/dbus-message-util.c     | 10 ++--
+ dbus/dbus-message.c          | 90 +++++++++++++++++++++++++++++++++++-
+ dbus/dbus-transport-socket.c | 20 ++++++--
+ dbus/dbus-transport.c        |  8 +++-
+ 5 files changed, 117 insertions(+), 15 deletions(-)
+
+diff --git a/dbus/dbus-message-internal.h b/dbus/dbus-message-internal.h
+index 4bb4d8b..386bc50 100644
+--- a/dbus/dbus-message-internal.h
++++ b/dbus/dbus-message-internal.h
+@@ -73,7 +73,9 @@ void               _dbus_message_loader_unref                 (DBusMessageLoader
+ 
+ DBUS_PRIVATE_EXPORT
+ void               _dbus_message_loader_get_buffer            (DBusMessageLoader  *loader,
+-                                                               DBusString        **buffer);
++                                                               DBusString        **buffer,
++                                                               int                *max_to_read,
++                                                               dbus_bool_t        *may_read_unix_fds);
+ DBUS_PRIVATE_EXPORT
+ void               _dbus_message_loader_return_buffer         (DBusMessageLoader  *loader,
+                                                                DBusString         *buffer);
+diff --git a/dbus/dbus-message-util.c b/dbus/dbus-message-util.c
+index 5acd541..d613a5f 100644
+--- a/dbus/dbus-message-util.c
++++ b/dbus/dbus-message-util.c
+@@ -490,7 +490,7 @@ dbus_internal_do_not_use_try_message_data (const DBusString    *data,
+     {
+       DBusString *buffer;
+ 
+-      _dbus_message_loader_get_buffer (loader, &buffer);
++      _dbus_message_loader_get_buffer (loader, &buffer, NULL, NULL);
+       _dbus_string_append_byte (buffer,
+                                 _dbus_string_get_byte (data, i));
+       _dbus_message_loader_return_buffer (loader, buffer);
+@@ -509,7 +509,7 @@ dbus_internal_do_not_use_try_message_data (const DBusString    *data,
+   {
+     DBusString *buffer;
+ 
+-    _dbus_message_loader_get_buffer (loader, &buffer);
++    _dbus_message_loader_get_buffer (loader, &buffer, NULL, NULL);
+     _dbus_string_copy (data, 0, buffer,
+                        _dbus_string_get_length (buffer));
+     _dbus_message_loader_return_buffer (loader, buffer);
+@@ -530,7 +530,7 @@ dbus_internal_do_not_use_try_message_data (const DBusString    *data,
+     {
+       DBusString *buffer;
+ 
+-      _dbus_message_loader_get_buffer (loader, &buffer);
++      _dbus_message_loader_get_buffer (loader, &buffer, NULL, NULL);
+       _dbus_string_append_byte (buffer,
+                                 _dbus_string_get_byte (data, i));
+       if ((i+1) < len)
+@@ -1498,7 +1498,7 @@ _dbus_message_test (const char *test_data_dir)
+     {
+       DBusString *buffer;
+ 
+-      _dbus_message_loader_get_buffer (loader, &buffer);
++      _dbus_message_loader_get_buffer (loader, &buffer, NULL, NULL);
+       _dbus_string_append_byte (buffer, data[i]);
+       _dbus_message_loader_return_buffer (loader, buffer);
+     }
+@@ -1509,7 +1509,7 @@ _dbus_message_test (const char *test_data_dir)
+     {
+       DBusString *buffer;
+ 
+-      _dbus_message_loader_get_buffer (loader, &buffer);
++      _dbus_message_loader_get_buffer (loader, &buffer, NULL, NULL);
+       _dbus_string_append_byte (buffer, data[i]);
+       _dbus_message_loader_return_buffer (loader, buffer);
+     }
+diff --git a/dbus/dbus-message.c b/dbus/dbus-message.c
+index e0d9c8b..e8cb0ce 100644
+--- a/dbus/dbus-message.c
++++ b/dbus/dbus-message.c
+@@ -4037,13 +4037,99 @@ _dbus_message_loader_unref (DBusMessageLoader *loader)
+  */
+ void
+ _dbus_message_loader_get_buffer (DBusMessageLoader  *loader,
+-                                 DBusString        **buffer)
++                                 DBusString        **buffer,
++                                 int                *max_to_read,
++                                 dbus_bool_t        *may_read_fds)
+ {
+   _dbus_assert (!loader->buffer_outstanding);
+ 
+   *buffer = &loader->data;
+ 
+   loader->buffer_outstanding = TRUE;
++
++  if (max_to_read != NULL)
++    {
++#ifdef HAVE_UNIX_FD_PASSING
++      int offset = 0;
++      int remain;
++      int byte_order;
++      int fields_array_len;
++      int header_len;
++      int body_len;
++#endif
++
++      *max_to_read = DBUS_MAXIMUM_MESSAGE_LENGTH;
++      *may_read_fds = TRUE;
++
++#ifdef HAVE_UNIX_FD_PASSING
++      /* If we aren't holding onto any fds, we can read as much as we want
++       * (fast path). */
++      if (loader->n_unix_fds == 0)
++        return;
++
++      /* Slow path: we have a message with some fds in it. We don't want
++       * to start on the next message until this one is out of the way;
++       * otherwise a legitimate sender can keep us processing messages
++       * containing fds, until we disconnect it for having had fds pending
++       * for too long, a limit that is in place to stop malicious senders
++       * from setting up recursive fd-passing that takes up our quota and
++       * will never go away. */
++
++      remain = _dbus_string_get_length (&loader->data);
++
++      while (remain > 0)
++        {
++          DBusValidity validity = DBUS_VALIDITY_UNKNOWN;
++          int needed;
++
++          /* If 0 < remain < DBUS_MINIMUM_HEADER_SIZE, then we've had at
++           * least the first byte of a message, but we don't know how
++           * much more to read. Only read the rest of the
++           * DBUS_MINIMUM_HEADER_SIZE for now; then we'll know. */
++          if (remain < DBUS_MINIMUM_HEADER_SIZE)
++            {
++              *max_to_read = DBUS_MINIMUM_HEADER_SIZE - remain;
++              *may_read_fds = FALSE;
++              return;
++            }
++
++          if (!_dbus_header_have_message_untrusted (loader->max_message_size,
++                                                    &validity,
++                                                    &byte_order,
++                                                    &fields_array_len,
++                                                    &header_len,
++                                                    &body_len,
++                                                    &loader->data,
++                                                    offset,
++                                                    remain))
++            {
++              /* If a message in the buffer is invalid, we're going to
++               * disconnect the sender anyway, so reading an arbitrary amount
++               * is fine. */
++              if (validity != DBUS_VALID)
++                return;
++
++              /* We have a partial message, with the
++               * DBUS_MINIMUM_HEADER_SIZE-byte fixed part of the header (which
++               * lets us work out how much more we need), but no more. Read
++               * the rest of the message. */
++              needed = header_len + body_len;
++              _dbus_assert (needed > remain);
++              *max_to_read = needed - remain;
++              *may_read_fds = FALSE;
++              return;
++            }
++
++          /* Skip over entire messages until we have less than a message
++           * remaining. */
++          needed = header_len + body_len;
++          _dbus_assert (needed > DBUS_MINIMUM_HEADER_SIZE);
++          _dbus_assert (remain >= needed);
++          remain -= needed;
++          offset += needed;
++        }
++#endif
++    }
+ }
+ 
+ /**
+@@ -4872,7 +4958,7 @@ dbus_message_demarshal (const char *str,
+   if (loader == NULL)
+     return NULL;
+ 
+-  _dbus_message_loader_get_buffer (loader, &buffer);
++  _dbus_message_loader_get_buffer (loader, &buffer, NULL, NULL);
+ 
+   if (!_dbus_string_append_len (buffer, str, len))
+     goto fail_oom;
+diff --git a/dbus/dbus-transport-socket.c b/dbus/dbus-transport-socket.c
+index 35c3cbf..2745aaf 100644
+--- a/dbus/dbus-transport-socket.c
++++ b/dbus/dbus-transport-socket.c
+@@ -794,7 +794,9 @@ do_reading (DBusTransport *transport)
+       if (bytes_read > 0)
+         {
+           _dbus_message_loader_get_buffer (transport->loader,
+-                                           &buffer);
++                                           &buffer,
++                                           NULL,
++                                           NULL);
+ 
+           if (!_dbus_auth_decode_data (transport->auth,
+                                        &socket_transport->encoded_incoming,
+@@ -817,11 +819,19 @@ do_reading (DBusTransport *transport)
+     }
+   else
+     {
++      int max_to_read = DBUS_MAXIMUM_MESSAGE_LENGTH;
++      dbus_bool_t may_read_unix_fds = TRUE;
++
+       _dbus_message_loader_get_buffer (transport->loader,
+-                                       &buffer);
++                                       &buffer,
++                                       &max_to_read,
++                                       &may_read_unix_fds);
++
++      if (max_to_read > socket_transport->max_bytes_read_per_iteration)
++        max_to_read = socket_transport->max_bytes_read_per_iteration;
+ 
+ #ifdef HAVE_UNIX_FD_PASSING
+-      if (DBUS_TRANSPORT_CAN_SEND_UNIX_FD(transport))
++      if (DBUS_TRANSPORT_CAN_SEND_UNIX_FD(transport) && may_read_unix_fds)
+         {
+           int *fds, n_fds;
+ 
+@@ -835,7 +845,7 @@ do_reading (DBusTransport *transport)
+ 
+           bytes_read = _dbus_read_socket_with_unix_fds(socket_transport->fd,
+                                                        buffer,
+-                                                       socket_transport->max_bytes_read_per_iteration,
++                                                       max_to_read,
+                                                        fds, &n_fds);
+           saved_errno = _dbus_save_socket_errno ();
+ 
+@@ -848,7 +858,7 @@ do_reading (DBusTransport *transport)
+ #endif
+         {
+           bytes_read = _dbus_read_socket (socket_transport->fd,
+-                                          buffer, socket_transport->max_bytes_read_per_iteration);
++                                          buffer, max_to_read);
+           saved_errno = _dbus_save_socket_errno ();
+         }
+ 
+diff --git a/dbus/dbus-transport.c b/dbus/dbus-transport.c
+index a56b885..e14ea12 100644
+--- a/dbus/dbus-transport.c
++++ b/dbus/dbus-transport.c
+@@ -1032,7 +1032,9 @@ recover_unused_bytes (DBusTransport *transport)
+         }
+       
+       _dbus_message_loader_get_buffer (transport->loader,
+-                                       &buffer);
++                                       &buffer,
++                                       NULL,
++                                       NULL);
+       
+       orig_len = _dbus_string_get_length (buffer);
+       
+@@ -1062,7 +1064,9 @@ recover_unused_bytes (DBusTransport *transport)
+       dbus_bool_t succeeded;
+ 
+       _dbus_message_loader_get_buffer (transport->loader,
+-                                       &buffer);
++                                       &buffer,
++				       NULL,
++				       NULL);
+                 
+       orig_len = _dbus_string_get_length (buffer);
+                 
+-- 
+2.33.0
+

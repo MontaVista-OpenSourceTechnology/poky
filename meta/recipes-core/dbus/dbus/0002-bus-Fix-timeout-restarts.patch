@@ -1,0 +1,268 @@
+From 02cbfe2c718b5c1476aca8df1c89871447f720ed Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Michal=20Koutn=C3=BD?= <mkoutny@suse.com>
+Date: Tue, 24 May 2016 11:14:11 +0200
+Subject: [PATCH 2/3] bus: Fix timeout restarts
+
+The code counting pending fds relied on restart of timeouts when they are
+enabled. This patch adds function that ensures that such enabled timeouts
+have their timekeeping data reset (and not only when timeout is
+registered into event loop processing).
+
+When timeouts weren't reset, they'd fire at rather random and mainly
+incorrect moments leading to interruption of connections of dbus-daemon.
+
+Every time we reset the interval, we also need to re-enable the timeout
+and mark its end time to be recalculated by the event loop, so combine
+the old set_enabled(TRUE) with set_interval() as a new restart() method.
+This leaves all the set_enabled() calls having a FALSE parameter, so
+remove the parameter and rename the method to disable().
+
+Upstream Status: Backport https://github.com/freedesktop/dbus/commit/529600397bcab47b9bed5da9208c2df05c8b86b4
+
+[smcv: fix minor coding style issues]
+[smcv: replace set_reenabled()/set_interval() pair with restart()]
+[smcv: replace set_enabled(FALSE) with disable()]
+Bug: https://bugs.freedesktop.org/show_bug.cgi?id=95619
+Signed-off-by: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Signed-off-by: Anand Je Sypureddy <anandje@mvista.com>
+---
+ bus/connection.c     |  9 ++++----
+ bus/expirelist.c     |  8 +++----
+ dbus/dbus-mainloop.c |  8 +++++++
+ dbus/dbus-timeout.c  | 50 ++++++++++++++++++++++++++++++++++----------
+ dbus/dbus-timeout.h  |  9 +++++---
+ 5 files changed, 60 insertions(+), 24 deletions(-)
+
+diff --git a/bus/connection.c b/bus/connection.c
+index 02d6c22..1ac9036 100644
+--- a/bus/connection.c
++++ b/bus/connection.c
+@@ -477,7 +477,7 @@ bus_connections_new (BusContext *context)
+   if (connections->expire_timeout == NULL)
+     goto failed_3;
+ 
+-  _dbus_timeout_set_enabled (connections->expire_timeout, FALSE);
++  _dbus_timeout_disable (connections->expire_timeout);
+ 
+   connections->pending_replies = bus_expire_list_new (bus_context_get_loop (context),
+                                                       bus_context_get_reply_timeout (context),
+@@ -653,14 +653,13 @@ check_pending_fds_cb (DBusConnection *connection)
+ 
+   if (n_pending_unix_fds_old == 0 && n_pending_unix_fds_new > 0)
+     {
+-      _dbus_timeout_set_interval (d->pending_unix_fds_timeout,
++      _dbus_timeout_restart (d->pending_unix_fds_timeout,
+               bus_context_get_pending_fd_timeout (d->connections->context));
+-      _dbus_timeout_set_enabled (d->pending_unix_fds_timeout, TRUE);
+     }
+ 
+   if (n_pending_unix_fds_old > 0 && n_pending_unix_fds_new == 0)
+     {
+-      _dbus_timeout_set_enabled (d->pending_unix_fds_timeout, FALSE);
++      _dbus_timeout_disable (d->pending_unix_fds_timeout);
+     }
+ 
+ 
+@@ -816,7 +815,7 @@ bus_connections_setup_connection (BusConnections *connections,
+   if (d->pending_unix_fds_timeout == NULL)
+     goto out;
+ 
+-  _dbus_timeout_set_enabled (d->pending_unix_fds_timeout, FALSE);
++  _dbus_timeout_disable (d->pending_unix_fds_timeout);
+   if (!_dbus_loop_add_timeout (bus_context_get_loop (connections->context),
+                                d->pending_unix_fds_timeout))
+     goto out;
+diff --git a/bus/expirelist.c b/bus/expirelist.c
+index 9a3886e..4a39752 100644
+--- a/bus/expirelist.c
++++ b/bus/expirelist.c
+@@ -63,7 +63,7 @@ bus_expire_list_new (DBusLoop      *loop,
+   if (list->timeout == NULL)
+     goto failed;
+ 
+-  _dbus_timeout_set_enabled (list->timeout, FALSE);
++  _dbus_timeout_disable (list->timeout);
+ 
+   if (!_dbus_loop_add_timeout (list->loop, list->timeout))
+     goto failed;
+@@ -97,16 +97,14 @@ bus_expire_timeout_set_interval (DBusTimeout   *timeout,
+ {
+   if (next_interval >= 0)
+     {
+-      _dbus_timeout_set_interval (timeout,
+-                                  next_interval);
+-      _dbus_timeout_set_enabled (timeout, TRUE);
++      _dbus_timeout_restart (timeout, next_interval);
+ 
+       _dbus_verbose ("Enabled an expire timeout with interval %d\n",
+                      next_interval);
+     }
+   else if (dbus_timeout_get_enabled (timeout))
+     {
+-      _dbus_timeout_set_enabled (timeout, FALSE);
++      _dbus_timeout_disable (timeout);
+ 
+       _dbus_verbose ("Disabled an expire timeout\n");
+     }
+diff --git a/dbus/dbus-mainloop.c b/dbus/dbus-mainloop.c
+index f6736fe..24d0b50 100644
+--- a/dbus/dbus-mainloop.c
++++ b/dbus/dbus-mainloop.c
+@@ -30,6 +30,7 @@
+ #include <dbus/dbus-hash.h>
+ #include <dbus/dbus-list.h>
+ #include <dbus/dbus-socket-set.h>
++#include <dbus/dbus-timeout.h>
+ #include <dbus/dbus-watch.h>
+ 
+ #define MAINLOOP_SPEW 0
+@@ -608,6 +609,13 @@ _dbus_loop_iterate (DBusLoop     *loop,
+             {
+               int msecs_remaining;
+ 
++              if (_dbus_timeout_needs_restart (tcb->timeout))
++                {
++                  tcb->last_tv_sec = tv_sec;
++                  tcb->last_tv_usec = tv_usec;
++                  _dbus_timeout_restarted (tcb->timeout);
++                }
++
+               check_timeout (tv_sec, tv_usec, tcb, &msecs_remaining);
+ 
+               if (timeout < 0)
+diff --git a/dbus/dbus-timeout.c b/dbus/dbus-timeout.c
+index a1d6ce5..f240117 100644
+--- a/dbus/dbus-timeout.c
++++ b/dbus/dbus-timeout.c
+@@ -49,6 +49,7 @@ struct DBusTimeout
+   void *data;		   	               /**< Application data. */
+   DBusFreeFunction free_data_function;         /**< Free the application data. */
+   unsigned int enabled : 1;                    /**< True if timeout is active. */
++  unsigned int needs_restart : 1;              /**< Flag that timeout should be restarted after re-enabling. */
+ };
+ 
+ /**
+@@ -79,6 +80,7 @@ _dbus_timeout_new (int                 interval,
+   timeout->free_handler_data_function = free_data_function;
+ 
+   timeout->enabled = TRUE;
++  timeout->needs_restart = FALSE;
+   
+   return timeout;
+ }
+@@ -122,25 +124,29 @@ _dbus_timeout_unref (DBusTimeout *timeout)
+ }
+ 
+ /**
+- * Changes the timeout interval. Note that you have to disable and
+- * re-enable the timeout using the timeout toggle function
+- * (_dbus_connection_toggle_timeout_unlocked() etc.) to notify the
+- * application of this change.
++ * Change the timeout interval to be interval milliseconds from now
++ * (forgetting when the timeout was initially started), and enable it.
++ *
++ * This function is only valid when used in conjunction with DBusLoop:
++ * it can be used in the message bus daemon implementation or in unit tests,
++ * but it cannot be used in conjunction with an application main loop.
+  *
+  * @param timeout the timeout
+  * @param interval the new interval
+  */
+ void
+-_dbus_timeout_set_interval (DBusTimeout *timeout,
+-                            int          interval)
++_dbus_timeout_restart (DBusTimeout *timeout,
++                       int          interval)
+ {
+   _dbus_assert (interval >= 0);
+   
+   timeout->interval = interval;
++  timeout->enabled = TRUE;
++  timeout->needs_restart = TRUE;
+ }
+ 
+ /**
+- * Changes the timeout's enabled-ness. Note that you should use
++ * Disable the timeout. Note that you should use
+  * _dbus_connection_toggle_timeout_unlocked() etc. instead, if
+  * the timeout is passed out to an application main loop.
+  * i.e. you can't use this function in the D-Bus library, it's
+@@ -150,13 +156,11 @@ _dbus_timeout_set_interval (DBusTimeout *timeout,
+  * @param enabled #TRUE if timeout should be enabled.
+  */
+ void
+-_dbus_timeout_set_enabled (DBusTimeout  *timeout,
+-                           dbus_bool_t   enabled)
++_dbus_timeout_disable (DBusTimeout  *timeout)
+ {
+-  timeout->enabled = enabled != FALSE;
++  timeout->enabled = FALSE;
+ }
+ 
+-
+ /**
+  * @typedef DBusTimeoutList
+  *
+@@ -375,6 +379,30 @@ _dbus_timeout_list_toggle_timeout (DBusTimeoutList           *timeout_list,
+                                                 timeout_list->timeout_data);
+ }
+ 
++/**
++ * Returns whether a timeout needs restart time counting in the event loop.
++ *
++ * @param timeout the DBusTimeout object
++ * @returns #TRUE if restart is needed
++ */
++dbus_bool_t
++_dbus_timeout_needs_restart (DBusTimeout *timeout)
++{
++  return timeout->needs_restart;
++}
++
++/**
++ * Mark timeout as restarted (setting timestamps is responsibility of the event
++ * loop).
++ *
++ * @param timeout the DBusTimeout object
++ */
++void
++_dbus_timeout_restarted (DBusTimeout *timeout)
++{
++  timeout->needs_restart = FALSE;
++}
++
+ /** @} */
+ 
+ /**
+diff --git a/dbus/dbus-timeout.h b/dbus/dbus-timeout.h
+index c652bb7..3d0b8b4 100644
+--- a/dbus/dbus-timeout.h
++++ b/dbus/dbus-timeout.h
+@@ -49,11 +49,10 @@ DBusTimeout* _dbus_timeout_ref          (DBusTimeout        *timeout);
+ DBUS_PRIVATE_EXPORT
+ void         _dbus_timeout_unref        (DBusTimeout        *timeout);
+ DBUS_PRIVATE_EXPORT
+-void         _dbus_timeout_set_interval (DBusTimeout        *timeout,
++void         _dbus_timeout_restart      (DBusTimeout        *timeout,
+                                          int                 interval);
+ DBUS_PRIVATE_EXPORT
+-void         _dbus_timeout_set_enabled  (DBusTimeout        *timeout,
+-                                         dbus_bool_t         enabled);
++void         _dbus_timeout_disable      (DBusTimeout        *timeout);
+ 
+ DBusTimeoutList *_dbus_timeout_list_new            (void);
+ void             _dbus_timeout_list_free           (DBusTimeoutList           *timeout_list);
+@@ -71,6 +70,10 @@ void             _dbus_timeout_list_toggle_timeout (DBusTimeoutList           *t
+                                                     DBusTimeout               *timeout,
+                                                     dbus_bool_t                enabled);
+ 
++DBUS_PRIVATE_EXPORT
++dbus_bool_t _dbus_timeout_needs_restart (DBusTimeout *timeout);
++DBUS_PRIVATE_EXPORT
++void        _dbus_timeout_restarted     (DBusTimeout *timeout);
+ 
+ /** @} */
+ 
+-- 
+2.33.0
+

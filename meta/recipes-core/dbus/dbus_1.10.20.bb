@@ -11,7 +11,7 @@ RDEPENDS_dbus_class-nativesdk = ""
 PACKAGES += "${@bb.utils.contains('DISTRO_FEATURES', 'ptest', '${PN}-ptest', '', d)}"
 ALLOW_EMPTY_dbus-ptest = "1"
 RDEPENDS_dbus-ptest_class-target = "dbus-test-ptest"
-PR .= ".2"
+PR .= ".3"
 SRC_URI = "http://dbus.freedesktop.org/releases/dbus/dbus-${PV}.tar.gz \
            file://tmpdir.patch \
            file://dbus-1.init \
@@ -25,6 +25,9 @@ SRC_URI = "http://dbus.freedesktop.org/releases/dbus/dbus-${PV}.tar.gz \
 	   file://CVE-2020-35512_dep2.patch \
 	   file://CVE-2020-35512_dep3.patch \
 	   file://CVE-2020-35512.patch \
+	   file://0001-Only-read-one-message-at-a-time-if-there-are-fds-pen.patch \
+	   file://0002-bus-Fix-timeout-restarts.patch \
+	   file://0003-DBusMainLoop-ensure-all-required-timeouts-are-restar.patch \
 "
 
 SRC_URI[md5sum] = "94c991e763d4f9f13690416b2dcd9411"

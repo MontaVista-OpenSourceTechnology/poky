@@ -1,0 +1,35 @@
+From c9e7ad733c81f559b691b920f1714e8591713a57 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Michal=20Koutn=C3=BD?= <mkoutny@suse.com>
+Date: Thu, 29 Jun 2017 11:24:49 +0200
+Subject: [PATCH 3/3] DBusMainLoop: ensure all required timeouts are restarted
+
+This is a followup of 529600397bcab47b9bed5da9208c2df05c8b86b4. We can't
+shortcut the timeouts iteration in order not to miss any timeouts that
+might require timestamp restart.
+
+Upstream Status: Backport https://github.com/freedesktop/dbus/commit/446b0d9ac75ac54cf1fa95192e9cd43b8861f6c5
+
+Bug: https://bugs.freedesktop.org/show_bug.cgi?id=95619
+Reviewed-by: Simon McVittie <smcv@collabora.com>
+Signed-off-by: Anand Je Sypureddy <anandje@mvista.com>
+---
+ dbus/dbus-mainloop.c | 3 ---
+ 1 file changed, 3 deletions(-)
+
+diff --git a/dbus/dbus-mainloop.c b/dbus/dbus-mainloop.c
+index 24d0b50..e3cdb09 100644
+--- a/dbus/dbus-mainloop.c
++++ b/dbus/dbus-mainloop.c
+@@ -629,9 +629,6 @@ _dbus_loop_iterate (DBusLoop     *loop,
+ #endif
+               
+               _dbus_assert (timeout >= 0);
+-                  
+-              if (timeout == 0)
+-                break; /* it's not going to get shorter... */
+             }
+ #if MAINLOOP_SPEW
+           else
+-- 
+2.33.0
+
