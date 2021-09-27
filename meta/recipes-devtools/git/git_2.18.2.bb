@@ -25,4 +25,5 @@ SRC_URI += "file://CVE-2018-19486.patch \
             file://CVE-2020-11008_p7.patch \
             file://CVE-2020-11008_p8.patch \
             file://CVE-2020-11008_p9.patch \
+            file://CVE-2021-40330.patch \
            "
