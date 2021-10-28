@@ -16,10 +16,11 @@ BINCONFIG = "${bindir}/croco-0.6-config"
 
 inherit autotools pkgconfig gnomebase gtk-doc binconfig-disabled
 
-PR .= ".1"
+PR .= ".2"
 
 SRC_URI += "file://CVE-2017-7960.patch \
             file://CVE-2017-7961.patch \
+	    file://CVE-2020-12825.patch \
             "
 
 SRC_URI[archive.md5sum] = "bc0984fce078ba2ce29f9500c6b9ddce"
