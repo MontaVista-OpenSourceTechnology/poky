@@ -1,4 +1,7 @@
-vim: do not adjust script pathnames
+From 7fa9acf53f9ec9df1ef0821d19239b6135e921fd Mon Sep 17 00:00:00 2001
+From: Joe Slater <joe.slater@windriver.com>
+Date: Wed, 15 Apr 2020 14:28:38 -0700
+Subject: [PATCH] vim: do not adjust script pathnames
 
 When cross-compiling, we do not want to reference the host versions of
 things like perl and awk.
@@ -7,9 +10,15 @@ Upstream-Status: Pending
 
 Signed-off-by: Joe Slater <joe.slater@windriver.com>
 
+---
+ src/Makefile | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/src/Makefile b/src/Makefile
+index d637548af..b7e2f7eef 100644
 --- a/src/Makefile
 +++ b/src/Makefile
-@@ -2507,11 +2507,14 @@ installtools: $(TOOLS) $(DESTDIR)$(exec_
+@@ -2507,11 +2507,14 @@ installtools: $(TOOLS) $(DESTDIR)$(exec_prefix) $(DEST_BIN) \
  		 rm -rf $$cvs; \
  	      fi
  	-chmod $(FILEMOD) $(DEST_TOOLS)/*
