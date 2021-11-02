@@ -27,7 +27,6 @@ SRC_URI = "http://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-${PV}.tar
            file://add-test-support-for-busybox.patch \
            file://CVE-2021-28041.patch \
            file://CVE-2020-14145.patch \
-           file://CVE-2021-28041.patch \
            file://0001-CVE-2016-20012.patch \
            "
 SRC_URI[md5sum] = "3076e6413e8dbe56d33848c1054ac091"
