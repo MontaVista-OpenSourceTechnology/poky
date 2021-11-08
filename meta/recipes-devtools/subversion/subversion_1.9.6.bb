@@ -10,7 +10,7 @@ BBCLASSEXTEND = "native"
 
 inherit gettext pkgconfig
 
-PR .= ".5"
+PR .= ".6"
 
 SRC_URI = "${APACHE_MIRROR}/${BPN}/${BPN}-${PV}.tar.bz2 \
            file://disable_macos.patch \
@@ -23,6 +23,7 @@ SRC_URI = "${APACHE_MIRROR}/${BPN}/${BPN}-${PV}.tar.bz2 \
            file://CVE-2018-11782_p3.patch \
            file://CVE-2018-11782_p4.patch \
 	   file://CVE-2019-0203.patch \
+	   file://0001-CVE-2020-17525.patch \
            "
 
 SRC_URI[md5sum] = "f27e00338d4a9f7f9aec9d4a3f8b418b"
