@@ -4,7 +4,7 @@ GO_BASEVERSION = "1.9"
 GO_MINOR = ".4"
 PV .= "${GO_MINOR}"
 
-PR .= ".9"
+PR .= ".10"
 
 FILESEXTRAPATHS_prepend := "${FILE_DIRNAME}/go-${GO_BASEVERSION}:"
 
@@ -35,6 +35,9 @@ SRC_URI += "\
 	file://CVE-2019-14809.patch \
 	file://0001-CVE-2021-29923.patch \
 	file://0001-CVE-2020-28367.patch \
+	file://CVE-2020-16845.patch \
+	file://CVE-2021-3114.patch \
+	file://CVE-2020-24553.patch \
 "
 SRC_URI_append_libc-musl = " file://set-external-linker.patch"
 
