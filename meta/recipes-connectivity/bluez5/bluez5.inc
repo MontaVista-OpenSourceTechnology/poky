@@ -42,6 +42,8 @@ PACKAGECONFIG[tools] = "--enable-tools,--disable-tools"
 PACKAGECONFIG[threads] = "--enable-threads,--disable-threads"
 PACKAGECONFIG[deprecated] = "--enable-deprecated,--disable-deprecated"
 
+PR .= "1"
+
 SRC_URI = "\
     ${KERNELORG_MIRROR}/linux/bluetooth/bluez-${PV}.tar.xz \
     file://out-of-tree.patch \
@@ -55,6 +57,7 @@ SRC_URI = "\
     file://CVE-2020-0556_p2.patch \
     file://CVE-2018-10910_p1.patch \
     file://CVE-2018-10910_p2.patch \
+    file://0001-CVE-2020-27153.patch \
 "
 S = "${WORKDIR}/bluez-${PV}"
 
