@@ -13,9 +13,10 @@ SRC_URI += " \
            file://CVE-2019-16255.patch \
            file://CVE-2020-10663.patch \
 	   file://CVE-2020-25613.patch \
+	   file://0001-CVE-2021-31799.patch \
            "
 
-PR = "r8"
+PR = "r8.1"
 
 SRC_URI[md5sum] = "d50e00ccc1c9cf450f837b92d3ed3e88"
 SRC_URI[sha256sum] = "254f1c1a79e4cc814d1e7320bc5bdd995dc57e08727d30a767664619a9c8ae5a"
