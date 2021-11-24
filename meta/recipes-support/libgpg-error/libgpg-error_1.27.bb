@@ -11,9 +11,12 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=59530bdf33659b29e73d4adb9f9f6552 \
 
 SECTION = "libs"
 
+PR .= "1"
+
 UPSTREAM_CHECK_URI = "https://gnupg.org/download/index.html"
 SRC_URI = "${GNUPG_MIRROR}/libgpg-error/libgpg-error-${PV}.tar.bz2 \
            file://pkgconfig.patch \
+           file://0001-awk-Prepare-for-Gawk-5.0.patch \
 	  "
 
 SRC_URI[md5sum] = "5217ef3e76a7275a2a3b569a12ddc989"
