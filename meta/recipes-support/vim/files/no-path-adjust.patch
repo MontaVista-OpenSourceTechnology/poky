@@ -10,15 +10,11 @@ Upstream-Status: Pending
 
 Signed-off-by: Joe Slater <joe.slater@windriver.com>
 
----
- src/Makefile | 5 ++++-
- 1 file changed, 4 insertions(+), 1 deletion(-)
-
-diff --git a/src/Makefile b/src/Makefile
-index d637548af..b7e2f7eef 100644
---- a/src/Makefile
-+++ b/src/Makefile
-@@ -2507,11 +2507,14 @@ installtools: $(TOOLS) $(DESTDIR)$(exec_prefix) $(DEST_BIN) \
+Index: git/src/Makefile
+===================================================================
+--- git.orig/src/Makefile
++++ git/src/Makefile
+@@ -2565,11 +2565,14 @@ installtools: $(TOOLS) $(DESTDIR)$(exec_
  		 rm -rf $$cvs; \
  	      fi
  	-chmod $(FILEMOD) $(DEST_TOOLS)/*
