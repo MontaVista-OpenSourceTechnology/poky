@@ -6,9 +6,11 @@ LIC_FILES_CHKSUM = "file://COPYING.LESSERv3;md5=6a6a8e020838b23406c81b19c1d46df6
                     file://COPYINGv2;md5=b234ee4d69f5fce4486a80fdaf4a4263 \
                     file://serpent-decrypt.c;beginline=14;endline=36;md5=ca0d220bc413e1842ecc507690ce416e \
                     file://serpent-set-key.c;beginline=14;endline=36;md5=ca0d220bc413e1842ecc507690ce416e"
+PR .= ".1"
 
 SRC_URI += "\
             file://check-header-files-of-openssl-only-if-enable_.patch \
+            file://0001-CVE-2021-20305.patch \
             "
 
 SRC_URI_append_class-target = "\
