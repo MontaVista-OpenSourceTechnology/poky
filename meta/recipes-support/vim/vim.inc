@@ -28,6 +28,7 @@ SRC_URI = "git://github.com/vim/vim.git;branch=master;protocol=https \
            file://0002-patch-8.2.3582-reading-uninitialized-memory-when-giv.patch \
 	   file://0001-CVE-2021-3974.patch \
            file://0002-patch-8.2.3611-crash-when-using-CTRL-W-f-without-fin.patch \
+	   file://CVE-2021-4069.patch \
            "
 
 SRCREV = "98056533b96b6b5d8849641de93185dd7bcadc44"
