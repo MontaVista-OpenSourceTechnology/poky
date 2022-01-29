@@ -16,6 +16,8 @@ LIC_FILES_CHKSUM = "file://nss/COPYING;md5=3b1e88e1b9c0b5a4b2881d46cce06a18 \
 
 VERSION_DIR = "${@d.getVar('BP').upper().replace('-', '_').replace('.', '_') + '_RTM'}"
 
+PR .= ".1"
+
 SRC_URI = "http://ftp.mozilla.org/pub/mozilla.org/security/nss/releases/${VERSION_DIR}/src/${BP}.tar.gz \
            file://nss.pc.in \
            file://signlibs.sh \
@@ -29,6 +31,7 @@ SRC_URI = "http://ftp.mozilla.org/pub/mozilla.org/security/nss/releases/${VERSIO
            file://blank-key4.db \
            file://system-pkcs11.txt \
            file://nss-fix-SHA_HTONL-bug-for-arm-32be.patch \
+           file://CVE-2021-43527.patch \
            "
 
 SRC_URI[md5sum] = "10720fc70fd483de1b085402fb10ed59"
