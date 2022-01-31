@@ -50,6 +50,7 @@ SRC_URI = "${GLIBC_GIT_URI};branch=${SRCBRANCH};name=glibc \
            file://CVE-2020-6096.patch \
            file://CVE-2021-33574_1.patch \
            file://CVE-2021-33574_2.patch \
+           file://0001-CVE-2022-23218.patch \
 "
 
 PR = "r1.3"
