@@ -13,7 +13,7 @@ LICENSE = "vim"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=6b30ea4fa660c483b619924bc709ef99 \
                     file://runtime/doc/uganda.txt;md5=a3f193c20c6faff93c69185d5d070535"
 
-PR .= "7"
+PR .= "8"
 SRC_URI = "git://github.com/vim/vim.git;branch=master;protocol=https \
            file://disable_acl_header_check.patch \
            file://vim-add-knob-whether-elf.h-are-checked.patch \
@@ -31,6 +31,7 @@ SRC_URI = "git://github.com/vim/vim.git;branch=master;protocol=https \
 	   file://0001-CVE-2021-3974.patch \
            file://0002-patch-8.2.3611-crash-when-using-CTRL-W-f-without-fin.patch \
 	   file://0001-CVE-2021-3984.patch \
+	   file://0001-CVE-2021-4019.patch \
            "
 
 PV .= ".4424"
