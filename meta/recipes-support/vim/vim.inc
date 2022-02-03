@@ -13,13 +13,24 @@ LICENSE = "vim"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=6b30ea4fa660c483b619924bc709ef99 \
                     file://runtime/doc/uganda.txt;md5=a3f193c20c6faff93c69185d5d070535"
 
-PR .= "6"
+PR .= "7"
 SRC_URI = "git://github.com/vim/vim.git;branch=master;protocol=https \
            file://disable_acl_header_check.patch \
            file://vim-add-knob-whether-elf.h-are-checked.patch \
            file://0001-src-Makefile-improve-reproducibility.patch \
            file://no-path-adjust.patch \
            file://racefix.patch \
+           file://b7081e135a16091c93f6f5f7525a5c58fb7ca9f9.patch \
+	   file://CVE-2021-3778.patch \
+           file://0002-patch-8.2.3428-using-freed-memory-when-replacing.patch \
+           file://0003-patch-8.2.3487-illegal-memory-access-if-buffer-name-.patch \
+           file://0004-patch-8.2.3489-ml_get-error-after-search-with-range.patch \
+           file://0005-patch-8.2.3564-invalid-memory-access-when-scrolling-.patch \
+           file://0001-patch-8.2.3581-reading-character-past-end-of-line.patch \
+           file://0002-patch-8.2.3582-reading-uninitialized-memory-when-giv.patch \
+	   file://0001-CVE-2021-3974.patch \
+           file://0002-patch-8.2.3611-crash-when-using-CTRL-W-f-without-fin.patch \
+	   file://0001-CVE-2021-3984.patch \
            "
 
 PV .= ".4424"
