@@ -727,7 +727,8 @@ class RpmPM(PackageManager):
                              "--setopt=reposdir=%s" %(oe.path.join(self.target_rootfs, "etc/yum.repos.d")),
                              "--repofrompath=oe-repo,%s" % (self.rpm_repo_dir),
                              "--installroot=%s" % (self.target_rootfs),
-                             "--setopt=logdir=%s" % (self.d.getVar('T'))
+                             "--setopt=logdir=%s" % (self.d.getVar('T')),
+                             "--setopt=diskspacecheck=False"
                             ]
         cmd = [dnf_cmd] + standard_dnf_args + dnf_args
         try:
