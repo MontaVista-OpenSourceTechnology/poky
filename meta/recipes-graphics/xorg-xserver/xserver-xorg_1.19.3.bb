@@ -19,10 +19,11 @@ SRC_URI += "file://musl-arm-inb-outb.patch \
 	    file://CVE-2021-3472.patch \
 	    file://0001-CVE-2020-25712.patch \
 	    file://0001-CVE-2021-4008.patch \
+	    file://0001-CVE-2021-4011.patch \
             "
 SRC_URI[md5sum] = "015d2fc4b9f2bfe7a626edb63a62c65e"
 SRC_URI[sha256sum] = "677a8166e03474719238dfe396ce673c4234735464d6dadf2959b600d20e5a98"
-PR .= ".9"
+PR .= ".10"
 # These extensions are now integrated into the server, so declare the migration
 # path for in-place upgrades.
 
