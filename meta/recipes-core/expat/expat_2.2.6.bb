@@ -6,7 +6,7 @@ LICENSE = "MIT"
 
 LIC_FILES_CHKSUM = "file://COPYING;md5=5b8620d98e49772d95fc1d291c26aa79"
 
-PR = "r2"
+PR = "r2.1"
 
 SRC_URI = "${SOURCEFORGE_MIRROR}/expat/expat-${PV}.tar.bz2 \
            file://autotools.patch \
@@ -14,6 +14,15 @@ SRC_URI = "${SOURCEFORGE_MIRROR}/expat/expat-${PV}.tar.bz2 \
            file://CVE-2018-20843.patch;striplevel=2 \
            file://CVE-2019-15903.patch \
            file://0001-CVE-2022-23990-expat.patch \
+           file://CVE-2022-2282X.patch \
+           file://CVE-2021-46143.patch \
+           file://CVE-2021-45960.patch \
+           file://CVE-2022-25235.patch \
+           file://CVE-2022-25236.patch \
+           file://CVE-2022-25236_2.patch \
+           file://CVE-2022-25314.patch \
+           file://CVE-2022-25313.patch \
+           file://CVE-2022-25315.patch \
 	  "
 
 SRC_URI[md5sum] = "ca047ae951b40020ac831c28859161b2"
