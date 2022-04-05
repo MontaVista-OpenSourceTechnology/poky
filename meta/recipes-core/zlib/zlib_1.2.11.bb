@@ -6,9 +6,11 @@ SECTION = "libs"
 LICENSE = "Zlib"
 LIC_FILES_CHKSUM = "file://zlib.h;beginline=6;endline=23;md5=5377232268e952e9ef63bc555f7aa6c0"
 
+PR .= ".1"
 SRC_URI = "${SOURCEFORGE_MIRROR}/libpng/${BPN}/${PV}/${BPN}-${PV}.tar.xz \
            file://ldflags-tests.patch \
            file://run-ptest \
+           file://0001-CVE-2018-25032.patch \
            "
 UPSTREAM_CHECK_URI = "http://zlib.net/"
 
