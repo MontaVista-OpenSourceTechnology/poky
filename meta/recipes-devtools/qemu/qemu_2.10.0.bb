@@ -7,7 +7,7 @@ RDEPENDS_${PN}-ptest = "bash make"
 LIC_FILES_CHKSUM = "file://COPYING;md5=441c28d2cf86e15a37fa47e15a72fbac \
                     file://COPYING.LIB;endline=24;md5=c04def7ae38850e7d3ef548588159913"
 
-PR = "r31"
+PR = "r31.1"
 
 SRC_URI = "http://wiki.qemu-project.org/download/${BP}.tar.bz2 \
            file://powerpc_rom.bin \
@@ -116,6 +116,7 @@ SRC_URI = "http://wiki.qemu-project.org/download/${BP}.tar.bz2 \
 	   file://0001-CVE-2021-3713.patch \
            file://0001-linux-user-rename-gettid-to-sys_gettid-to-avoid-clas.patch \
            file://0001-linux-user-remove-host-stime-syscall.patch \
+           file://0001-CVE-2021-3748.patch \
            "
 
 UPSTREAM_CHECK_REGEX = "qemu-(?P<pver>\d+\..*)\.tar"
