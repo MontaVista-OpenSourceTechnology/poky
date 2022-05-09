@@ -1,0 +1,26 @@
+From c665d84398611ead60ba2dc8482d7df476190bfe Mon Sep 17 00:00:00 2001
+From: Priyal Doshi <pdoshi@mvista.com>
+Date: Mon, 9 May 2022 17:12:55 +0530
+Subject: [PATCH] change in unit16_t to fix compilation error
+
+Signed-off-by: Priyal Doshi <pdoshi@mvista.com>
+---
+ tools/tiffcp.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/tools/tiffcp.c b/tools/tiffcp.c
+index efe7e54..6fc5c20 100644
+--- a/tools/tiffcp.c
++++ b/tools/tiffcp.c
+@@ -1505,7 +1505,7 @@ DECLAREwriteFunc(writeBufferToSeparateStrips)
+ 	tdata_t obuf;
+ 	tstrip_t strip = 0;
+ 	tsample_t s;
+-	uint16_t bps = 0, bytes_per_sample;
++	uint16 bps = 0, bytes_per_sample;
+ 
+ 	obuf = _TIFFmalloc(stripsize);
+ 	if (obuf == NULL)
+-- 
+2.7.4
+
