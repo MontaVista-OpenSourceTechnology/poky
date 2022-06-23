@@ -46,7 +46,7 @@ PACKAGECONFIG[mesh] = "--enable-mesh --enable-external-ell,--disable-mesh, json-
 PACKAGECONFIG[btpclient] = "--enable-btpclient --enable-external-ell,--disable-btpclient, ell"
 PACKAGECONFIG[udev] = "--enable-udev,--disable-udev,udev"
 
-PR .= "2"
+PR .= "3"
 SRC_URI = "${KERNELORG_MIRROR}/linux/bluetooth/bluez-${PV}.tar.xz \
            file://init \
            file://run-ptest \
@@ -57,6 +57,8 @@ SRC_URI = "${KERNELORG_MIRROR}/linux/bluetooth/bluez-${PV}.tar.xz \
            file://CVE-2021-3588.patch \
            file://CVE-2021-3658.patch \
            file://CVE-2022-0204.patch \
+           file://0001-CVE-2021-43400.patch \
+           file://0001-CVE-2021-41229.patch \
            "
 S = "${WORKDIR}/bluez-${PV}"
 
