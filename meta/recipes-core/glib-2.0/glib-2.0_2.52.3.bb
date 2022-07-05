@@ -1,7 +1,7 @@
 require glib.inc
 
 PE = "1"
-PR = "r3.1"
+PR = "r3.2"
 
 SHRT_VER = "${@oe.utils.trim_version("${PV}", 2)}"
 
@@ -22,6 +22,8 @@ SRC_URI = "${GNOME_MIRROR}/glib/${SHRT_VER}/glib-${PV}.tar.xz \
            file://CVE-2019-13012_p1.patch \
            file://CVE-2019-13012_p2.patch \
 	   file://0001-gdbus-Avoid-printing-null-strings.patch \
+	   file://CVE-2021-27218.patch \
+	   file://CVE-2021-27219.patch \
            "
 
 SRC_URI_append_class-native = " file://relocate-modules.patch"
