@@ -277,6 +277,7 @@ PACKAGECONFIG[capstone] = "--enable-capstone,--disable-capstone"
 # libnfs is currently provided by meta-kodi
 PACKAGECONFIG[libnfs] = "--enable-libnfs,--disable-libnfs,libnfs"
 PACKAGECONFIG[brlapi] = "--enable-brlapi,--disable-brlapi"
+PACKAGECONFIG[vde] = "--enable-vde,--disable-vde"
 
 INSANE_SKIP_${PN} = "arch"
 
