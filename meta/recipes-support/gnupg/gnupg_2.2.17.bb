@@ -8,12 +8,14 @@ DEPENDS = "npth libassuan libksba zlib bzip2 readline libgcrypt"
 
 inherit autotools gettext texinfo pkgconfig
 
+PR = "r1"
 UPSTREAM_CHECK_URI = "https://gnupg.org/download/index.html"
 SRC_URI = "${GNUPG_MIRROR}/${BPN}/${BPN}-${PV}.tar.bz2 \
            file://0001-Use-pkg-config-to-find-pth-instead-of-pth-config.patch \
            file://0002-use-pkgconfig-instead-of-npth-config.patch \
            file://0003-dirmngr-uses-libgpg-error.patch \
            file://0004-autogen.sh-fix-find-version-for-beta-checking.patch \
+           file://0001-CVE-2022-34903.patch \
            "
 
 SRC_URI[md5sum] = "1ba2d9b70c377f8e967742064c27a19c"
