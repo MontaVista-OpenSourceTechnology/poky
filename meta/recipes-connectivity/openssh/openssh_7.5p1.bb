@@ -12,7 +12,7 @@ LIC_FILES_CHKSUM = "file://LICENCE;md5=e326045657e842541d3f35aada442507"
 DEPENDS = "zlib openssl10"
 DEPENDS += "${@bb.utils.contains('DISTRO_FEATURES', 'pam', 'libpam', '', d)}"
 
-PR = "r1.6"
+PR = "r1.7"
 
 SRC_URI = "http://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-${PV}.tar.gz \
            file://sshd_config \
@@ -39,6 +39,7 @@ SRC_URI = "http://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-${PV}.tar
            file://0001-upstream-Have-progressmeter-force-an-update-at-the-b.patch \
 	   file://CVE-2020-14145.patch \
 	   file://0001-CVE-2016-20012.patch \
+           file://0001-CVE-2021-41617.patch \
            "
 
 PAM_SRC_URI = "file://sshd"
