@@ -5,7 +5,7 @@ LICENSE = "BSD-3-Clause"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=94caec5a51ef55ef711ee4e8b1c69e29"
 PE = "1"
 
-PR .= ".10"
+PR .= ".11"
 
 SRC_URI = "${SOURCEFORGE_MIRROR}/infozip/UnZip%206.x%20%28latest%29/UnZip%206.0/unzip60.tar.gz \
 	file://avoid-strip.patch \
@@ -25,6 +25,8 @@ SRC_URI = "${SOURCEFORGE_MIRROR}/infozip/UnZip%206.x%20%28latest%29/UnZip%206.0/
 	file://CVE-2019-13232_p1.patch \
 	file://CVE-2019-13232_p2.patch \
 	file://CVE-2019-13232_p3.patch \
+	file://CVE-2022-0529.patch \
+	file://CVE-2022-0530.patch \
 "
 UPSTREAM_VERSION_UNKNOWN = "1"
 
