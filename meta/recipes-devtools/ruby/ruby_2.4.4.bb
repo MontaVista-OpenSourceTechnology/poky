@@ -20,9 +20,10 @@ SRC_URI += " \
 	   file://0001-CVE-2021-41817.patch \
 	   file://0001-CVE-2021-41819.patch \
 	   file://0001-CVE-2019-8321-to-CVE-2019-8325.patch \
+           file://0001-CVE-2022-28739.patch \
            "
 
-PR = "r9.3"
+PR = "r9.4"
 
 SRC_URI[md5sum] = "d50e00ccc1c9cf450f837b92d3ed3e88"
 SRC_URI[sha256sum] = "254f1c1a79e4cc814d1e7320bc5bdd995dc57e08727d30a767664619a9c8ae5a"
