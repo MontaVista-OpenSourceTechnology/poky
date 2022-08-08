@@ -7,11 +7,14 @@ LICENSE = "BSD"
 LIC_FILES_CHKSUM = "file://COPYING;md5=f835cce8852481e4b2bbbdd23b5e47f3 \
                     file://src/netname.c;beginline=1;endline=27;md5=f8a8cd2cb25ac5aa16767364fb0e3c24"
 
+PR .= ".1"
+
 PROVIDES = "virtual/librpc"
 
 SRC_URI = "${SOURCEFORGE_MIRROR}/${BPN}/${BP}.tar.bz2 \
            file://libtirpc-1.0.4-rc1.patch \
            file://musl.patch \
+           file://CVE-2021-46828.patch \
            "
 
 SRC_URI[md5sum] = "f8403a10695348854e71d525c4db5931"
