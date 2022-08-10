@@ -24,7 +24,7 @@ HOMEPAGE = "http://www.rpm.org"
 LICENSE = "GPL-2.0"
 LIC_FILES_CHKSUM = "file://COPYING;md5=f5259151d26ff18e78023450a5ac8d96"
 
-PR = "r2"
+PR = "r3"
 SRC_URI = "git://github.com/rpm-software-management/rpm \
            file://0001-Do-not-add-an-unsatisfiable-dependency-when-building.patch \
            file://0001-Do-not-read-config-files-from-HOME.patch \
@@ -48,6 +48,7 @@ SRC_URI = "git://github.com/rpm-software-management/rpm \
            file://CVE-2017-7500_p1.patch \
            file://CVE-2017-7500_p2.patch \
            file://CVE-2021-20266.patch \
+           file://CVE-2021-3521.patch \
            "
 UPSTREAM_VERSION_UNKNOWN = "1"
 
