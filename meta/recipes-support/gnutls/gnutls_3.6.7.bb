@@ -17,7 +17,7 @@ DEPENDS_append_libc-musl = " argp-standalone"
 
 SHRT_VER = "${@d.getVar('PV').split('.')[0]}.${@d.getVar('PV').split('.')[1]}"
 
-PR .= ".3"
+PR .= ".4"
 
 SRC_URI = "https://www.gnupg.org/ftp/gcrypt/gnutls/v${SHRT_VER}/gnutls-${PV}.tar.xz \
            file://arm_eabi.patch \
@@ -26,6 +26,7 @@ SRC_URI = "https://www.gnupg.org/ftp/gcrypt/gnutls/v${SHRT_VER}/gnutls-${PV}.tar
            file://CVE-2020-13777.patch \
            file://CVE-2020-24659.patch \
            file://CVE-2021-20232.patch \
+           file://CVE-2022-2509.patch \
            "
 
 SRC_URI[md5sum] = "c4ac669c500df939d4fbfea722367929"
