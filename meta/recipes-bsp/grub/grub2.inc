@@ -33,6 +33,8 @@ SRC_URI = "https://ftp.gnu.org/gnu/grub/grub-${PV}.tar.gz \
 	   file://CVE-2021-3696.patch \
 	   file://CVE-2021-3697-1.patch \
 	   file://CVE-2021-3697-2.patch \
+	   file://CVE-2022-28734.patch \
+	   file://CVE-2022-28736.patch \
 "
 SRC_URI[md5sum] = "1116d1f60c840e6dbd67abbc99acb45d"
 SRC_URI[sha256sum] = "660ee136fbcee08858516ed4de2ad87068bfe1b6b8b37896ce3529ff054a726d"
