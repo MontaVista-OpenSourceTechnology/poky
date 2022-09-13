@@ -7,7 +7,7 @@ LIC_FILES_CHKSUM = "file://COPYRIGHT;md5=dba46507446198119bcde32a4feaab43"
 
 DEPENDS = "openssl libcap"
 
-PR .= ".8"
+PR .= ".9"
 
 SRC_URI = "https://ftp.isc.org/isc/bind9/${PV}/${BPN}-${PV}.tar.gz \
            file://conf.patch \
@@ -35,6 +35,8 @@ SRC_URI = "https://ftp.isc.org/isc/bind9/${PV}/${BPN}-${PV}.tar.gz \
            file://0001-CVE-2021-25214_3.patch \
            file://0001-CVE-2021-25219.patch \
            file://0001-CVE-2021-25220.patch \
+           file://0001-CVE-2018-5745_p1.patch \
+           file://0001-CVE-2018-5745_p2.patch \
            "
 
 UPSTREAM_CHECK_URI = "https://ftp.isc.org/isc/bind9/"
