@@ -31,7 +31,7 @@ PACKAGECONFIG[lz4] = "--with-lz4,--without-lz4,lz4,"
 
 EXTRA_OECONF += "--enable-largefile"
 
-PR = "r9.1"
+PR = "r10"
 SRC_URI = "http://libarchive.org/downloads/libarchive-${PV}.tar.gz \
            file://bug929.patch \
            file://CVE-2017-14166.patch \
@@ -48,6 +48,8 @@ SRC_URI = "http://libarchive.org/downloads/libarchive-${PV}.tar.gz \
            file://CVE-2019-18408.patch \
            file://CVE-2019-19221.patch \
            file://0001-CVE-2021-23177.patch \
+           file://0001-CVE-2021-31566-01.patch \
+           file://0001-CVE-2021-31566-02.patch \
           "
 
 SRC_URI[md5sum] = "4583bd6b2ebf7e0e8963d90879eb1b27"
