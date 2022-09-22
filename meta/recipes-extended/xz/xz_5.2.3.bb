@@ -21,7 +21,11 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=c475b6c7dca236740ace4bba553e8e1c \
                     file://COPYING.LGPLv2.1;md5=4fbd65380cdd255951079008b364516c \
                     file://lib/getopt.c;endline=23;md5=2069b0ee710572c03bb3114e4532cd84 "
 
-SRC_URI = "http://tukaani.org/xz/xz-${PV}.tar.gz"
+PR .= ".1"
+
+SRC_URI = "http://tukaani.org/xz/xz-${PV}.tar.gz \
+           file://0001-CVE-2022-1271.patch \
+           "
 SRC_URI[md5sum] = "ef68674fb47a8b8e741b34e429d86e9d"
 SRC_URI[sha256sum] = "71928b357d0a09a12a4b4c5fafca8c31c19b0e7d3b8ebb19622e96f26dbf28cb"
 

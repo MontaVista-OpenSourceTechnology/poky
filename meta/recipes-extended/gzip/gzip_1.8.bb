@@ -2,9 +2,13 @@ require gzip.inc
 
 LICENSE = "GPLv3+"
 
+PR .= ".1"
+
 SRC_URI = "${GNU_MIRROR}/gzip/${BP}.tar.gz \
             file://0001-gzip-port-zdiff-zless-to-Busybox.patch \
-            file://run-ptest"
+            file://run-ptest \
+            file://0001-CVE-2022-1271.patch \
+           "
 SRC_URI_append_class-target = " file://wrong-path-fix.patch"
 
 LIC_FILES_CHKSUM = "file://COPYING;md5=d32239bcb673463ab874e80d47fae504 \
