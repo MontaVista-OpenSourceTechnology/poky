@@ -23,13 +23,10 @@ SRC_URI += "\
     file://CVE-2021-33197.patch \
     file://0001-CVE-2021-33195.patch \
     file://0001-CVE-2021-33198.patch \
-    file://0001-CVE-2021-27918.patch \
-    file://0001-CVE-2021-41771.patch \
     file://CVE-2021-38297.patch \
     file://CVE-2022-23806.patch \
     file://CVE-2022-23772.patch \
     file://0001-CVE-2021-44716.patch \
-    file://0001-CVE-2021-39293.patch \
     file://0001-CVE-2022-24921.patch \
     file://0001-CVE-2022-23773.patch \
     file://CVE-2021-44717.patch \
