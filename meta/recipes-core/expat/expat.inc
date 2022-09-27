@@ -4,7 +4,7 @@ HOMEPAGE = "http://expat.sourceforge.net/"
 SECTION = "libs"
 LICENSE = "MIT"
 
-PR = "r2.8"
+PR = "r2.9"
 
 SRC_URI = "${SOURCEFORGE_MIRROR}/expat/expat-${PV}.tar.bz2 \
            file://autotools.patch \
@@ -21,6 +21,7 @@ SRC_URI = "${SOURCEFORGE_MIRROR}/expat/expat-${PV}.tar.bz2 \
 	   file://0001-CVE-2022-25314.patch \
            file://0001-CVE-2022-25313.patch \
            file://0001-CVE-2022-25315.patch \
+           file://0001-CVE-2022-40674.patch \
 	  "
 
 SRC_URI[md5sum] = "789e297f547980fc9ecc036f9a070d49"
