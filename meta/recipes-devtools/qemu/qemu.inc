@@ -93,11 +93,7 @@ SRC_URI = "https://download.qemu.org/${BPN}-${PV}.tar.xz \
            file://CVE-2020-27617.patch \
            file://CVE-2020-28916.patch \
            file://CVE-2021-3682.patch \
-           file://CVE-2021-3930.patch \
-	       file://0001-CVE-2021-3748.patch \
 	       file://0001-CVE-2022-1050.patch \
-	       file://0001-CVE-2021-4206.patch \
-	       file://0001-CVE-2021-4207.patch \
            file://CVE-2020-13253_1.patch \
            file://CVE-2020-13253_2.patch \
            file://CVE-2020-13253_3.patch \
