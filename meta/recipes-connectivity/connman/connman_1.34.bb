@@ -1,6 +1,6 @@
 require connman.inc
 
-PR .= ".1"
+PR .= ".2"
 SRC_URI  = "${KERNELORG_MIRROR}/linux/network/${BPN}/${BP}.tar.xz \
             file://0001-plugin.h-Change-visibility-to-default-for-debug-symb.patch \
             file://0001-firewall-nftables-fix-build-with-libnftnl-1.0.7.patch \
@@ -11,6 +11,8 @@ SRC_URI  = "${KERNELORG_MIRROR}/linux/network/${BPN}/${BP}.tar.xz \
             file://CVE-2017-12865.patch \
             file://0001-CVE-2022-23096-CVE-2022-23097-connman.patch \
 	    file://0001-CVE-2022-23098.patch \
+            file://0001-CVE-2022-32292.patch \
+            file://0001-CVE-2022-32293.patch \
             "
 SRC_URI_append_libc-musl = " file://0002-resolve-musl-does-not-implement-res_ninit.patch \
                              "
