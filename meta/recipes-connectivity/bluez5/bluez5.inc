@@ -42,7 +42,7 @@ PACKAGECONFIG[tools] = "--enable-tools,--disable-tools"
 PACKAGECONFIG[threads] = "--enable-threads,--disable-threads"
 PACKAGECONFIG[deprecated] = "--enable-deprecated,--disable-deprecated"
 
-PR .= "6"
+PR .= "5"
 
 SRC_URI = "\
     ${KERNELORG_MIRROR}/linux/bluetooth/bluez-${PV}.tar.xz \
@@ -62,18 +62,6 @@ SRC_URI = "\
     file://0001-CVE-2022-0204.patch \
     file://0001-CVE-2019-8921.patch \
     file://0001-CVE-2021-41229.patch \
-    file://0001-CVE-2021-43400.patch \
-    file://0002-CVE-2021-43400.patch \
-    file://0003-CVE-2021-43400.patch \
-    file://0004-CVE-2021-43400.patch \
-    file://0005-CVE-2021-43400.patch \
-    file://0006-CVE-2021-43400.patch \
-    file://0007-CVE-2021-43400.patch \
-    file://0008-CVE-2021-43400.patch \
-    file://0009-CVE-2021-43400.patch \
-    file://0010-CVE-2021-43400.patch \
-    file://0011-CVE-2021-43400.patch \
-    file://0012-CVE-2021-43400.patch \
 "
 S = "${WORKDIR}/bluez-${PV}"
 
