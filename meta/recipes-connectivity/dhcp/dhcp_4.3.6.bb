@@ -1,5 +1,6 @@
 require dhcp.inc
 
+PR .= "2"
 SRC_URI += "file://0001-define-macro-_PATH_DHCPD_CONF-and-_PATH_DHCLIENT_CON.patch \
             file://0002-dhclient-dbus.patch \
             file://0003-link-with-lcrypto.patch \
@@ -14,6 +15,8 @@ SRC_URI += "file://0001-define-macro-_PATH_DHCPD_CONF-and-_PATH_DHCLIENT_CON.pat
             file://0012-dhcp-correct-the-intention-for-xml2-lib-search.patch \
             file://CVE-2017-3144.patch \
             file://0001-CVE-2021-25217.patch \
+            file://CVE-2022-2928.patch \
+            file://CVE-2022-2929.patch \
            "
 
 SRC_URI[md5sum] = "afa6e9b3eb7539ea048421a82c668adc"
