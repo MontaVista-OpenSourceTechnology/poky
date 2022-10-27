@@ -3,7 +3,7 @@ inherit gettext
 
 BBCLASSEXTEND = "native nativesdk"
 
-PR = "r5"
+PR = "r6"
 
 SRC_URI += "file://disable_tests.patch \
             file://Fix-hanging-issue-in-_XReply.patch \
@@ -19,6 +19,8 @@ SRC_URI += "file://disable_tests.patch \
             file://CVE-2020-14344-p7.patch \
             file://CVE-2020-14363.patch \
 	    file://CVE-2021-31535.patch \
+            file://CVE-2022-3554.patch \
+            file://CVE-2022-3555.patch \
            "
 
 do_configure_append () {
