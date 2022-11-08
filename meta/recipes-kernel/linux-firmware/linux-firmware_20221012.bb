@@ -1099,3 +1099,9 @@ python populate_packages:prepend () {
 # Firmware files are generally not ran on the CPU, so they can be
 # allarch despite being architecture specific
 INSANE_SKIP = "arch"
+
+# Don't warn about already stripped files
+INSANE_SKIP:${PN} = "already-stripped"
+
+# No need to put firmware into the sysroot
+SYSROOT_DIRS_IGNORE += "${nonarch_base_libdir}/firmware"
