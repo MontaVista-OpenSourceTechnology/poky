@@ -3,7 +3,7 @@ require systemd.inc
 PROVIDES = "udev"
 
 PE = "1"
-PR .= ".1"
+PR .= ".2"
 
 DEPENDS = "intltool-native gperf-native libcap util-linux"
 
@@ -45,6 +45,7 @@ SRC_URI += "file://touchscreen.rules \
            file://CVE-2019-6454.patch \
            file://sd-bus-if-we-receive-an-invalid-dbus-message-ignore-.patch \
            file://CVE-2020-13776.patch \
+           file://CVE-2022-2526.patch \
            "
 
 # patches made for musl are only applied on TCLIBC is musl
