@@ -1,4 +1,7 @@
 require dpkg.inc
+
+PR .= ".1"
+
 LIC_FILES_CHKSUM = "file://COPYING;md5=751419260aa954499f7abaabaa882bbe"
 
 SRC_URI = "http://snapshot.debian.org/archive/debian/20170518T093838Z/pool/main/d/dpkg/dpkg_1.18.24.tar.xz \
@@ -14,6 +17,7 @@ SRC_URI = "http://snapshot.debian.org/archive/debian/20170518T093838Z/pool/main/
            file://0006-add-musleabi-to-known-target-tripets.patch \
            file://0007-dpkg-deb-build.c-Remove-usage-of-clamp-mtime-in-tar.patch \
            file://0001-dpkg-Support-muslx32-build.patch \
+           file://CVE-2022-1664.patch \
            "
 SRC_URI_append_class-native = " file://glibc2.5-sync_file_range.patch "
 
