@@ -11,7 +11,7 @@ LIC_FILES_CHKSUM = "file://LICENSE;md5=f475368924827d06d4b416111c8bdb77"
 export DIRS = "crypto ssl apps engines"
 export OE_LDFLAGS="${LDFLAGS}"
 
-PR = "r11"
+PR = "r12"
 SRC_URI += "file://find.pl;subdir=openssl-${PV}/util/ \
            file://run-ptest \
            file://openssl-c_rehash.sh \
@@ -56,6 +56,19 @@ SRC_URI += "file://find.pl;subdir=openssl-${PV}/util/ \
            file://CVE-2022-0778.patch \
 	   file://CVE-2022-1292.patch \
            file://CVE-2022-2068.patch \
+           file://CVE-2021-3712-1.patch \
+           file://CVE-2021-3712-2.patch \
+           file://CVE-2021-3712-3.patch \
+           file://CVE-2021-3712-4.patch \
+           file://CVE-2021-3712-5.patch \
+           file://CVE-2021-3712-6.patch \
+           file://CVE-2021-3712-7.patch \
+           file://CVE-2021-3712-8.patch \
+           file://CVE-2021-3712-9.patch \
+           file://CVE-2021-3712-10.patch \
+           file://CVE-2021-3712-11.patch \
+           file://CVE-2021-3712-12.patch \
+           file://CVE-2021-3712-13.patch \
            "
 
 SRC_URI_append_class-target = "\
