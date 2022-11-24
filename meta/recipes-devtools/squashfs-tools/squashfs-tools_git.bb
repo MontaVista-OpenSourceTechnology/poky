@@ -10,13 +10,17 @@ DEPENDS = "attr zlib xz lzo lz4"
 
 PV = "4.3+gitr${SRCPV}"
 SRCREV = "9c1db6d13a51a2e009f0027ef336ce03624eac0d"
-PR .= ".1"
+PR .= ".2"
 SRC_URI = "git://github.com/plougher/squashfs-tools.git;protocol=https \
            http://downloads.sourceforge.net/sevenzip/lzma465.tar.bz2;name=lzma \
            file://0001-mksquashfs.c-get-inline-functions-work-with-C99.patch;striplevel=2 \
            file://squashfs-tools-4.3-sysmacros.patch;striplevel=2 \
            file://fix-compat.patch \
            file://0001-CVE-2021-40153.patch \
+           file://CVE-2021-41072-1.patch \
+           file://CVE-2021-41072-2.patch \
+           file://CVE-2021-41072-3.patch \
+           file://CVE-2021-41072-4.patch \
 "
 UPSTREAM_VERSION_UNKNOWN = "1"
 SRC_URI[lzma.md5sum] = "29d5ffd03a5a3e51aef6a74e9eafb759"
