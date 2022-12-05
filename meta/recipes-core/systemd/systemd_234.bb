@@ -45,6 +45,7 @@ SRC_URI = "git://github.com/systemd/systemd.git;protocol=git \
            file://0001-core-evaluate-presets-after-generators-have-run-6526.patch \
            file://0001-main-skip-many-initialization-steps-when-running-in-.patch \
            file://CVE-2022-2526.patch \
+           file://0001-systemd-failed-to-build-with-dns_stream-error.patch \
            "
 SRC_URI_append_qemuall = " file://0001-core-device.c-Change-the-default-device-timeout-to-2.patch"
 
