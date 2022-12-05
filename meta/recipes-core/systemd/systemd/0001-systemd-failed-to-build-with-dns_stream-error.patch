@@ -1,0 +1,34 @@
+From c9fd8572881b7125befeff9da771d81e11dee0bb Mon Sep 17 00:00:00 2001
+From: Vivek Kumbhar <vkumbhar@mvista.com>
+Date: Mon, 5 Dec 2022 14:08:57 +0000
+Subject: [PATCH] systemd failed to build with dns_stream error
+
+---
+ src/resolve/resolved-dns-stream.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/resolve/resolved-dns-stream.c b/src/resolve/resolved-dns-stream.c
+index 87340b1ded..2dea55c657 100644
+--- a/src/resolve/resolved-dns-stream.c
++++ b/src/resolve/resolved-dns-stream.c
+@@ -49,6 +49,8 @@ static int dns_stream_update_io(DnsStream *s) {
+         return sd_event_source_set_io_events(s->io_event_source, f);
+ }
+ 
++DEFINE_TRIVIAL_CLEANUP_FUNC(DnsStream*, dns_stream_unref);
++
+ static int dns_stream_complete(DnsStream *s, int error) {
+         _cleanup_(dns_stream_unrefp) _unused_ DnsStream *ref = dns_stream_ref(s); /* Protect stream while we process it */
+ 
+@@ -348,8 +350,6 @@ DnsStream *dns_stream_unref(DnsStream *s) {
+         return mfree(s);
+ }
+ 
+-DEFINE_TRIVIAL_CLEANUP_FUNC(DnsStream*, dns_stream_unref);
+-
+ DnsStream *dns_stream_ref(DnsStream *s) {
+         if (!s)
+                 return NULL;
+-- 
+2.18.2
+
