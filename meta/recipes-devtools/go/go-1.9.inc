@@ -62,6 +62,7 @@ SRC_URI += "\
         file://CVE-2022-41715.patch \
         file://CVE-2022-2880.patch \
         file://CVE-2021-33197.patch \
+	file://CVE-2020-14040.patch \
 "
 SRC_URI_append_libc-musl = " file://set-external-linker.patch"
 
