@@ -1,6 +1,6 @@
 require sudo.inc
 
-PR = "r2.2"
+PR = "r2.3"
 
 SRC_URI = "http://ftp.sudo.ws/sudo/dist/sudo-${PV}.tar.gz \
            ${@bb.utils.contains('DISTRO_FEATURES', 'pam', '${PAM_SRC_URI}', '', d)} \
@@ -14,6 +14,7 @@ SRC_URI = "http://ftp.sudo.ws/sudo/dist/sudo-${PV}.tar.gz \
            file://CVE-2021-3156_3.patch \
            file://CVE-2021-3156_4.patch \
            file://CVE-2021-3156_5.patch \
+           file://0001-Fix-CVE-2022-43995-potential-heap-overflow-for-passw.patch \
            "
 
 PAM_SRC_URI = "file://sudo.pam"
