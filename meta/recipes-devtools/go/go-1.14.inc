@@ -7,7 +7,7 @@ FILESEXTRAPATHS_prepend := "${FILE_DIRNAME}/go-${GO_BASEVERSION}:"
 
 LIC_FILES_CHKSUM = "file://LICENSE;md5=5d4950ecb7b26d2c5e4e7b4e0dd74707"
 
-PR .= "8"
+PR .= "9"
 
 SRC_URI += "\
     file://0001-allow-CC-and-CXX-to-have-multiple-words.patch \
@@ -21,13 +21,9 @@ SRC_URI += "\
     file://CVE-2021-34558.patch \
     file://CVE-2021-33196.patch \
     file://CVE-2021-33197.patch \
-    file://0001-CVE-2021-33195.patch \
-    file://0001-CVE-2021-33198.patch \
     file://CVE-2021-38297.patch \
     file://CVE-2022-23806.patch \
     file://CVE-2022-23772.patch \
-    file://0001-CVE-2021-44716.patch \
-    file://0001-CVE-2022-24921.patch \
     file://0001-CVE-2022-23773.patch \
     file://CVE-2021-44717.patch \
     file://CVE-2022-24675.patch \
