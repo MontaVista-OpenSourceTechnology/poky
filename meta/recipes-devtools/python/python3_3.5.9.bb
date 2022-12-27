@@ -19,7 +19,7 @@ file://tweak-MULTIARCH-for-powerpc-linux-gnuspe.patch \
 file://support_SOURCE_DATE_EPOCH_in_py_compile.patch \
 ${DISTRO_SRC_URI} \
 "
-PR .= ".3"
+PR .= ".4"
 SRC_URI += "\
             file://03-fix-tkinter-detection.patch \
             file://avoid_warning_about_tkinter.patch \
@@ -51,6 +51,7 @@ SRC_URI += "\
 	    file://0001-CVE-2015-20107.patch \
 	    file://0001-CVE-2022-0391.patch \
             file://0001-CVE-2021-3733.patch \
+            file://CVE-2022-45061.patch \
            "
 
 SRC_URI[md5sum] = "ef7f82485e83c7f8f8bcb920a9c2457b"
