@@ -69,6 +69,7 @@ SRC_URI += "file://find.pl;subdir=openssl-${PV}/util/ \
            file://CVE-2021-3712-11.patch \
            file://CVE-2021-3712-12.patch \
            file://CVE-2021-3712-13.patch \
+           file://CVE-2020-1971.patch \
            "
 
 SRC_URI_append_class-target = "\
