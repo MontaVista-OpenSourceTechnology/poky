@@ -10,7 +10,7 @@ SECTION = "base/shell"
 
 inherit useradd pkgconfig autotools perlnative update-rc.d update-alternatives qemu systemd ptest gettext bash-completion manpages
 
-PR .= ".1"
+PR .= ".2"
 SRC_URI = "git://github.com/systemd/systemd.git;protocol=git \
            file://touchscreen.rules \
            file://00-create-volatile.conf \
@@ -46,6 +46,7 @@ SRC_URI = "git://github.com/systemd/systemd.git;protocol=git \
            file://0001-main-skip-many-initialization-steps-when-running-in-.patch \
            file://CVE-2022-2526.patch \
            file://0001-systemd-failed-to-build-with-dns_stream-error.patch \
+           file://CVE-2022-3821.patch \
            "
 SRC_URI_append_qemuall = " file://0001-core-device.c-Change-the-default-device-timeout-to-2.patch"
 
