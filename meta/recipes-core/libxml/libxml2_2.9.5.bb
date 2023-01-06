@@ -37,7 +37,6 @@ SRC_URI = "http://www.xmlsoft.org/sources/libxml2-${PV}.tar.gz;name=libtar \
 	   file://0001-CVE-2022-23308.patch \
            file://0001-CVE-2016-3709.patch \
            file://CVE-2022-29824.patch \
-           file://CVE-2022-40303.patch \
            "
 
 SRC_URI[libtar.md5sum] = "5ce0da9bdaa267b40c4ca36d35363b8b"
