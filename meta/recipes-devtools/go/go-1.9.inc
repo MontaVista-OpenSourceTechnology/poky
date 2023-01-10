@@ -64,6 +64,7 @@ SRC_URI += "\
         file://CVE-2021-33197.patch \
         file://CVE-2020-14040.patch \
         file://CVE-2022-32148.patch \
+        file://0001-CGX-2.4-go-native-failed-to-build.patch \
 "
 SRC_URI_append_libc-musl = " file://set-external-linker.patch"
 

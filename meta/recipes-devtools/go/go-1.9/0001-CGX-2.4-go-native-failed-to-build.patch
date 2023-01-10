@@ -1,0 +1,34 @@
+From ebe05aa2c78381816b07784cf774007d5c9d2d9f Mon Sep 17 00:00:00 2001
+From: Vivek Kumbhar <vkumbhar@mvista.com>
+Date: Tue, 10 Jan 2023 04:51:54 +0000
+Subject: [PATCH] CGX 2.4 go-native failed to build
+
+---
+ src/net/http/httputil/reverseproxy.go | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/src/net/http/httputil/reverseproxy.go b/src/net/http/httputil/reverseproxy.go
+index cc282e8..f8c110c 100644
+--- a/src/net/http/httputil/reverseproxy.go
++++ b/src/net/http/httputil/reverseproxy.go
+@@ -16,6 +16,8 @@ import (
+ 	"strings"
+ 	"sync"
+ 	"time"
++	
++	"golang_org/x/net/lex/httplex"
+ )
+ 
+ // onExitFlushLoop is a callback set by tests to detect the state of the
+@@ -196,7 +198,7 @@ func (p *ReverseProxy) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
+ 	// advertise that unless the incoming client request thought it was worth
+ 	// mentioning.) Note that we look at req.Header, not outreq.Header, since
+ 	// the latter has passed through removeConnectionHeaders.
+-	if httpguts.HeaderValuesContainsToken(req.Header["Te"], "trailers") {
++	if httplex.HeaderValuesContainsToken(req.Header["Te"], "trailers") {
+ 		outreq.Header.Set("Te", "trailers")
+ 	}
+ 
+-- 
+2.18.2
+
