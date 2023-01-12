@@ -16,7 +16,6 @@ SRC_URI = "https://ftp.pcre.org/pub/pcre/pcre2-${PV}.tar.bz2 \
            file://libpcre2-CVE-2017-8786.patch \
            file://libpcre2-CVE-2017-7186.patch \
            file://0001-CVE-2022-1586.patch \
-           file://CVE-2019-20838-CVE-2020-14155.patch \
 "
 
 SRC_URI[md5sum] = "b2cd00ca7e24049040099b0a46bb3649"
