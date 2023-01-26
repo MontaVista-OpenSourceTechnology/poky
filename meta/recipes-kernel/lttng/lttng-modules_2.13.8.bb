@@ -9,11 +9,8 @@ inherit module
 
 include lttng-platforms.inc
 
-PR .= ".1"
-
 SRC_URI = "https://lttng.org/files/${BPN}/${BPN}-${PV}.tar.bz2 \
            file://0009-Rename-genhd-wrapper-to-blkdev.patch \
-           file://fix-jbd2-use-the-correct-print-format.patch \
            file://fix-jbd2-use-the-correct-print-format-v5.10.163.patch \
            file://fix-jbd2-upper-bound-for-v5.10.163.patch \
            "
