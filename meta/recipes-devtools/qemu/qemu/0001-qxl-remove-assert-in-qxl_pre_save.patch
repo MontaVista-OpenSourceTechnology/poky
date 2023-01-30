@@ -1,0 +1,37 @@
+From 827a5c4a687235b6389e22246cd1e678f5434f67 Mon Sep 17 00:00:00 2001
+From: Vijay Anusuri <vanusuri@mvista.com>
+Date: Mon, 30 Jan 2023 05:15:30 +0000
+Subject: [PATCH] qxl: remove assert in qxl_pre_save.
+
+Since commit 551dbd0 ("migration: check pre_save return in
+vmstate_save_state") the pre_save hook can fail.  So lets finally
+use that to drop the guest-triggerable assert in qxl_pre_save().
+
+Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
+Reviewed-by: Marc-André Lureau <marcandre.lureau@redhat.com>
+Message-Id: <20210721093347.338536-2-kraxel@redhat.com>
+
+Upstream-Status: Backport [https://github.com/qemu/qemu/commit/39b8a183e2f399d19f3ab6a3db44c7c74774dabd]
+Signed-off-by: Vijay Anusuri <vanusuri@mvista.com>
+---
+ hw/display/qxl.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/hw/display/qxl.c b/hw/display/qxl.c
+index a029f5ef..72484abf 100644
+--- a/hw/display/qxl.c
++++ b/hw/display/qxl.c
+@@ -2254,7 +2254,9 @@ static void qxl_pre_save(void *opaque)
+     } else {
+         d->last_release_offset = (uint8_t *)d->last_release - ram_start;
+     }
+-    assert(d->last_release_offset < d->vga.vram_size);
++    if (d->last_release_offset < d->vga.vram_size) {
++        return 1;
++    }
+ }
+ 
+ static int qxl_pre_load(void *opaque)
+-- 
+2.18.2
+

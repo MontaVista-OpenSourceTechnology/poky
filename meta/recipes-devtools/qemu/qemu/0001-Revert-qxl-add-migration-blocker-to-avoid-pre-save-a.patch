@@ -1,0 +1,92 @@
+From 601aac1a55580a089c8365264287b5cc4cef759e Mon Sep 17 00:00:00 2001
+From: Vijay Anusuri <vanusuri@mvista.com>
+Date: Mon, 30 Jan 2023 05:34:14 +0000
+Subject: [PATCH] Revert "qxl: add migration blocker to avoid pre-save assert"
+
+This reverts commit 86dbcdd.
+
+The pre-save assert is gone now, so the migration blocker
+is not needed any more.
+
+Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
+Reviewed-by: Marc-André Lureau <marcandre.lureau@redhat.com>
+Message-Id: <20210721093347.338536-3-kraxel@redhat.com>
+
+Upstream-Status: Backport [https://github.com/qemu/qemu/commit/dcc5fc2a3adb9ec4b196f82ebe4079bc88f3c91e]
+Signed-off-by: Vijay Anusuri <vanusuri@mvista.com>
+---
+ hw/display/qxl.c | 31 -------------------------------
+ hw/display/qxl.h |  1 -
+ 2 files changed, 32 deletions(-)
+
+diff --git a/hw/display/qxl.c b/hw/display/qxl.c
+index 72484abf..f304e429 100644
+--- a/hw/display/qxl.c
++++ b/hw/display/qxl.c
+@@ -26,7 +26,6 @@
+ #include "qemu/queue.h"
+ #include "qemu/atomic.h"
+ #include "sysemu/sysemu.h"
+-#include "migration/blocker.h"
+ #include "trace.h"
+ 
+ #include "qxl.h"
+@@ -677,30 +676,6 @@ static int interface_get_command(QXLInstance *sin, struct QXLCommandExt *ext)
+         qxl->guest_primary.commands++;
+         qxl_track_command(qxl, ext);
+         qxl_log_command(qxl, "cmd", ext);
+-        {
+-            /*
+-             * Windows 8 drivers place qxl commands in the vram
+-             * (instead of the ram) bar.  We can't live migrate such a
+-             * guest, so add a migration blocker in case we detect
+-             * this, to avoid triggering the assert in pre_save().
+-             *
+-             * https://cgit.freedesktop.org/spice/win32/qxl-wddm-dod/commit/?id=f6e099db39e7d0787f294d5fd0dce328b5210faa
+-             */
+-            void *msg = qxl_phys2virt(qxl, ext->cmd.data, ext->group_id);
+-            if (msg != NULL && (
+-                    msg < (void *)qxl->vga.vram_ptr ||
+-                    msg > ((void *)qxl->vga.vram_ptr + qxl->vga.vram_size))) {
+-                if (!qxl->migration_blocker) {
+-                    Error *local_err = NULL;
+-                    error_setg(&qxl->migration_blocker,
+-                               "qxl: guest bug: command not in ram bar");
+-                    migrate_add_blocker(qxl->migration_blocker, &local_err);
+-                    if (local_err) {
+-                        error_report_err(local_err);
+-                    }
+-                }
+-            }
+-        }
+         trace_qxl_ring_command_get(qxl->id, qxl_mode_to_string(qxl->mode));
+         return true;
+     default:
+@@ -1291,12 +1266,6 @@ static void qxl_hard_reset(PCIQXLDevice *d, int loadvm)
+     qemu_spice_create_host_memslot(&d->ssd);
+     qxl_soft_reset(d);
+ 
+-    if (d->migration_blocker) {
+-        migrate_del_blocker(d->migration_blocker);
+-        error_free(d->migration_blocker);
+-        d->migration_blocker = NULL;
+-    }
+-
+     if (startstop) {
+         qemu_spice_display_start();
+     }
+diff --git a/hw/display/qxl.h b/hw/display/qxl.h
+index e4e32622..f757f973 100644
+--- a/hw/display/qxl.h
++++ b/hw/display/qxl.h
+@@ -40,7 +40,6 @@ typedef struct PCIQXLDevice {
+     uint32_t           cmdlog;
+ 
+     uint32_t           guest_bug;
+-    Error              *migration_blocker;
+ 
+     enum qxl_mode      mode;
+     uint32_t           cmdflags;
+-- 
+2.18.2
+
