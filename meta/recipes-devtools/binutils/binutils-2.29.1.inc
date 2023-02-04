@@ -94,10 +94,14 @@ SRC_URI = "\
      file://CVE-2019-9074.patch \
      file://CVE-2019-9075.patch \
      file://CVE-2019-9077.patch \
+     file://0001-Enhance-objdump-s-disassemble-switch-so-that-it-can-.patch \
+     file://CVE-2018-9138_p1.patch \
+     file://CVE-2018-9138_p2.patch \
+     file://CVE-2019-9070.patch \
 "
 S  = "${WORKDIR}/git"
 
-PR .= ".13"
+PR .= ".14"
 
 do_configure_prepend () {
         rm -rf ${S}/gdb ${S}/libdecnumber ${S}/readline ${S}/sim

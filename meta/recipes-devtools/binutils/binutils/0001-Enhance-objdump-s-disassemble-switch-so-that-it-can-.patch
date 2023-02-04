@@ -1,0 +1,404 @@
+From 9e428950518001616ea84eaa4383457cd8d9bb6e Mon Sep 17 00:00:00 2001
+From: Masatake Yamato <yamato@redhat.com>
+Date: Wed, 7 Nov 2018 18:07:36 +0000
+Subject: [PATCH 1/4] Enhance objdump's --disassemble switch so that it can now
+ take an optional parameter, specifying the starting symbol for disassembly.
+ Disassembly will continue from this symbol up to the next symbol.
+
+	* objdump.c (long_options): Have the --disassemble option take an
+	optional argument.
+	(usage): Add description for the `symbol' argument to the
+	--disassemble option.
+	(disasm_sym): New file private variable.
+	(struct objdump_disasm_info): New field `symbol'.
+	(disassemble_section): Introduce `do_print' local variable
+	to control whether objdump displays the result of disassembling
+	for a symbol or not.
+	(main): Set `symbol' file private variable if the option argument
+	for the --disassemble option is given.
+	* doc/binutils.texi (objdump): Add description for the option
+	argument.
+	* NEWS: Mention the new feature.
+	* testsuite/binutils-all/objdump.exp: Add tests of the -d and
+	--disassemble=<symbol> options.
+	* testsuite/binutils-all/bintest.s: Add more symbols and code.
+	* testsuite/binutils-all/readelf.s: Update expected output.
+	* testsuite/binutils-all/readelf.ss-64: Likewise.
+	* testsuite/binutils-all/readelf.ss-mips: Likewise.
+	* testsuite/binutils-all/readelf.ss-tmips: Likewise.
+
+Upstream-Status: Backport [https://sourceware.org/git/?p=binutils-gdb.git;a=commit;h=d3def5d73eb9d8295ca7b11d130b17a815151951]
+
+Signed-off-by: E V Ravi <reluri@mvista.com>
+
+%% original patch: 0001-Enhance-objdump-s-disassemble-switch-so-that-it-can-.patch
+---
+ binutils/NEWS                                    |  4 ++
+ binutils/doc/binutils.texi                       | 12 ++--
+ binutils/objdump.c                               | 37 +++++++++--
+ binutils/testsuite/binutils-all/bintest.s        |  8 +++
+ binutils/testsuite/binutils-all/objcopy.exp      |  1 +
+ binutils/testsuite/binutils-all/objdump.exp      | 79 ++++++++++++++++++++++++
+ binutils/testsuite/binutils-all/readelf.s        |  5 +-
+ binutils/testsuite/binutils-all/readelf.ss       | 12 ++--
+ binutils/testsuite/binutils-all/readelf.ss-64    |  1 +
+ binutils/testsuite/binutils-all/readelf.ss-mips  |  4 +-
+ binutils/testsuite/binutils-all/readelf.ss-tmips |  4 +-
+ 11 files changed, 148 insertions(+), 19 deletions(-)
+
+diff --git a/binutils/NEWS b/binutils/NEWS
+index 23c63ef..a1473c8 100644
+--- a/binutils/NEWS
++++ b/binutils/NEWS
+@@ -1,5 +1,9 @@
+ -*- text -*-
+ 
++* Objdump's --disassemble option can now take a parameter, specifying the
++  starting symbol for disassembly.  Disassembly will continue from this
++  symbol up to the next symbol.
++
+ Changes in 2.29:
+ 
+ * The MIPS port now supports microMIPS eXtended Physical Addressing (XPA)
+diff --git a/binutils/doc/binutils.texi b/binutils/doc/binutils.texi
+index a2a670a..d33d5c9 100644
+--- a/binutils/doc/binutils.texi
++++ b/binutils/doc/binutils.texi
+@@ -2050,7 +2050,7 @@ ld(1), objdump(1), and the Info entries for @file{binutils}.
+ objdump [@option{-a}|@option{--archive-headers}]
+         [@option{-b} @var{bfdname}|@option{--target=@var{bfdname}}]
+         [@option{-C}|@option{--demangle}[=@var{style}] ]
+-        [@option{-d}|@option{--disassemble}]
++        [@option{-d}|@option{--disassemble}[=@var{symbol}]]
+         [@option{-D}|@option{--disassemble-all}]
+         [@option{-z}|@option{--disassemble-zeroes}]
+         [@option{-EB}|@option{-EL}|@option{--endian=}@{big | little @}]
+@@ -2179,11 +2179,15 @@ with ctags tool.
+ 
+ @item -d
+ @itemx --disassemble
++@itemx --disassemble=@var{symbol}
+ @cindex disassembling object code
+ @cindex machine instructions
+-Display the assembler mnemonics for the machine instructions from
+-@var{objfile}.  This option only disassembles those sections which are
+-expected to contain instructions.
++Display the assembler mnemonics for the machine instructions from the
++input file.  This option only disassembles those sections which are 
++expected to contain instructions.  If the optional @var{symbol}
++argument is given, then display the assembler mnemonics only from
++@var{symbol} up to next symbol.  If there are no matches for
++@var{symbol} then nothing will be displayed.
+ 
+ @item -D
+ @itemx --disassemble-all
+diff --git a/binutils/objdump.c b/binutils/objdump.c
+index 1e5f6ca..c3b6e67 100644
+--- a/binutils/objdump.c
++++ b/binutils/objdump.c
+@@ -118,6 +118,7 @@ static const char *prefix;		/* --prefix */
+ static int prefix_strip;		/* --prefix-strip */
+ static size_t prefix_length;
+ static bfd_boolean unwind_inlines;	/* --inlines.  */
++static const char * disasm_sym;		/* Disassembly start symbol.  */
+ 
+ /* A structure to record the sections mentioned in -j switches.  */
+ struct only
+@@ -145,6 +146,7 @@ struct objdump_disasm_info
+   long               dynrelcount;
+   disassembler_ftype disassemble_fn;
+   arelent *          reloc;
++  const char *       symbol;
+ };
+ 
+ /* Architecture to disassemble for, or default if NULL.  */
+@@ -209,6 +211,7 @@ usage (FILE *stream, int status)
+   -x, --all-headers        Display the contents of all headers\n\
+   -d, --disassemble        Display assembler contents of executable sections\n\
+   -D, --disassemble-all    Display assembler contents of all sections\n\
++      --disassemble=<sym>  Display assembler contents from <sym>\n\
+   -S, --source             Intermix source code with disassembly\n\
+   -s, --full-contents      Display the full contents of all sections requested\n\
+   -g, --debugging          Display debug information in object file\n\
+@@ -313,7 +316,7 @@ static struct option long_options[]=
+   {"debugging", no_argument, NULL, 'g'},
+   {"debugging-tags", no_argument, NULL, 'e'},
+   {"demangle", optional_argument, NULL, 'C'},
+-  {"disassemble", no_argument, NULL, 'd'},
++  {"disassemble", optional_argument, NULL, 'd'},
+   {"disassemble-all", no_argument, NULL, 'D'},
+   {"disassembler-options", required_argument, NULL, 'M'},
+   {"disassemble-zeroes", no_argument, NULL, 'z'},
+@@ -2224,6 +2227,7 @@ disassemble_section (bfd *abfd, asection *section, void *inf)
+       asymbol *nextsym;
+       bfd_vma nextstop_offset;
+       bfd_boolean insns;
++      bfd_boolean do_print = TRUE;
+ 
+       addr = section->vma + addr_offset;
+       addr = ((addr & ((sign_adjust << 1) - 1)) ^ sign_adjust) - sign_adjust;
+@@ -2249,7 +2253,23 @@ disassemble_section (bfd *abfd, asection *section, void *inf)
+ 	  pinfo->symtab_pos = -1;
+ 	}
+ 
+-      if (! prefix_addresses)
++      if (sym && paux->symbol)
++	{
++	  const char *name = bfd_asymbol_name (sym);
++	  char *alloc = NULL;
++
++	  if (do_demangle && name[0] != '\0')
++	    {
++	      /* Demangle the name.  */
++	      alloc = bfd_demangle (abfd, name, DMGL_ANSI | DMGL_PARAMS);
++	      if (alloc != NULL)
++		name = alloc;
++	    }
++	  do_print = streq (name, paux->symbol);
++	  free (alloc);
++	}
++
++      if (! prefix_addresses && do_print)
+ 	{
+ 	  pinfo->fprintf_func (pinfo->stream, "\n");
+ 	  objdump_print_addr_with_sym (abfd, section, sym, addr,
+@@ -2310,9 +2330,14 @@ disassemble_section (bfd *abfd, asection *section, void *inf)
+       else
+ 	insns = FALSE;
+ 
+-      disassemble_bytes (pinfo, paux->disassemble_fn, insns, data,
+-			 addr_offset, nextstop_offset,
+-			 rel_offset, &rel_pp, rel_ppend);
++      if (do_print)
++	{
++	  disassemble_bytes (pinfo, paux->disassemble_fn, insns, data,
++			     addr_offset, nextstop_offset,
++			     rel_offset, &rel_pp, rel_ppend);
++	  if (paux->symbol)
++	    break;
++	}
+ 
+       addr_offset = nextstop_offset;
+       sym = nextsym;
+@@ -2365,6 +2390,7 @@ disassemble_data (bfd *abfd)
+   aux.dynrelbuf = NULL;
+   aux.dynrelcount = 0;
+   aux.reloc = NULL;
++  aux.symbol = disasm_sym;
+ 
+   disasm_info.print_address_func = objdump_print_address;
+   disasm_info.symbol_at_address_func = objdump_symbol_at_address;
+@@ -3918,6 +3944,7 @@ main (int argc, char **argv)
+ 	case 'd':
+ 	  disassemble = TRUE;
+ 	  seenflag = TRUE;
++	  disasm_sym = optarg;
+ 	  break;
+ 	case 'z':
+ 	  disassemble_zeroes = TRUE;
+diff --git a/binutils/testsuite/binutils-all/bintest.s b/binutils/testsuite/binutils-all/bintest.s
+index 9e00650..dcf742f 100644
+--- a/binutils/testsuite/binutils-all/bintest.s
++++ b/binutils/testsuite/binutils-all/bintest.s
+@@ -10,3 +10,11 @@ data_symbol:
+ static_data_symbol:
+ 	.long	2
+ 	.comm common_symbol,4
++	.text
++	.global text_symbol2
++text_symbol2:
++	.long	2
++	.global text_symbol3
++text_symbol3:
++	.long 3
++	
+diff --git a/binutils/testsuite/binutils-all/objcopy.exp b/binutils/testsuite/binutils-all/objcopy.exp
+index 6d57837..183c73b 100644
+--- a/binutils/testsuite/binutils-all/objcopy.exp
++++ b/binutils/testsuite/binutils-all/objcopy.exp
+@@ -86,6 +86,7 @@ proc objcopy_test {testname srcfile} {
+ 	setup_xfail "m68*-*-sysv*" "m68*-apple-aux*"
+ 	setup_xfail "m8*-*"
+ 	setup_xfail "sh-*-coff*"
++	setup_xfail "tic54x-*-*"
+ 	setup_xfail "tic80-*-*" "w65-*"
+ 
+ 	clear_xfail "hppa*64*-*-hpux*" "hppa*-*-linux*" "hppa*-*-lites*"
+diff --git a/binutils/testsuite/binutils-all/objdump.exp b/binutils/testsuite/binutils-all/objdump.exp
+index 3dee405..af73d50 100644
+--- a/binutils/testsuite/binutils-all/objdump.exp
++++ b/binutils/testsuite/binutils-all/objdump.exp
+@@ -206,6 +206,85 @@ if { [ remote_file host exists $testarchive ] } then {
+     test_objdump_r $testarchive bintest2.o
+ }
+ 
++# Test objdump -d
++proc test_objdump_d { testfile dumpfile } {
++    global OBJDUMP
++    global OBJDUMPFLAGS
++
++    set got [binutils_run $OBJDUMP "$OBJDUMPFLAGS -d $testfile"]
++
++    set want "$dumpfile:.*Disassembly of section"
++    if ![regexp $want $got] then {
++	fail "objdump -d $testfile: No disassembly title"
++	return
++    }
++
++    set want "$dumpfile:.*00+0 <text_symbol>"
++    if ![regexp $want $got] then {
++	fail "objdump -d $testfile: Missing symbol name and address"
++	return
++    }
++
++    set want "$dumpfile:.*00+. <text_symbol2>"
++    if ![regexp $want $got] then {
++	fail "objdump -d $testfile: Missing second symbol"
++	return
++    }
++
++    set want "$dumpfile:.*00+. <text_symbol3>"
++    if ![regexp $want $got] then {
++	fail "objdump -d $testfile: Missing third symbol"
++	return
++    }
++
++    pass "objdump -d $testfile"
++}
++
++test_objdump_d $testfile $testfile
++if { [ remote_file host exists $testarchive ] } then {
++    test_objdump_d $testarchive bintest2.o
++}
++
++# Test objdump --disassemble=<symbol>
++proc test_objdump_d_sym { testfile dumpfile } {
++    global OBJDUMP
++    global OBJDUMPFLAGS
++
++    set got [binutils_run $OBJDUMP "$OBJDUMPFLAGS --disassemble=text_symbol2 $testfile"]
++
++    set want "$dumpfile:.*Disassembly of section"
++    if ![regexp $want $got] then {
++	fail "objdump --disassemble=text_symbol2 $testfile: No disassembly title"
++	return
++    }
++
++    set want "$dumpfile:.*00+0 <text_symbol>"
++    if [regexp $want $got] then {
++	fail "objdump --disassemble=text_symbol2 $testfile: First symbol displayed, when it should be absent"
++	return
++    }
++
++    set want "$dumpfile:.*00+. <text_symbol2>"
++    if ![regexp $want $got] then {
++	fail "objdump --disassemble=text_symbol2 $testfile: Missing second symbol"
++	return
++    }
++
++    set want "$dumpfile:.*00+. <text_symbol3>"
++    if [regexp $want $got] then {
++	fail "objdump --disassemble=text_symbol2 $testfile: Third symbol displayed when it should be absent"
++	return
++    }
++
++    pass "objdump --disassemble=text_symbol2 $testfile"
++}
++
++test_objdump_d_sym $testfile $testfile
++if { [ remote_file host exists $testarchive ] } then {
++    test_objdump_d_sym $testarchive bintest2.o
++}
++
++
+ # Test objdump -s
+ 
+ proc test_objdump_s { testfile dumpfile } {
+diff --git a/binutils/testsuite/binutils-all/readelf.s b/binutils/testsuite/binutils-all/readelf.s
+index 5aae0ce..6ae4dc7 100644
+--- a/binutils/testsuite/binutils-all/readelf.s
++++ b/binutils/testsuite/binutils-all/readelf.s
+@@ -9,8 +9,9 @@ Section Headers:
+  +\[ 2\] .rel.* +REL. +0+ 0+.* 0000.. 0. +I +.+ +1 +4
+ # MIPS targets put .rela.text here.
+ #...
+- +\[ .\] .* +PROGBITS +00000000 0000(3c|40|48|50) 0000(04|10) 00 +WA +0 +0 +(.|..)
+- +\[ .\] .* +NOBITS +00000000 0000(40|44|4c|60) 000000 00 +WA +0 +0 +(.|..)
++ +\[ .\] .* +PROGBITS +00000000 0000(3c|40|44|48|50) 0000(04|10) 00 +WA +0 +0 +(.|..)
++ +\[ .\] .* +NOBITS +00000000 0000(40|44|48|4c|60) 000000 00 +WA +0 +0 +(.|..)
++# ARM targets put .ARM.attributes here
+ # MIPS targets put .reginfo, .mdebug, .MIPS.abiflags and .gnu.attributes here.
+ # v850 targets put .call_table_data and .call_table_text here.
+ #...
+diff --git a/binutils/testsuite/binutils-all/readelf.ss b/binutils/testsuite/binutils-all/readelf.ss
+index e9ab3ef..acc6d93 100644
+--- a/binutils/testsuite/binutils-all/readelf.ss
++++ b/binutils/testsuite/binutils-all/readelf.ss
+@@ -6,15 +6,15 @@ Symbol table '.symtab' contains .* entries:
+  +2: 00000000 +0 +SECTION +LOCAL +DEFAULT +[34] 
+  +3: 00000000 +0 +SECTION +LOCAL +DEFAULT +[45] 
+  +4: 00000000 +0 +NOTYPE +LOCAL +DEFAULT +1 static_text_symbol
+-# arm-elf targets add the $d mapping symbol here...
++# ARM targets add the $d mapping symbol here...
++# NDS32 targets add the $d2 mapping symbol here...
+ #...
+  +.: 00000000 +0 +NOTYPE +LOCAL +DEFAULT +[34] static_data_symbol
+ # v850 targets include extra SECTION symbols here for the .call_table_data
+ # and .call_table_text sections.
+ #...
+- +.: 00000000 +0 +NOTYPE +GLOBAL +DEFAULT +1 text_symbol
+- +..: 00000000 +0 +NOTYPE +GLOBAL +DEFAULT +UND external_symbol
+- +..: 00000000 +0 +NOTYPE +GLOBAL +DEFAULT +[34] data_symbol
+- +..: 00000004 +4 +(COMMON|OBJECT) +GLOBAL +DEFAULT +(COM|ANSI_COM) common_symbol
+-# The MSP430 adds special crt0 symbols here.
++ +[0-9]+: 00000000 +0 +NOTYPE +GLOBAL +DEFAULT +1 text_symbol
++ +[0-9]+: 00000000 +0 +NOTYPE +GLOBAL +DEFAULT +UND external_symbol
++ +[0-9]+: 00000000 +0 +NOTYPE +GLOBAL +DEFAULT +[34] data_symbol
++ +[0-9]+: 00000004 +4 +(COMMON|OBJECT) +GLOBAL +DEFAULT +(COM|ANSI_COM) common_symbol
+ #...
+diff --git a/binutils/testsuite/binutils-all/readelf.ss-64 b/binutils/testsuite/binutils-all/readelf.ss-64
+index b67bfda..bd10cab 100644
+--- a/binutils/testsuite/binutils-all/readelf.ss-64
++++ b/binutils/testsuite/binutils-all/readelf.ss-64
+@@ -15,3 +15,4 @@ Symbol table '.symtab' contains .* entries:
+  +.: 0000000000000000 +0 +NOTYPE +GLOBAL +DEFAULT +UND external_symbol
+  +.: 0000000000000000 +0 +NOTYPE +GLOBAL +DEFAULT +3 data_symbol
+  +[0-9]+: 0000000000000004 +4 +(COMMON|OBJECT) +GLOBAL +DEFAULT +COM common_symbol
++#pass
+diff --git a/binutils/testsuite/binutils-all/readelf.ss-mips b/binutils/testsuite/binutils-all/readelf.ss-mips
+index 01d3df1..9f4cfa5 100644
+--- a/binutils/testsuite/binutils-all/readelf.ss-mips
++++ b/binutils/testsuite/binutils-all/readelf.ss-mips
+@@ -1,5 +1,5 @@
+ 
+-Symbol table '.symtab' contains 14 entries:
++Symbol table '.symtab' contains 16 entries:
+  +Num: +Value +Size +Type +Bind +Vis +Ndx +Name
+  +0: 00000000 +0 +NOTYPE +LOCAL +DEFAULT +UND 
+  +1: 00000000 +0 +SECTION +LOCAL +DEFAULT +. (|\.text)
+@@ -15,3 +15,5 @@ Symbol table '.symtab' contains 14 entries:
+  +11: 00000000 +0 +OBJECT +GLOBAL +DEFAULT +. data_symbol
+  +12: 00000000 +0 +NOTYPE +LOCAL +DEFAULT +. static_data_symbol
+  +13: 00000004 +4 +(COMMON|OBJECT) +GLOBAL +DEFAULT +(PRC|COM) common_symbol
++ +14: 00000008 +0 +OBJECT +GLOBAL +DEFAULT +. text_symbol2
++ +15: 0000000c +0 +OBJECT +GLOBAL +DEFAULT +. text_symbol3
+diff --git a/binutils/testsuite/binutils-all/readelf.ss-tmips b/binutils/testsuite/binutils-all/readelf.ss-tmips
+index c59f753..d22fc08 100644
+--- a/binutils/testsuite/binutils-all/readelf.ss-tmips
++++ b/binutils/testsuite/binutils-all/readelf.ss-tmips
+@@ -1,5 +1,5 @@
+ 
+-Symbol table '.symtab' contains 14 entries:
++Symbol table '.symtab' contains 16 entries:
+  +Num: +Value +Size +Type +Bind +Vis +Ndx +Name
+  +0: 00000000 +0 +NOTYPE +LOCAL +DEFAULT +UND 
+  +1: 00000000 +0 +SECTION +LOCAL +DEFAULT +1 
+@@ -15,3 +15,5 @@ Symbol table '.symtab' contains 14 entries:
+  +11: 00000000 +0 +NOTYPE +GLOBAL +DEFAULT +UND external_symbol
+  +12: 00000000 +0 +OBJECT +GLOBAL +DEFAULT +3 data_symbol
+  +13: 00000004 +4 +(COMMON|OBJECT) +GLOBAL +DEFAULT +(PRC|COM) common_symbol
++ +14: 00000008 +0 +OBJECT +GLOBAL +DEFAULT +. text_symbol2
++ +15: 0000000c +0 +OBJECT +GLOBAL +DEFAULT +. text_symbol3
+-- 
+2.7.4
+
