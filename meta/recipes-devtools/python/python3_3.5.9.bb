@@ -4,7 +4,7 @@ DEPENDS = "python3-native libffi bzip2 gdbm openssl \
            sqlite3 zlib virtual/libintl xz qemu-native \
            qemu-helper-native virtual/crypt"
 
-PR .= "3"
+PR .= "4"
 
 DISTRO_SRC_URI ?= "file://sitecustomize.py"
 DISTRO_SRC_URI_linuxstdbase = ""
@@ -52,6 +52,8 @@ SRC_URI += "\
             file://CVE-2021-3737.patch \
             file://CVE-2022-0391.patch \
             file://CVE-2015-20107.patch \
+            file://CVE-2021-4189.patch \
+            file://CVE-2022-45061.patch \
            "
 
 SRC_URI_append_class-nativesdk = " \
