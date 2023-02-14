@@ -3,7 +3,7 @@ require systemd.inc
 PROVIDES = "udev"
 
 PE = "1"
-PR .= ".2"
+PR .= ".3"
 
 DEPENDS = "intltool-native gperf-native libcap util-linux"
 
@@ -73,6 +73,7 @@ SRC_URI_MUSL = "file://0001-Use-getenv-when-secure-versions-are-not-available.pa
                file://0021-Hide-__start_BUS_ERROR_MAP-and-__stop_BUS_ERROR_MAP.patch \
                file://CVE-2020-13529.patch \
                file://CVE-2021-33910.patch \
+               file://CVE-2022-3821.patch \
                "
 
 # Workaround undefined reference to `__stack_chk_fail_local' on qemux86 and qemuppc for musl
