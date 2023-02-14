@@ -5,7 +5,7 @@ DEPENDS = "python-native libffi bzip2 gdbm openssl \
 
 PR = "${INC_PR}"
 
-PR .= ".5"
+PR .= ".6"
 
 DISTRO_SRC_URI ?= "file://sitecustomize.py"
 DISTRO_SRC_URI_linuxstdbase = ""
@@ -40,6 +40,8 @@ SRC_URI += "\
   file://CVE-2021-3733.patch \
   file://CVE-2022-0391.patch \
   file://CVE-2015-20107.patch \
+  file://CVE-2021-4189.patch \
+  file://CVE-2022-45061.patch \
 "
 
 S = "${WORKDIR}/Python-${PV}"
