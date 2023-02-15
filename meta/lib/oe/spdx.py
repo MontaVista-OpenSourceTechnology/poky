@@ -214,6 +214,18 @@ class SPDXPackageVerificationCode(SPDXObject):
 
 
 class SPDXPackage(SPDXObject):
+    ALLOWED_CHECKSUMS = [
+        "SHA1",
+        "SHA224",
+        "SHA256",
+        "SHA384",
+        "SHA512",
+        "MD2",
+        "MD4",
+        "MD5",
+        "MD6",
+    ]
+
     name = _String()
     SPDXID = _String()
     versionInfo = _String()
@@ -232,6 +244,7 @@ class SPDXPackage(SPDXObject):
     hasFiles = _StringList()
     packageFileName = _String()
     annotations = _ObjectList(SPDXAnnotation)
+    checksums = _ObjectList(SPDXChecksum)
 
 
 class SPDXFile(SPDXObject):
