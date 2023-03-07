@@ -52,9 +52,10 @@ SRC_URI = "${GLIBC_GIT_URI};branch=${SRCBRANCH};name=glibc \
            file://CVE-2021-33574_2.patch \
            file://0001-CVE-2022-23218.patch \
            file://0001-CVE-2022-23219.patch \
+           file://CVE-2023-0687.patch \
 "
 
-PR = "r1.3"
+PR = "r1.4"
 
 NATIVESDKFIXES ?= ""
 NATIVESDKFIXES_class-nativesdk = "\
