@@ -106,10 +106,11 @@ SRC_URI = "\
      file://CVE-2019-17451.patch \
      file://CVE-2021-3487.patch \
      file://CVE-2022-38533.patch \
+     file://CVE-2021-45078.patch \
 "
 S  = "${WORKDIR}/git"
 
-PR .= ".17"
+PR .= ".18"
 
 do_configure_prepend () {
         rm -rf ${S}/gdb ${S}/libdecnumber ${S}/readline ${S}/sim
