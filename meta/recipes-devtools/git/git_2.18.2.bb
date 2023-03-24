@@ -10,7 +10,7 @@ SRC_URI[tarball.sha256sum] = "8f6434af7b1c7ee91f281f3f2bb88236992ac48699fdecaea8
 SRC_URI[manpages.md5sum] = "f8f6cc00e82b45b92caaa2db518df442"
 SRC_URI[manpages.sha256sum] = "434eaad341acb0b6cc884154d469f145aab86f3cef8e66101681581b15031fa4"
 
-PR .= ".9"
+PR .= ".10"
 SRC_URI += "file://CVE-2018-19486.patch \
             file://CVE-2020-5260_p1.patch \
             file://CVE-2020-5260_p2.patch \
@@ -78,4 +78,12 @@ SRC_URI += "file://CVE-2018-19486.patch \
             file://CVE-2022-41903-10.patch \
             file://CVE-2022-41903-11.patch \
             file://CVE-2022-41903-12.patch \
+            file://CVE-2023-22490-1.patch \
+            file://CVE-2023-22490-2.patch \
+            file://CVE-2023-22490-3pre1.patch \
+            file://CVE-2023-22490-3pre2.patch \
+            file://CVE-2023-22490-3pre3.patch \
+            file://CVE-2023-22490-3pre4.patch \
+            file://CVE-2023-22490-3.patch \
+            file://CVE-2023-23946.patch \
            "
