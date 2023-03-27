@@ -4,7 +4,7 @@ GO_BASEVERSION = "1.9"
 GO_MINOR = ".4"
 PV .= "${GO_MINOR}"
 
-PR .= ".30"
+PR .= ".31"
 
 FILESEXTRAPATHS_prepend := "${FILE_DIRNAME}/go-${GO_BASEVERSION}:"
 
@@ -67,6 +67,7 @@ SRC_URI += "\
         file://0001-CGX-2.4-go-native-failed-to-build.patch \
         file://CVE-2022-41717.patch \
         file://CVE-2022-24675.patch \
+        file://CVE-2022-41723.patch \
 "
 SRC_URI_append_libc-musl = " file://set-external-linker.patch"
 
