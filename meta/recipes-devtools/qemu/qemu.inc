@@ -14,7 +14,7 @@ inherit pkgconfig ptest
 LIC_FILES_CHKSUM = "file://COPYING;md5=441c28d2cf86e15a37fa47e15a72fbac \
                     file://COPYING.LIB;endline=24;md5=8c5efda6cf1e1b03dcfd0e6c0d271c7f"
 
-PR .= ".4"
+PR .= ".5"
 SRC_URI = "https://download.qemu.org/${BPN}-${PV}.tar.xz \
            file://powerpc_rom.bin \
            file://run-ptest \
@@ -136,6 +136,7 @@ SRC_URI = "https://download.qemu.org/${BPN}-${PV}.tar.xz \
            file://CVE-2021-3409-3.patch \
            file://CVE-2021-3409-4.patch \
            file://CVE-2021-3409-5.patch \
+           file://hw-display-qxl-Pass-requested-buffer-size-to-qxl_phy.patch \
            "
 UPSTREAM_CHECK_REGEX = "qemu-(?P<pver>\d+(\.\d+)+)\.tar"
 
