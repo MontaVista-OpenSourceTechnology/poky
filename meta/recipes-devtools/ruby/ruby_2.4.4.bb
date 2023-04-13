@@ -21,6 +21,7 @@ SRC_URI += " \
 	   file://0001-CVE-2021-41819.patch \
 	   file://0001-CVE-2019-8321-to-CVE-2019-8325.patch \
            file://0001-CVE-2022-28739.patch \
+           file://CVE-2023-28756.patch \
            "
 
 PR = "r9.4"
