@@ -46,8 +46,9 @@ SRC_URI = "${SRC_URI_BASE} \
            file://CVE-2017-11714.patch \
            file://0001-CVE-2019-25059.patch \
            file://CVE-2020-27792.patch \
+           file://CVE-2023-28879.patch \
            "
-PR .= ".2"
+PR .= ".3"
 SRC_URI_class-native = "${SRC_URI_BASE} \
                         file://ghostscript-9.21-native-fix-disable-system-libtiff.patch \
                         file://base-genht.c-add-a-preprocessor-define-to-allow-fope.patch \
