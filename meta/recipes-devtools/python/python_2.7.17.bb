@@ -30,6 +30,7 @@ SRC_URI += " \
            file://0001-python2-use-cc_basename-to-replace-CC-for-checking-c.patch \
            file://CVE-2021-3177.patch \
            file://CVE-2021-4189.patch \
+           file://CVE-2023-24329.patch \
 "
 
 S = "${WORKDIR}/Python-${PV}"
