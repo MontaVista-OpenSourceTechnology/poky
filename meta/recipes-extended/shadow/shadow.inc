@@ -11,7 +11,7 @@ DEPENDS_class-nativesdk = ""
 
 UPSTREAM_CHECK_URI = "https://github.com/shadow-maint/shadow/releases"
 
-PR .= ".2"
+PR .= ".3"
 SRC_URI = "https://downloads.yoctoproject.org/mirror/sources/${BP}.tar.xz \
            file://shadow-4.1.3-dots-in-usernames.patch \
            file://usermod-fix-compilation-failure-with-subids-disabled.patch \
@@ -25,6 +25,8 @@ SRC_URI = "https://downloads.yoctoproject.org/mirror/sources/${BP}.tar.xz \
            file://CVE-2018-7169.patch \
            file://CVE-2016-6252.patch \
            file://CVE-2019-19882.patch \
+           file://CVE-2023-29383.patch \
+           file://0001-Overhaul-valid_field.patch \
            "
 
 SRC_URI_append_class-target = " \
