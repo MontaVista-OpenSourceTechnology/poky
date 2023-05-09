@@ -19,6 +19,7 @@ SRC_URI = "${SOURCEFORGE_MIRROR}/freetype/freetype-${PV}.tar.bz2 \
            file://0001-CVE-2022-27406.patch \
            file://0001-CVE-2020-15999.patch \
 	   file://CVE-2023-2004.patch \
+	   file://CVE-2023-2004-pre1.patch \
 	"
 
 PR .= ".4"
