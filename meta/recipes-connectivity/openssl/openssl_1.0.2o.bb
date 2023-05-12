@@ -73,6 +73,7 @@ SRC_URI += "file://find.pl;subdir=openssl-${PV}/util/ \
            file://CVE-2023-0465.patch \
            file://CVE-2023-0466.patch \
            file://CVE-2023-0286.patch \
+           file://CVE-2023-0215.patch \
            "
 
 SRC_URI_append_class-target = "\
