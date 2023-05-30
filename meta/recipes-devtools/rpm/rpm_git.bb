@@ -50,7 +50,6 @@ SRC_URI = "git://github.com/rpm-software-management/rpm \
            file://CVE-2021-20266.patch \
            file://CVE-2021-3521.patch \
            file://CVE-2021-3421-CVE-2021-20271.patch \
-           file://CVE-2021-35938.patch \
            "
 UPSTREAM_VERSION_UNKNOWN = "1"
 
