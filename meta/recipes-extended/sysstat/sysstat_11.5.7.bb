@@ -2,12 +2,13 @@ require sysstat.inc
 
 LIC_FILES_CHKSUM = "file://COPYING;md5=a23a74b3f4caf9616230789d94217acb"
 
-PR = "r1"
+PR = "r2"
 
 SRC_URI += "file://0001-Include-needed-headers-explicitly.patch \
             file://CVE-2022-39377-1.patch \
             file://CVE-2022-39377-2.patch \
             file://CVE-2022-39377-3.patch \
+            file://CVE-2023-33204.patch \
            "
 
 SRC_URI[md5sum] = "8f4a5d0de29f1056153e25e7a9c518d2"
