@@ -13,9 +13,10 @@ DEPENDS_append_x86_class-target    = " nasm-native"
 SRC_URI = "${SOURCEFORGE_MIRROR}/${BPN}/${BPN}-${PV}.tar.gz \
            file://CVE-2018-14498.patch \
            file://CVE-2020-13790.patch \
+           file://CVE-2020-17541.patch \
           "
 
-PR .= ".1"
+PR .= ".2"
 
 SRC_URI[md5sum] = "6b4923e297a7eaa255f08511017a8818"
 SRC_URI[sha256sum] = "9098943b270388727ae61de82adec73cf9f0dbb240b3bc8b172595ebf405b528"
