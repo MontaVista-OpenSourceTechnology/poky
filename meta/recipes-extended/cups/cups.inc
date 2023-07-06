@@ -4,7 +4,7 @@ SECTION = "console/utils"
 LICENSE = "GPLv2 & LGPLv2"
 DEPENDS = "gnutls libpng jpeg dbus dbus-glib zlib libusb"
 
-PR .= ".2"
+PR .= ".3"
 
 SRC_URI = "https://github.com/apple/cups/releases/download/v${PV}/${BP}-source.tar.gz \
            file://use_echo_only_in_init.patch \
@@ -12,6 +12,7 @@ SRC_URI = "https://github.com/apple/cups/releases/download/v${PV}/${BP}-source.t
            file://cups_serverbin.patch \
 	   file://CVE-2018-4300.patch \
 	   file://CVE-2023-32324.patch \
+	   file://CVE-2023-34241.patch \
 	  "
 
 UPSTREAM_CHECK_URI = "https://github.com/apple/cups/releases"
