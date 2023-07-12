@@ -23,8 +23,8 @@ SRC_URI_append_class-nativesdk = " \
            file://environment.d-openssl.sh \
            "
 
-SRC_URI[md5sum] = "1cfee919e0eac6be62c88c5ae8bcd91e"
-SRC_URI[sha256sum] = "8dee9b24bdb1dcbf0c3d1e9b02fb8f6bf22165e807f45adeb7c9677536859d3b"
+SRC_URI[md5sum] = "72f7ba7395f0f0652783ba1089aa0dcc"
+SRC_URI[sha256sum] = "e2f8d84b523eecd06c7be7626830370300fbcc15386bf5142d72758f6963ebc6"
 
 inherit lib_package multilib_header ptest
 
