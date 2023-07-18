@@ -7,7 +7,7 @@ RDEPENDS_${PN}-ptest = "bash make"
 LIC_FILES_CHKSUM = "file://COPYING;md5=441c28d2cf86e15a37fa47e15a72fbac \
                     file://COPYING.LIB;endline=24;md5=c04def7ae38850e7d3ef548588159913"
 
-PR = "r31.9"
+PR = "r32"
 
 SRC_URI = "http://wiki.qemu-project.org/download/${BP}.tar.bz2 \
            file://powerpc_rom.bin \
@@ -139,6 +139,7 @@ SRC_URI = "http://wiki.qemu-project.org/download/${BP}.tar.bz2 \
            file://0001-qxl-remove-assert-in-qxl_pre_save.patch \
            file://0001-Revert-qxl-add-migration-blocker-to-avoid-pre-save-a.patch \
            file://0001-qxl-fix-pre-save-logic.patch \
+           file://CVE-2023-0330.patch \
            "
 
 UPSTREAM_CHECK_REGEX = "qemu-(?P<pver>\d+\..*)\.tar"
