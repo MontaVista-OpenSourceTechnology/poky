@@ -77,6 +77,7 @@ SRC_URI += "\
         file://CVE-2023-24540.patch \
         file://CVE-2023-24539.patch \
         file://CVE-2023-29400.patch \
+        file://CVE-2023-29405.patch \
 "
 SRC_URI_append_libc-musl = " file://set-external-linker.patch"
 
