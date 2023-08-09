@@ -34,10 +34,6 @@ SRC_URI = "http://www.python.org/ftp/python/${PV}/Python-${PV}.tar.xz \
            file://0001-python3-Do-not-hardcode-lib-for-distutils.patch \
            file://0020-configure.ac-setup.py-do-not-add-a-curses-include-pa.patch \
            file://makerace.patch \
-           file://0001-CVE-2015-20107.patch \
-           file://CVE-2022-45061.patch \
-           file://CVE-2022-37454.patch \
-           file://CVE-2023-24329.patch \
            "
 PR .= ".1"
 SRC_URI_append_class-native = " \
