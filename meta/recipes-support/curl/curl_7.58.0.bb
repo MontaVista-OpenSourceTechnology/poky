@@ -58,6 +58,7 @@ SRC_URI = "http://curl.haxx.se/download/curl-${PV}.tar.bz2 \
            file://CVE-2023-28320-pre1.patch \
            file://CVE-2023-28320-1.patch \
            file://CVE-2023-28320-2.patch \
+           file://CVE-2023-28321.patch \
 "
 
 
