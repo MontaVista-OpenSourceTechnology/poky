@@ -75,6 +75,7 @@ SRC_URI += "file://find.pl;subdir=openssl-${PV}/util/ \
            file://CVE-2023-0286.patch \
            file://CVE-2023-0215.patch \
            file://CVE-2023-2650.patch \
+           file://cgx-complete-image_failed_to_bake_with_openssl_conflict.patch \
            "
 
 SRC_URI_append_class-target = "\

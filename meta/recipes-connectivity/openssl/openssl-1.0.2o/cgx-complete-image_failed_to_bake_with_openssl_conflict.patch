@@ -1,0 +1,64 @@
+From 0b3fa728180d9052f23102a9933cb8fad7cf7863 Mon Sep 17 00:00:00 2001
+From: Vivek Kumbhar <vkumbhar@mvista.com>
+Date: Mon, 18 Sep 2023 05:19:38 +0000
+Subject: [PATCH] fix
+
+---
+ crypto/x509/x509_vfy.h                     | 1 +
+ crypto/x509/x509_vpm.c                     | 5 +++++
+ doc/crypto/X509_VERIFY_PARAM_set_flags.pod | 5 ++++-
+ 3 files changed, 10 insertions(+), 1 deletion(-)
+
+diff --git a/crypto/x509/x509_vfy.h b/crypto/x509/x509_vfy.h
+index 5062682..a208b3a 100644
+--- a/crypto/x509/x509_vfy.h
++++ b/crypto/x509/x509_vfy.h
+@@ -586,6 +586,7 @@ unsigned long X509_VERIFY_PARAM_get_flags(X509_VERIFY_PARAM *param);
+ int X509_VERIFY_PARAM_set_purpose(X509_VERIFY_PARAM *param, int purpose);
+ int X509_VERIFY_PARAM_set_trust(X509_VERIFY_PARAM *param, int trust);
+ void X509_VERIFY_PARAM_set_depth(X509_VERIFY_PARAM *param, int depth);
++time_t X509_VERIFY_PARAM_get_time(const X509_VERIFY_PARAM *param);
+ void X509_VERIFY_PARAM_set_time(X509_VERIFY_PARAM *param, time_t t);
+ int X509_VERIFY_PARAM_add0_policy(X509_VERIFY_PARAM *param,
+                                   ASN1_OBJECT *policy);
+diff --git a/crypto/x509/x509_vpm.c b/crypto/x509/x509_vpm.c
+index 7d68a4a..cf7c6e2 100644
+--- a/crypto/x509/x509_vpm.c
++++ b/crypto/x509/x509_vpm.c
+@@ -410,6 +410,11 @@ void X509_VERIFY_PARAM_set_depth(X509_VERIFY_PARAM *param, int depth)
+     param->depth = depth;
+ }
+
++time_t X509_VERIFY_PARAM_get_time(const X509_VERIFY_PARAM *param)
++{
++    return param->check_time;
++}
++
+ void X509_VERIFY_PARAM_set_time(X509_VERIFY_PARAM *param, time_t t)
+ {
+     param->check_time = t;
+diff --git a/doc/crypto/X509_VERIFY_PARAM_set_flags.pod b/doc/crypto/X509_VERIFY_PARAM_set_flags.pod
+index 8f7bdb8..476f4d2 100644
+--- a/doc/crypto/X509_VERIFY_PARAM_set_flags.pod
++++ b/doc/crypto/X509_VERIFY_PARAM_set_flags.pod
+@@ -2,7 +2,8 @@
+
+ =head1 NAME
+
+-X509_VERIFY_PARAM_set_flags, X509_VERIFY_PARAM_clear_flags, X509_VERIFY_PARAM_get_flags, X509_VERIFY_PARAM_set_purpose, X509_VERIFY_PARAM_set_trust, X509_VERIFY_PARAM_set_depth, X509_VERIFY_PARAM_get_depth, X509_VERIFY_PARAM_set_time, X509_VERIFY_PARAM_add0_policy, X509_VERIFY_PARAM_set1_policies, X509_VERIFY_PARAM_set1_host, X509_VERIFY_PARAM_add1_host, X509_VERIFY_PARAM_set_hostflags, X509_VERIFY_PARAM_get0_peername, X509_VERIFY_PARAM_set1_email, X509_VERIFY_PARAM_set1_ip, X509_VERIFY_PARAM_set1_ip_asc - X509 verification parameters
++X509_VERIFY_PARAM_set_flags, X509_VERIFY_PARAM_clear_flags, X509_VERIFY_PARAM_get_flags, X509_VERIFY_PARAM_set_purpose, X509_VERIFY_PARAM_set_trust, X509_VERIFY_PARAM_set_depth, X509_VERIFY_PARAM_get_depth, X509_VERIFY_PARAM_set_time,
++X509_VERIFY_PARAM_get_time, X509_VERIFY_PARAM_add0_policy, X509_VERIFY_PARAM_set1_policies, X509_VERIFY_PARAM_set1_host, X509_VERIFY_PARAM_add1_host, X509_VERIFY_PARAM_set_hostflags, X509_VERIFY_PARAM_get0_peername, X509_VERIFY_PARAM_set1_email, X509_VERIFY_PARAM_set1_ip, X509_VERIFY_PARAM_set1_ip_asc - X509 verification parameters
+
+ =head1 SYNOPSIS
+
+@@ -16,6 +17,8 @@ X509_VERIFY_PARAM_set_flags, X509_VERIFY_PARAM_clear_flags, X509_VERIFY_PARAM_ge
+  int X509_VERIFY_PARAM_set_purpose(X509_VERIFY_PARAM *param, int purpose);
+  int X509_VERIFY_PARAM_set_trust(X509_VERIFY_PARAM *param, int trust);
+
++ time_t X509_VERIFY_PARAM_get_time(const X509_VERIFY_PARAM *param);
++
+  void X509_VERIFY_PARAM_set_time(X509_VERIFY_PARAM *param, time_t t);
+
+  int X509_VERIFY_PARAM_add0_policy(X509_VERIFY_PARAM *param,
+--
+2.18.2
