@@ -25,9 +25,8 @@ SRC_URI = "http://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-${PV}.tar
            file://fix-potential-signed-overflow-in-pointer-arithmatic.patch \
            file://sshd_check_keys \
            file://add-test-support-for-busybox.patch \
-           file://CVE-2021-28041.patch \
            file://CVE-2020-14145.patch \
-           file://0001-CVE-2016-20012.patch \
+           file://CVE-2021-28041.patch \
            file://CVE-2021-41617.patch \
            file://CVE-2023-38408-01.patch \
            file://CVE-2023-38408-02.patch \
