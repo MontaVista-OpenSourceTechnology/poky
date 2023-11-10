@@ -29,6 +29,7 @@ The following boards are supported by the meta-yocto-bsp layer:
 
   * Texas Instruments Beaglebone (beaglebone-yocto)
   * General IA platforms (genericx86 and genericx86-64)
+  * General 64-bit Arm SystemReady platforms (genericarm64)
 
 For more information see the board's section below. The appropriate MACHINE
 variable value corresponding to the board is given in brackets.
@@ -124,6 +125,12 @@ USB Device:
      b) Use systemd-boot instead
      - Build an image with EFI_PROVIDER="systemd-boot" then use the above
        dd command to write the image to a USB stick.
+
+
+SystemReady Arm Platforms
+=========================
+
+TODO
 
 
 Texas Instruments Beaglebone (beaglebone-yocto)
