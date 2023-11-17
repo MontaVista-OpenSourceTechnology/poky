@@ -55,6 +55,7 @@ do_compile() {
     for LOCALE in cs fr ko pl sk zh_CN zh_TW;do
         echo -n > src/po/${LOCALE}.po
     done
+    touch src/po/*.po
     autotools_do_compile
 }
 
