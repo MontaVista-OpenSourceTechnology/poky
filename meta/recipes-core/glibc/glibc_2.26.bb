@@ -57,9 +57,10 @@ SRC_URI = "${GLIBC_GIT_URI};branch=${SRCBRANCH};name=glibc \
            file://CVE-2021-38604_1.patch \
            file://CVE-2021-38604_2.patch \
            file://0001-time-Use-64-bit-time-values-for-time-zone-parsing.patch \
+	   file://CVE-2021-35942.patch \
 "
 
-PR = "r1.7"
+PR = "r1.8"
 
 NATIVESDKFIXES ?= ""
 NATIVESDKFIXES_class-nativesdk = "\
