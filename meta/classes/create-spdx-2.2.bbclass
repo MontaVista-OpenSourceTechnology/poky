@@ -42,6 +42,9 @@ SPDX_SUPPLIER[doc] = "The SPDX PackageSupplier field for SPDX packages created f
     is the contact information for the person or organization who is doing the \
     build."
 
+#WORKAROUND for backport
+SSTATE_ARCHS:prepend = " ${BUILD_ARCH}_${SDK_ARCH}-nativesdk "
+
 def extract_licenses(filename):
     import re
 
