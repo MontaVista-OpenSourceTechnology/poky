@@ -43,7 +43,7 @@ SPDX_SUPPLIER[doc] = "The SPDX PackageSupplier field for SPDX packages created f
     build."
 
 #WORKAROUND for backport
-SSTATE_ARCHS:prepend = " ${BUILD_ARCH}_${SDK_ARCH}-nativesdk "
+SSTATE_ARCHS:prepend = " ${BUILD_ARCH}_${SDK_ARCH}-nativesdk ${ALL_MULTILIB_PACKAGE_ARCHS}"
 
 def extract_licenses(filename):
     import re
