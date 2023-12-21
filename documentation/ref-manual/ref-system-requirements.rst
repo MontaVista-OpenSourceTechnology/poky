@@ -37,11 +37,23 @@ Supported Linux Distributions
 Currently, the Yocto Project is supported on the following
 distributions:
 
--  Ubuntu 16.04 (LTS)
+-  Ubuntu 20.04 (LTS)
+
+-  Ubuntu 22.04 (LTS)
+
+-  Fedora 38
+
+-  Debian GNU/Linux 11.x (Bullseye)
+
+-  AlmaLinux 8
+
+The following distribution versions are still tested even though the
+organizations publishing them no longer make updates publicly available:
 
 -  Ubuntu 18.04 (LTS)
 
--  Ubuntu 19.04
+Finally, here are the distribution versions which were previously
+tested on former revisions of "&DISTRO_NAME;", but no longer are:
 
 -  Ubuntu 20.04
 
@@ -65,6 +77,8 @@ distributions:
 
 -  Fedora 36
 
+-  Fedora 37
+
 -  CentOS 7.x
 
 -  Debian GNU/Linux 8.x (Jessie)
@@ -80,10 +94,6 @@ distributions:
 -  OpenSUSE Leap 15.2
 
 -  OpenSUSE Leap 15.3
-
--  AlmaLinux 8.5
-
--  AlmaLinux 8.7
 
 .. note::
 
