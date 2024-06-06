@@ -64,6 +64,7 @@ SRC_URI = "${KERNELORG_MIRROR}/linux/bluetooth/bluez-${PV}.tar.xz \
            file://CVE-2022-3637.patch \
            file://CVE-2023-45866.patch \
            file://CVE-2023-27349.patch \
+           file://CVE-2023-50229.patch \
            "
 S = "${WORKDIR}/bluez-${PV}"
 
