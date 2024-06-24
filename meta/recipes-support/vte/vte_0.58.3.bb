@@ -21,6 +21,8 @@ inherit gnomebase gtk-doc features_check upstream-version-is-even gobject-intros
 # vapigen.m4 is required when vala is not present (but the one from vala should be used normally)
 SRC_URI += "file://0001-app.cc-use-old-school-asignment-to-avoid-gcc-4.8-err.patch \
             file://0002-Add-W_EXITCODE-macro-for-non-glibc-systems.patch \
+            file://CVE-2024-37535-1.patch \
+            file://CVE-2024-37535-2.patch \
            "
 SRC_URI[archive.md5sum] = "f59eb0784a361c0939c03d4566255916"
 SRC_URI[archive.sha256sum] = "22dcb54ac2ad1a56ab0a745e16ccfeb383f0b5860b5bfa1784561216f98d4975"
