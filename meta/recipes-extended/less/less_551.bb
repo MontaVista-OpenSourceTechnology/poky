@@ -27,6 +27,7 @@ DEPENDS = "ncurses"
 
 SRC_URI = "http://www.greenwoodsoftware.com/${BPN}/${BPN}-${PV}.tar.gz \
            file://CVE-2022-48624.patch \
+           file://CVE-2024-32487.patch \
 	  "
 
 SRC_URI[md5sum] = "4ad4408b06d7a6626a055cb453f36819"
