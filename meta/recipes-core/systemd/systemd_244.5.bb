@@ -40,6 +40,7 @@ SRC_URI += "file://touchscreen.rules \
            file://CVE-2023-26604-2.patch \
            file://CVE-2023-26604-3.patch \
            file://CVE-2023-26604-4.patch \
+           file://CVE-2022-4415.patch \
            "
 
 # patches needed by musl
