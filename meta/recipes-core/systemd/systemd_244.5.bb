@@ -3,6 +3,7 @@ require systemd.inc
 PROVIDES = "udev"
 
 PE = "1"
+PR = "r1"
 
 DEPENDS = "intltool-native gperf-native libcap util-linux"
 
@@ -41,6 +42,7 @@ SRC_URI += "file://touchscreen.rules \
            file://CVE-2023-26604-3.patch \
            file://CVE-2023-26604-4.patch \
            file://CVE-2022-4415.patch \
+           file://CVE-2023-7008.patch \
            "
 
 # patches needed by musl
