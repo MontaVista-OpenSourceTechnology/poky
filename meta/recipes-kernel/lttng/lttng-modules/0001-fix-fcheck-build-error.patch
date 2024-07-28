@@ -1,0 +1,29 @@
+From fe47ad17677c4019b7997ac0d7c775f676c77df6 Mon Sep 17 00:00:00 2001
+From: Siddharth Doshi <sdoshi@mvista.com>
+Date: Sun, 28 Jul 2024 08:12:41 +0000
+Subject: [PATCH] lttng-modules: Fix Fcheck build error
+
+Upstream-Status: Submitted [http://bugz.mvista.com/show_bug.cgi?id=153567#c3]
+
+Signed-off-by: Corey Minyard <cminyard@mvista.com>
+Signed-off-by: Siddharth Doshi <sdoshi@mvista.com>
+---
+ include/wrapper/fdtable.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/include/wrapper/fdtable.h b/include/wrapper/fdtable.h
+index e07dfeb..5d2f194 100644
+--- a/include/wrapper/fdtable.h
++++ b/include/wrapper/fdtable.h
+@@ -22,7 +22,7 @@ struct file *lttng_lookup_fd_rcu(unsigned int fd)
+ static inline
+ struct file *lttng_lookup_fd_rcu(unsigned int fd)
+ {
+-	return fcheck(fd);
++	return files_lookup_fd_rcu(current->files, fd);
+ }
+ #endif
+ 
+-- 
+2.35.7
+
