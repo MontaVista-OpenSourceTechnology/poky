@@ -19,6 +19,7 @@ SRC_URI = "git://github.com/vim/vim.git;branch=master;protocol=https \
            file://0001-src-Makefile-improve-reproducibility.patch \
            file://no-path-adjust.patch \
 	   file://CVE-2024-43374.patch \
+	   file://CVE-2024-41957.patch \
            "
 
 PV .= ".2190"
