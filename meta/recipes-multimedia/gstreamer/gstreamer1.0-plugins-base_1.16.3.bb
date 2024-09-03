@@ -17,6 +17,7 @@ SRC_URI = " \
             file://0009-glimagesink-Downrank-to-marginal.patch \
             file://CVE-2021-3522.patch \
             file://CVE-2024-4453.patch \
+            file://CVE-2023-37328.patch \
             "
 PR .= ".1"
 SRC_URI[md5sum] = "e3ddb1bae9fb510b49a295f212f1e6e4"
