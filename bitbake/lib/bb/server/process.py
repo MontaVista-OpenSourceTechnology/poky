@@ -520,10 +520,10 @@ class ServerCommunicator():
             self.connection.send(command)
         except BrokenPipeError as e:
             raise BrokenPipeError("bitbake-server might have died or been forcibly stopped, ie. OOM killed") from e
-        if not self.recv.poll(30):
-            logger.info("No reply from server in 30s (for command %s at %s)" % (command[0], currenttime()))
-            if not self.recv.poll(30):
-                raise ProcessTimeout("Timeout while waiting for a reply from the bitbake server (60s at %s)" % currenttime())
+        if not self.recv.poll(150):
+            logger.info("No reply from server in 150s (for command %s at %s)" % (command[0], currenttime()))
+            if not self.recv.poll(150):
+                raise ProcessTimeout("Timeout while waiting for a reply from the bitbake server (300s at %s)" % currenttime())
         try:
             ret, exc = self.recv.get()
         except EOFError as e:
