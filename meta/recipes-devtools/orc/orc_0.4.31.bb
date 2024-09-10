@@ -8,6 +8,11 @@ SRC_URI = "http://gstreamer.freedesktop.org/src/orc/orc-${PV}.tar.xz"
 SRC_URI[md5sum] = "b6b95a47eff713e91873e2c2b1a5b3ad"
 SRC_URI[sha256sum] = "a0ab5f10a6a9ae7c3a6b4218246564c3bf00d657cbdf587e6d34ec3ef0616075"
 
+PR .= ".1"
+SRC_URI += " \
+           file://CVE-2024-40897.patch \
+           "
+
 inherit meson pkgconfig gtk-doc
 
 GTKDOC_MESON_OPTION = "gtk_doc"
