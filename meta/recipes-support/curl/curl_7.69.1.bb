@@ -61,8 +61,10 @@ SRC_URI = "https://curl.haxx.se/download/curl-${PV}.tar.bz2 \
            file://CVE-2024-2398.patch \
 	   file://CVE-2024-7264-pre1.patch \
 	   file://CVE-2024-7264.patch \
+	   file://CVE-2024-8096.patch \
 "
 
+PR .= ".1"
 SRC_URI[md5sum] = "ec5fc263f898a3dfef08e805f1ecca42"
 SRC_URI[sha256sum] = "2ff5e5bd507adf6aa88ff4bbafd4c7af464867ffb688be93b9930717a56c4de8"
 
