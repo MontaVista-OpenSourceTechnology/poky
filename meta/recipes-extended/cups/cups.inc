@@ -13,7 +13,8 @@ SRC_URI = "https://github.com/apple/cups/releases/download/v${PV}/${BP}-source.t
            file://0002-don-t-try-to-run-generated-binaries.patch \
            file://0003-cups_1.4.6.bb-Fix-build-on-ppc64.patch \
            file://0004-cups-fix-multilib-install-file-conflicts.patch\
-           file://CVE-2022-26691.patch \
+           file://CVE-2022-26691-1.patch \
+	   file://CVE-2022-26691-2.patch \
            file://CVE-2023-32324.patch \
            file://CVE-2023-34241.patch \
            file://CVE-2023-32360.patch \
