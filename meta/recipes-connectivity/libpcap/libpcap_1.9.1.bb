@@ -10,7 +10,15 @@ LIC_FILES_CHKSUM = "file://LICENSE;md5=5eb289217c160e2920d2e35bddc36453 \
                     file://pcap.h;beginline=1;endline=32;md5=39af3510e011f34b8872f120b1dc31d2"
 DEPENDS = "flex-native bison-native"
 
+PR .= "1"
 SRC_URI = "https://www.tcpdump.org/release/${BP}.tar.gz \
+           file://CVE-2023-7256-pre1.patch \
+           file://CVE-2023-7256-pre2.patch \
+           file://CVE-2023-7256-pre3.patch \
+           file://CVE-2023-7256-pre4.patch \
+           file://CVE-2023-7256-pre5.patch \
+           file://CVE-2023-7256.patch \
+           file://CVE-2024-8006.patch \
            "
 SRC_URI[md5sum] = "21af603d9a591c7d96a6457021d84e6c"
 SRC_URI[sha256sum] = "635237637c5b619bcceba91900666b64d56ecb7be63f298f601ec786ce087094"
