@@ -1,0 +1,56 @@
+From 4c4a5e113d3becd6496f759db5de2e7bb7e6b1d5 Mon Sep 17 00:00:00 2001
+From: Priyal Doshi <pdoshi@mvista.com>
+Date: Thu, 19 Sep 2024 15:44:42 +0530
+Subject: [PATCH] kexec-tools: fix kexec failure when kernel version patchlevel >255
+
+[ 2nd try, to a larger cc: list, and this time submitted
+  with a patch rather than just a bug report   ]
+
+Kexec blows up when the kernel version patchlevel is >255.
+This was first noticed when a 4.4.262 kernel was booted
+on a CentOS 7 system.  The message on the console is of
+the form:
+
+  Unsupported utsname.release: 4.4.262
+
+The attached patch should fix this.  Untested.  There might
+be a few places where a hardcoded constant rather than
+KERNEL_VERSION is used, but I did not see any.
+
+Signed-off-by: Joe Korty <joe.korty@xxxxxxxxxxxxxxxxx
+Upstream-Status: Backport [https://lore.kernel.org/kexec/20210409154642.GA30739@zipoli.concurrrent-rt.com/raw]
+Signed-off-by: Priyal Doshi <pdoshi@mvista.com>
+---
+ kexec/kernel_version.c | 2 +-
+ kexec/kexec.h          | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/kexec/kernel_version.c b/kexec/kernel_version.c
+index 21fb13a..36c06ff 100644
+--- a/kexec/kernel_version.c
++++ b/kexec/kernel_version.c
+@@ -47,7 +47,7 @@ long kernel_version(void)
+ 		patch = 0;
+ 	}
+ 
+-	if (major >= 256 || minor >= 256 || patch >= 256) {
++	if (major >= 256 || minor >= 256 || patch >= 65536) {
+ 		fprintf(stderr, "Unsupported utsname.release: %s\n",
+ 			utsname.release);
+ 		return -1;
+diff --git a/kexec/kexec.h b/kexec/kexec.h
+index a97b9ce..7ca959e 100644
+--- a/kexec/kexec.h
++++ b/kexec/kexec.h
+@@ -179,7 +179,7 @@ extern const struct arch_map_entry arches[];
+ long physical_arch(void);
+ 
+ #define KERNEL_VERSION(major, minor, patch) \
+-	(((major) << 16) | ((minor) << 8) | patch)
++	(((major) << 24) | ((minor) << 16) | patch)
+ long kernel_version(void);
+ 
+ void usage(void);
+-- 
+2.25.1
+
