@@ -621,7 +621,7 @@ buildhistory_list_pkg_files() {
 	fi
 
 	# Create individual files-in-package for each recipe's package
-	pkgdirlist=$(find ${PKGDEST}/* -maxdepth 0 -type d)
+	pkgdirlist=$(find ${PKGDEST} -maxdepth 1 -mindepth 1 -type d)
 	for pkgdir in $pkgdirlist; do
 		pkgname=$(basename $pkgdir)
 		outfolder="${BUILDHISTORY_DIR_PACKAGE}/$pkgname"
