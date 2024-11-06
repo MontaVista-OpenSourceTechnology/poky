@@ -1,0 +1,27 @@
+From a2072682c624267cbe5143822928ae6e4d4d4432 Mon Sep 17 00:00:00 2001
+From: Priyal Doshi <pdoshi@mvista.com>
+Date: Wed, 6 Nov 2024 10:41:32 +0530
+Subject: [PATCH] Segmentation fault caused due to the function "input_userauth_failure" changes absent in the source file "sshconnect2.c" for CVE-2023-48795
+
+Signed-off-by: Priyal Doshi <pdoshi@mvista.com>
+---
+ sshconnect2.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/sshconnect2.c b/sshconnect2.c
+index a9fa843..21e3472 100644
+--- a/sshconnect2.c
++++ b/sshconnect2.c
+@@ -580,7 +580,8 @@ input_userauth_success_unexpected(int type, u_int32_t seq, void *ctxt)
+ int
+ input_userauth_failure(int type, u_int32_t seq, void *ctxt)
+ {
+-	Authctxt *authctxt = ctxt;
++	struct ssh *ssh = ctxt;
++	Authctxt *authctxt = ssh->authctxt;
+ 	char *authlist = NULL;
+ 	int partial;
+ 
+-- 
+2.7.4
+
