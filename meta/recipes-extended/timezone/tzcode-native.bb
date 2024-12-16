@@ -7,7 +7,8 @@ S = "${WORKDIR}"
 
 inherit native
 
-EXTRA_OEMAKE += "cc='${CC}'"
+CFLAGS ="-std=gnu11"
+EXTRA_OEMAKE += "cc='${CC}' CFLAGS='${CFLAGS}'"
 
 do_install () {
         install -d ${D}${bindir}/
