@@ -14,7 +14,7 @@ inherit pkgconfig ptest
 LIC_FILES_CHKSUM = "file://COPYING;md5=441c28d2cf86e15a37fa47e15a72fbac \
                     file://COPYING.LIB;endline=24;md5=8c5efda6cf1e1b03dcfd0e6c0d271c7f"
 
-PR .= ".5"
+PR .= ".6"
 SRC_URI = "https://download.qemu.org/${BPN}-${PV}.tar.xz \
            file://powerpc_rom.bin \
            file://run-ptest \
@@ -147,6 +147,9 @@ SRC_URI = "https://download.qemu.org/${BPN}-${PV}.tar.xz \
            file://9pfs-local-ignore-O_NOATIME-if-we-don-t-have-permiss.patch \
            file://CVE-2023-2861.patch \
            file://CVE-2023-1544.patch \
+           file://CVE-2023-3019-pre1.patch \
+           file://CVE-2023-3019-1.patch \
+           file://CVE-2023-3019-2.patch \
            "
 UPSTREAM_CHECK_REGEX = "qemu-(?P<pver>\d+(\.\d+)+)\.tar"
 
