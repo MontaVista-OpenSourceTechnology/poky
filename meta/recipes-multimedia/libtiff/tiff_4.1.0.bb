@@ -8,7 +8,7 @@ LIC_FILES_CHKSUM = "file://COPYRIGHT;md5=34da3db46fab7501992f9615d7e158cf"
 
 CVE_PRODUCT = "libtiff"
 
-PR .= ".2"
+PR .= ".3"
 
 SRC_URI = "http://download.osgeo.org/libtiff/tiff-${PV}.tar.gz \
            file://CVE-2020-35523.patch  \
@@ -21,7 +21,7 @@ SRC_URI = "http://download.osgeo.org/libtiff/tiff-${PV}.tar.gz \
            file://0001-tiffset-fix-global-buffer-overflow-for-ASCII-tags-wh.patch \
            file://561599c99f987dc32ae110370cfdd7df7975586b.patch \
            file://eecb0712f4c3a5b449f70c57988260a667ddbdef.patch \
-	       file://0001-CVE-2022-1056.patch \
+           file://0001-CVE-2022-1056.patch \
            file://CVE-2022-0865.patch \
            file://CVE-2022-0908.patch \
            file://CVE-2022-0907.patch \
