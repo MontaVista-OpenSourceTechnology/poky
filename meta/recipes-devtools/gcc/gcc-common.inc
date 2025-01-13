@@ -11,7 +11,7 @@ CVE_PRODUCT = "gcc"
 inherit autotools gettext texinfo
 
 BPN = "gcc"
-COMPILERDEP = "virtual/cross-cc:do_gcc_stash_builddir"
+COMPILERDEP = "${MLPREFIX}gcc-cross-${TARGET_ARCH}:do_gcc_stash_builddir"
 
 python extract_stashed_builddir () {
     src = d.expand("${COMPONENTS_DIR}/${BUILD_ARCH}/gcc-stashed-builddir-${TARGET_SYS}")

@@ -455,7 +455,7 @@ do_qa_unpack() {
 }
 
 do_kernel_configme[depends] += "virtual/cross-binutils:do_populate_sysroot"
-do_kernel_configme[depends] += "virtual/cross-cc:do_populate_sysroot"
+do_kernel_configme[depends] += "${PREFERRED_PROVIDER_virtual/cross-cc}:do_populate_sysroot"
 do_kernel_configme[depends] += "bc-native:do_populate_sysroot bison-native:do_populate_sysroot"
 do_kernel_configme[depends] += "kern-tools-native:do_populate_sysroot"
 do_kernel_configme[dirs] += "${S} ${B}"
