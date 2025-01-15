@@ -2,15 +2,19 @@
 # Default toolchain configuration
 #
 
-PREFERRED_PROVIDER_virtual/cross-binutils = "binutils-cross-${TARGET_ARCH}"
+PREFERRED_PROVIDER_virtual/cross-binutils = "${MLPREFIX}binutils-cross-${TARGET_ARCH}"
 PREFERRED_PROVIDER_virtual/cross-cc = "${MLPREFIX}gcc-cross-${TARGET_ARCH}"
-PREFERRED_PROVIDER_virtual/c++ = "${MLPREFIX}gcc-cross-${TARGET_ARCH}"
+PREFERRED_PROVIDER_virtual/cross-c++ = "${MLPREFIX}gcc-cross-${TARGET_ARCH}"
 PREFERRED_PROVIDER_virtual/compilerlibs = "gcc-runtime"
 PREFERRED_PROVIDER_gdb = "gdb"
 
-PREFERRED_PROVIDER_virtual/sdk-binutils ?= "binutils-crosssdk-${SDK_SYS}"
+PREFERRED_PROVIDER_virtual/cross-binutils:class-nativesdk ?= "binutils-crosssdk-${SDK_SYS}"
+PREFERRED_PROVIDER_virtual/cross-cc:class-nativesdk = "gcc-crosssdk-${SDK_SYS}"
+PREFERRED_PROVIDER_virtual/cross-c++:class-nativesdk = "gcc-crosssdk-${SDK_SYS}"
+
+PREFERRED_PROVIDER_virtual/cross-sdk-binutils ?= "binutils-crosssdk-${SDK_SYS}"
 PREFERRED_PROVIDER_virtual/cross-sdk-cc = "gcc-crosssdk-${SDK_SYS}"
-PREFERRED_PROVIDER_virtual/sdk-c++ = "gcc-crosssdk-${SDK_SYS}"
+PREFERRED_PROVIDER_virtual/cross-sdk-c++ = "gcc-crosssdk-${SDK_SYS}"
 PREFERRED_PROVIDER_virtual/sdk-compilerlibs = "nativesdk-gcc-runtime"
 
 # Default libc config

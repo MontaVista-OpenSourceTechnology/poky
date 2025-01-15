@@ -156,8 +156,9 @@ do_install:append:class-target () {
 }
 
 INHIBIT_DEFAULT_DEPS = "1"
-DEPENDS = "virtual/cross-cc virtual/c++ libgcc virtual/${MLPREFIX}libc"
-PROVIDES = "virtual/compilerlibs"
+DEPENDS = "virtual/cross-cc virtual/cross-c++ ${MLPREFIX}libgcc virtual/${MLPREFIX}libc"
+DEPENDS:class-nativesdk = "virtual/cross-sdk-cc virtual/cross-sdk-c++ ${MLPREFIX}libgcc virtual/${MLPREFIX}libc"
+PROVIDES = "virtual/${MLPREFIX}compilerlibs"
 
 BBCLASSEXTEND = "nativesdk"
 

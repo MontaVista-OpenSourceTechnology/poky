@@ -31,11 +31,11 @@ class ClassExtender(object):
             return name
         if name.endswith("-" + self.extname):
             name = name.replace("-" + self.extname, "")
-        if name in ['virtual/cross-cc', 'virtual/c++', 'virtual/cross-binutils']:
-            return name
         if name.startswith("virtual/"):
+            if "cross-sdk" in name:
+                return name
             # Assume large numbers of dashes means a triplet is present and we don't need to convert
-            if name.count("-") >= 3 and name.endswith(("-go", "-binutils", "-cc", "-c++")):
+            if name.count("-") >= 3 and name.endswith(("-go",)):
                 return name
             subs = name.split("/", 1)[1]
             if not subs.startswith(self.extname):

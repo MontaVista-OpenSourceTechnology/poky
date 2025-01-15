@@ -1,6 +1,6 @@
 inherit crosssdk
 
-DEPENDS = "go-native virtual/cross-sdk-cc virtual/nativesdk-compilerlibs virtual/sdk-binutils"
+DEPENDS = "go-native virtual/cross-sdk-cc virtual/nativesdk-compilerlibs virtual/cross-sdk-binutils"
 PN = "go-crosssdk-${SDK_SYS}"
 PROVIDES = "virtual/${TARGET_PREFIX}go"
 
