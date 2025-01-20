@@ -31,6 +31,7 @@ SRC_URI = " \
             file://CVE-2024-47613.patch \
             file://CVE-2024-47774.patch \
             file://CVE-2024-47599.patch \
+            file://CVE-2024-47606.patch \
             "
 
 PR .= ".1"
