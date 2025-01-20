@@ -23,6 +23,7 @@ SRC_URI = " \
     file://0004-meson-Add-option-for-installed-tests.patch \
     file://0005-bufferpool-only-resize-in-reset-when-maxsize-is-larger.patch \
     file://0006-tests-seek-Don-t-use-too-strict-timeout-for-validati.patch \
+    file://CVE-2024-47606.patch \
 "
 SRC_URI[md5sum] = "beecf6965a17fb17fa3b262fd36df70a"
 SRC_URI[sha256sum] = "692f037968e454e508b0f71d9674e2e26c78475021407fcf8193b1c7e59543c7"
