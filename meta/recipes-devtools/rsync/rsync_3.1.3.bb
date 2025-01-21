@@ -18,8 +18,10 @@ SRC_URI = "https://download.samba.org/pub/${BPN}/src/${BP}.tar.gz \
            file://CVE-2016-9843.patch \
            file://CVE-2022-29154.patch \
            file://0001-Fix-relative-when-copying-an-absolute-path.patch \
+           file://CVE-2024-12085.patch \
 "
 
+PR .= ".1"
 SRC_URI[md5sum] = "1581a588fde9d89f6bc6201e8129afaf"
 SRC_URI[sha256sum] = "55cc554efec5fdaad70de921cd5a5eeb6c29a95524c715f3bbf849235b0800c0"
 
