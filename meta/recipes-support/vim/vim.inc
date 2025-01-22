@@ -12,7 +12,7 @@ RSUGGESTS_${PN} = "diffutils"
 LICENSE = "vim"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=d1a651ab770b45d41c0f8cb5a8ca930e"
 
-PR .= ".1"
+PR .= ".2"
 SRC_URI = "git://github.com/vim/vim.git;branch=master;protocol=https \
            file://disable_acl_header_check.patch \
            file://vim-add-knob-whether-elf.h-are-checked.patch \
@@ -23,6 +23,7 @@ SRC_URI = "git://github.com/vim/vim.git;branch=master;protocol=https \
 	   file://CVE-2024-43790.patch \
 	   file://CVE-2024-43802.patch \
 	   file://CVE-2024-47814.patch \
+	   file://CVE-2025-24014.patch \
            "
 
 PV .= ".2190"
