@@ -7,10 +7,17 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=eb723b61539feef013de476e68b5c50a \
                     file://src/ofono.h;beginline=1;endline=20;md5=3ce17d5978ef3445def265b98899c2ee"
 DEPENDS = "dbus glib-2.0 udev mobile-broadband-provider-info ell"
 
+PR .= ".1"
 SRC_URI = "\
     ${KERNELORG_MIRROR}/linux/network/${BPN}/${BP}.tar.xz \
     file://ofono \
     file://0001-mbim-add-an-optional-TEMP_FAILURE_RETRY-macro-copy.patch \
+    file://CVE-2024-7539.patch \
+    file://CVE-2024-7543.patch \
+    file://CVE-2024-7544.patch \
+    file://CVE-2024-7545.patch \
+    file://CVE-2024-7546.patch \
+    file://CVE-2024-7547.patch \
 "
 SRC_URI[md5sum] = "1c26340e3c6ed132cc812595081bb3dc"
 SRC_URI[sha256sum] = "a15c5d28096c10eb30e47a68b6dc2e7c4a5a99d7f4cfedf0b69624f33d859e9b"
