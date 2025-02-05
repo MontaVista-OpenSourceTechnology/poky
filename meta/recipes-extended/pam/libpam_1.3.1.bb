@@ -12,6 +12,7 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=7eb5c1bf854e8881005d673599ee74d3 \
                     file://libpamc/License;md5=a4da476a14c093fdc73be3c3c9ba8fb3 \
                     "
 
+PR .= ".1"
 SRC_URI = "https://github.com/linux-pam/linux-pam/releases/download/v${PV}/Linux-PAM-${PV}.tar.xz \
            file://99_pam \
            file://pam.d/common-account \
@@ -25,6 +26,8 @@ SRC_URI = "https://github.com/linux-pam/linux-pam/releases/download/v${PV}/Linux
            file://pam-unix-nullok-secure.patch \
            file://crypt_configure.patch \
            file://CVE-2024-22365.patch \
+           file://CVE-2024-10041-1.patch \
+           file://CVE-2024-10041-2.patch \
           "
 
 SRC_URI[md5sum] = "558ff53b0fc0563ca97f79e911822165"
