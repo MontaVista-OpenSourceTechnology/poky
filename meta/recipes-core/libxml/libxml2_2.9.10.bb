@@ -10,7 +10,7 @@ LIC_FILES_CHKSUM = "file://Copyright;md5=2044417e2e5006b65a8b9067b683fcf1 \
                     file://trio.c;beginline=5;endline=14;md5=6c025753c86d958722ec76e94cae932e"
 
 DEPENDS = "zlib virtual/libiconv"
-PR .= ".3"
+PR .= ".4"
 
 inherit gnomebase
 
@@ -47,6 +47,7 @@ SRC_URI += "http://www.w3.org/XML/Test/xmlts20080827.tar.gz;subdir=${BP};name=te
            file://CVE-2023-45322-2.patch \
            file://CVE-2024-25062-pre1.patch \
            file://CVE-2024-25062.patch \
+           file://CVE-2022-49043.patch \
            "
 
 SRC_URI[archive.sha256sum] = "593b7b751dd18c2d6abcd0c4bcb29efc203d0b4373a6df98e3a455ea74ae2813"
