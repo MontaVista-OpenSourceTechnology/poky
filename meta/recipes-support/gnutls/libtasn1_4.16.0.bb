@@ -10,9 +10,12 @@ LIC_FILES_CHKSUM = "file://doc/COPYING;md5=d32239bcb673463ab874e80d47fae504 \
                     file://doc/COPYING.LESSER;md5=4fbd65380cdd255951079008b364516c \
                     file://LICENSE;md5=75ac100ec923f959898182307970c360"
 
+PR .= ".1"
 SRC_URI = "${GNU_MIRROR}/libtasn1/libtasn1-${PV}.tar.gz \
            file://dont-depend-on-help2man.patch \
            file://CVE-2021-46848.patch \
+           file://CVE-2024-12133-1.patch \
+           file://CVE-2024-12133-2.patch \
            "
 
 DEPENDS = "bison-native"
