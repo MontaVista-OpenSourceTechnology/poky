@@ -1,0 +1,44 @@
+From 83e9d4f70ddf7e06d01bc741970c08ab733da645 Mon Sep 17 00:00:00 2001
+From: Nicolas Dufresne <nicolas.dufresne@collabora.com>
+Date: Mon, 27 Jan 2020 17:16:02 -0500
+Subject: [PATCH] jpegdec: Check return value of gst_buffer_map()
+
+Without this check, the element will crash instead of returning an
+error.
+---
+ ext/jpeg/gstjpegdec.c | 11 ++++++++++-
+ 1 file changed, 10 insertions(+), 1 deletion(-)
+
+This fixes CVE-2024-47599. Dependency Patch #3.
+
+Signed-off-by: Javier Campos <jcampos@mvista.com>
+
+Index: gst-plugins-good-1.12.2/ext/jpeg/gstjpegdec.c
+===================================================================
+--- gst-plugins-good-1.12.2.orig/ext/jpeg/gstjpegdec.c
++++ gst-plugins-good-1.12.2/ext/jpeg/gstjpegdec.c
+@@ -1198,7 +1198,9 @@ gst_jpeg_dec_handle_frame (GstVideoDecod
+   guint8 *data;
+   gsize nbytes;
+ 
+-  gst_buffer_map (frame->input_buffer, &dec->current_frame_map, GST_MAP_READ);
++  if (!gst_buffer_map (frame->input_buffer, &dec->current_frame_map,
++          GST_MAP_READ))
++    goto map_failed;
+ 
+   data = dec->current_frame_map.data;
+   nbytes = dec->current_frame_map.size;
+@@ -1375,6 +1377,13 @@ need_more_data:
+     goto exit;
+   }
+   /* ERRORS */
++map_failed:
++  {
++    GST_ELEMENT_ERROR (dec, RESOURCE, READ, (_("Failed to read memory")),
++        ("gst_buffer_map() failed for READ access"));
++    ret = GST_FLOW_ERROR;
++    goto exit;
++  }
+ decode_error:
+   {
+     gchar err_msg[JMSG_LENGTH_MAX];

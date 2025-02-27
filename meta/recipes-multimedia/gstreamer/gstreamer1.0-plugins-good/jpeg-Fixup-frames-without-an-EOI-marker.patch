@@ -1,0 +1,87 @@
+From 10ff3c8e14e8fba9e0a5d696dce0bea27de644d7 Mon Sep 17 00:00:00 2001
+From: Ezequiel Garcia <ezequiel@vanguardiasur.com.ar>
+Date: Thu, 28 Sep 2017 18:00:38 -0300
+Subject: [PATCH] jpeg: Fixup frames without an EOI marker
+
+Some cameras fail to send an end-of-image marker (EOI)
+and can't be properly decoded by either JPEG or libjpeg.
+
+This commit parses the frame, making sure it has an EOI.
+If there isn't one, the EOI gets added to the buffer.
+
+A similar fixup is done in the rtpjpegdepay element,
+and it makes sense to do it in jpegdec as well.
+
+Signed-off-by: Ezequiel Garcia <ezequiel@vanguardiasur.com.ar>
+
+https://bugzilla.gnome.org/show_bug.cgi?id=791988
+---
+ ext/jpeg/gstjpegdec.c | 40 +++++++++++++++++++++++++++++++++++-----
+ 1 file changed, 35 insertions(+), 5 deletions(-)
+
+This fixes CVE-2024-47599. Dependency Patch #2.
+
+Signed-off-by: Javier Campos <jcampos@mvista.com>
+
+Index: gst-plugins-good-1.12.2/ext/jpeg/gstjpegdec.c
+===================================================================
+--- gst-plugins-good-1.12.2.orig/ext/jpeg/gstjpegdec.c
++++ gst-plugins-good-1.12.2/ext/jpeg/gstjpegdec.c
+@@ -376,11 +376,13 @@ gst_jpeg_dec_parse (GstVideoDecoder * bd
+       goto have_full_frame;
+     }
+     if (value == 0xd8) {
+-      /* Skip this frame if we found another SOI marker */
+-      GST_DEBUG ("0x%08x: SOI marker before EOI, skipping", offset + 2);
++      GST_DEBUG ("0x%08x: SOI marker before EOI marker", offset + 2);
++
++      /* clear parse state */
++      dec->saw_header = FALSE;
+       dec->parse_resync = FALSE;
+-      size = offset + 2;
+-      goto drop_frame;
++      toadd = offset;
++      goto have_full_frame;
+     }
+ 
+ 
+@@ -1192,10 +1194,38 @@ gst_jpeg_dec_handle_frame (GstVideoDecod
+   gboolean need_unmap = TRUE;
+   GstVideoCodecState *state = NULL;
+   gboolean release_frame = TRUE;
++  gboolean has_eoi;
++  guint8 *data;
++  gsize nbytes;
+ 
+-  dec->current_frame = frame;
+   gst_buffer_map (frame->input_buffer, &dec->current_frame_map, GST_MAP_READ);
+ 
++  data = dec->current_frame_map.data;
++  nbytes = dec->current_frame_map.size;
++  has_eoi = ((data[nbytes - 2] != 0xff) || (data[nbytes - 1] != 0xd9));
++
++  /* some cameras fail to send an end-of-image marker (EOI),
++   * add it if that is the case. */
++  if (!has_eoi) {
++    GstMapInfo map;
++    GstBuffer *eoibuf = gst_buffer_new_and_alloc (2);
++
++    /* unmap, will add EOI and remap at the end */
++    gst_buffer_unmap (frame->input_buffer, &dec->current_frame_map);
++
++    gst_buffer_map (eoibuf, &map, GST_MAP_WRITE);
++    map.data[0] = 0xff;
++    map.data[1] = 0xd9;
++    gst_buffer_unmap (eoibuf, &map);
++
++    /* append to input buffer, and remap */
++    frame->input_buffer = gst_buffer_append (frame->input_buffer, eoibuf);
++
++    gst_buffer_map (frame->input_buffer, &dec->current_frame_map, GST_MAP_READ);
++    GST_DEBUG ("fixup EOI marker added");
++  }
++
++  dec->current_frame = frame;
+   dec->cinfo.src->next_input_byte = dec->current_frame_map.data;
+   dec->cinfo.src->bytes_in_buffer = dec->current_frame_map.size;
+ 
