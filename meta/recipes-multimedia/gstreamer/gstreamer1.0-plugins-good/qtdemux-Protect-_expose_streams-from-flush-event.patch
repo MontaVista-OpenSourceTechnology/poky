@@ -1,0 +1,121 @@
+From 7651036530fb6861e41e3da060a6ec0876565e26 Mon Sep 17 00:00:00 2001
+From: Seungha Yang <seungha.yang@navercorp.com>
+Date: Tue, 8 May 2018 20:30:18 +0900
+Subject: [PATCH] qtdemux: Protect _expose_streams() from flush event
+
+Flush during stream change can break autoplugging or the
+flush event could be dropped.
+
+https://bugzilla.gnome.org/show_bug.cgi?id=684790
+---
+ gst/isomp4/qtdemux.c | 26 +++++++++++++++++++++++++-
+ gst/isomp4/qtdemux.h |  3 +++
+ 2 files changed, 28 insertions(+), 1 deletion(-)
+
+This fixes CVE-2024-47597. Dependency Patch #12.
+
+Signed-off-by: Javier Campos <jcampos@mvista.com>
+
+Index: gst-plugins-good-1.12.2/gst/isomp4/qtdemux.c
+===================================================================
+--- gst-plugins-good-1.12.2.orig/gst/isomp4/qtdemux.c
++++ gst-plugins-good-1.12.2/gst/isomp4/qtdemux.c
+@@ -140,6 +140,18 @@ struct _QtDemuxSample
+ 
+ #define QTSAMPLE_KEYFRAME(stream,sample) ((stream)->all_keyframe || (sample)->keyframe)
+ 
++#define QTDEMUX_EXPOSE_GET_LOCK(demux) (&((demux)->expose_lock))
++#define QTDEMUX_EXPOSE_LOCK(demux) G_STMT_START { \
++    GST_TRACE("Locking from thread %p", g_thread_self()); \
++    g_mutex_lock (QTDEMUX_EXPOSE_GET_LOCK (demux)); \
++    GST_TRACE("Locked from thread %p", g_thread_self()); \
++ } G_STMT_END
++
++#define QTDEMUX_EXPOSE_UNLOCK(demux) G_STMT_START { \
++    GST_TRACE("Unlocking from thread %p", g_thread_self()); \
++    g_mutex_unlock (QTDEMUX_EXPOSE_GET_LOCK (demux)); \
++ } G_STMT_END
++
+ /*
+  * Quicktime has tracks and segments. A track is a continuous piece of
+  * multimedia content. The track is not always played from start to finish but
+@@ -647,6 +659,7 @@ gst_qtdemux_init (GstQTDemux * qtdemux)
+   qtdemux->adapter = gst_adapter_new ();
+   g_queue_init (&qtdemux->protection_event_queue);
+   qtdemux->flowcombiner = gst_flow_combiner_new ();
++  g_mutex_init (&qtdemux->expose_lock);
+ 
+   GST_OBJECT_FLAG_SET (qtdemux, GST_ELEMENT_FLAG_INDEXABLE);
+ 
+@@ -670,6 +683,7 @@ gst_qtdemux_dispose (GObject * object)
+ 
+   g_free (qtdemux->cenc_aux_info_sizes);
+   qtdemux->cenc_aux_info_sizes = NULL;
++  g_mutex_clear (&qtdemux->expose_lock);
+ 
+   G_OBJECT_CLASS (parent_class)->dispose (object);
+ }
+@@ -2360,7 +2374,10 @@ gst_qtdemux_handle_sink_event (GstPad *
+         gst_event_unref (event);
+         goto drop;
+       }
+-      break;
++      QTDEMUX_EXPOSE_LOCK (demux);
++      res = gst_pad_event_default (demux->sinkpad, parent, event);
++      QTDEMUX_EXPOSE_UNLOCK (demux);
++      goto drop;
+     }
+     case GST_EVENT_FLUSH_STOP:
+     {
+@@ -4508,7 +4525,9 @@ beach:
+   if (ret == GST_FLOW_EOS && (qtdemux->got_moov || qtdemux->media_caps)) {
+     /* digested all data, show what we have */
+     qtdemux_prepare_streams (qtdemux);
++    QTDEMUX_EXPOSE_LOCK (qtdemux);
+     ret = qtdemux_expose_streams (qtdemux);
++    QTDEMUX_EXPOSE_UNLOCK (qtdemux);
+ 
+     qtdemux->state = QTDEMUX_STATE_MOVIE;
+     GST_DEBUG_OBJECT (qtdemux, "switching state to STATE_MOVIE (%d)",
+@@ -6831,7 +6850,9 @@ gst_qtdemux_process_adapter (GstQTDemux
+             qtdemux_node_dump (demux, demux->moov_node);
+             qtdemux_parse_tree (demux);
+             qtdemux_prepare_streams (demux);
++            QTDEMUX_EXPOSE_LOCK (demux);
+             qtdemux_expose_streams (demux);
++            QTDEMUX_EXPOSE_UNLOCK (demux);
+ 
+             demux->got_moov = TRUE;
+             gst_qtdemux_check_send_pending_segment (demux);
+@@ -6936,7 +6957,9 @@ gst_qtdemux_process_adapter (GstQTDemux
+                   gst_event_set_seqnum (demux->pending_newsegment,
+                       demux->segment_seqnum);
+               }
++              QTDEMUX_EXPOSE_LOCK (demux);
+               qtdemux_expose_streams (demux);
++              QTDEMUX_EXPOSE_UNLOCK (demux);
+             }
+           } else {
+             GST_DEBUG_OBJECT (demux, "Discarding [moof]");
+@@ -12376,6 +12399,7 @@ qtdemux_update_streams (GstQTDemux * qtd
+   return TRUE;
+ }
+ 
++/* Must be called with expose lock */
+ static GstFlowReturn
+ qtdemux_expose_streams (GstQTDemux * qtdemux)
+ {
+Index: gst-plugins-good-1.12.2/gst/isomp4/qtdemux.h
+===================================================================
+--- gst-plugins-good-1.12.2.orig/gst/isomp4/qtdemux.h
++++ gst-plugins-good-1.12.2/gst/isomp4/qtdemux.h
+@@ -74,6 +74,9 @@ struct _GstQTDemux {
+ 
+   gboolean posted_redirect;
+ 
++  /* Protect pad exposing from flush event */
++  GMutex expose_lock;
++
+   /* list of QtDemuxStream */
+   GList *active_streams;
+   GList *old_streams;

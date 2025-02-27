@@ -1,0 +1,179 @@
+From e2d75939bbfbd73d665ff8905d06888240715d6d Mon Sep 17 00:00:00 2001
+From: Jan Schmidt <jan@centricular.com>
+Date: Sun, 26 May 2019 01:24:54 +1000
+Subject: [PATCH] qtdemux: Factor out svmi parsing. Fix bounds checking.
+
+Move the SVMI stereoscopic atom parsing out to a helper
+function to shrink qtdemux_parse_trak a bit.
+
+Add a bounds check that the received atom is large enough
+before parsing it.
+
+Add a note to the atom parser that svmi comes from the
+MPEG-A spec 23000-11.
+
+Part-of: <https://gitlab.freedesktop.org/gstreamer/gst-plugins-good/-/merge_requests/634>
+---
+ gst/isomp4/atoms.c   |   2 +
+ gst/isomp4/qtdemux.c | 117 +++++++++++++++++++++++++++++++--------------------
+ 2 files changed, 74 insertions(+), 45 deletions(-)
+
+This fixes CVE-2024-47545. Dependency Patch #2.
+
+Signed-off-by: Javier Campos <jcampos@mvista.com>
+
+Index: gst-plugins-good-1.12.2/gst/isomp4/atoms.c
+===================================================================
+--- gst-plugins-good-1.12.2.orig/gst/isomp4/atoms.c
++++ gst-plugins-good-1.12.2/gst/isomp4/atoms.c
+@@ -763,6 +763,8 @@ atom_stsz_clear (AtomSTSZ * stsz)
+   stsz->table_size = 0;
+ }
+ 
++/* svmi is specified in ISO 23000-11 (Stereoscopic video application format)
++ * MPEG-A */
+ static void
+ atom_stsc_init (AtomSTSC * stsc)
+ {
+Index: gst-plugins-good-1.12.2/gst/isomp4/qtdemux.c
+===================================================================
+--- gst-plugins-good-1.12.2.orig/gst/isomp4/qtdemux.c
++++ gst-plugins-good-1.12.2/gst/isomp4/qtdemux.c
+@@ -9902,6 +9902,75 @@ qtdemux_parse_protection_scheme_info (Gs
+   return TRUE;
+ }
+ 
++static gboolean
++qtdemux_parse_stereo_svmi_atom (GstQTDemux * qtdemux, QtDemuxStream * stream,
++    GNode * stbl)
++{
++  GNode *svmi;
++
++  /*parse svmi header if existing */
++  svmi = qtdemux_tree_get_child_by_type (stbl, FOURCC_svmi);
++  if (svmi) {
++    guint len = QT_UINT32 ((guint8 *) svmi->data);
++    guint32 version = QT_UINT32 ((guint8 *) svmi->data + 8);
++    if (!version) {
++      GstVideoMultiviewMode mode = GST_VIDEO_MULTIVIEW_MODE_NONE;
++      GstVideoMultiviewFlags flags = GST_VIDEO_MULTIVIEW_FLAGS_NONE;
++      guint8 frame_type, frame_layout;
++      guint32 stereo_mono_change_count;
++
++      if (len < 18)
++        return FALSE;
++
++      /* MPEG-A stereo video */
++      if (qtdemux->major_brand == FOURCC_ss02)
++        flags |= GST_VIDEO_MULTIVIEW_FLAGS_MIXED_MONO;
++
++      frame_type = QT_UINT8 ((guint8 *) svmi->data + 12);
++      frame_layout = QT_UINT8 ((guint8 *) svmi->data + 13) & 0x01;
++      stereo_mono_change_count = QT_UINT32 ((guint8 *) svmi->data + 14);
++
++      switch (frame_type) {
++        case 0:
++          mode = GST_VIDEO_MULTIVIEW_MODE_SIDE_BY_SIDE;
++          break;
++        case 1:
++          mode = GST_VIDEO_MULTIVIEW_MODE_ROW_INTERLEAVED;
++          break;
++        case 2:
++          mode = GST_VIDEO_MULTIVIEW_MODE_FRAME_BY_FRAME;
++          break;
++        case 3:
++          /* mode 3 is primary/secondary view sequence, ie
++           * left/right views in separate tracks. See section 7.2
++           * of ISO/IEC 23000-11:2009 */
++          /* In the future this might be supported using related
++           * streams, like an enhancement track - if files like this
++           * ever exist */
++          GST_FIXME_OBJECT (qtdemux,
++              "Implement stereo video in separate streams");
++      }
++
++      if ((frame_layout & 0x1) == 0)
++        flags |= GST_VIDEO_MULTIVIEW_FLAGS_RIGHT_VIEW_FIRST;
++
++      GST_LOG_OBJECT (qtdemux,
++          "StereoVideo: composition type: %u, is_left_first: %u",
++          frame_type, frame_layout);
++
++      if (stereo_mono_change_count > 1) {
++        GST_FIXME_OBJECT (qtdemux,
++            "Mixed-mono flags are not yet supported in qtdemux.");
++      }
++
++      stream->multiview_mode = mode;
++      stream->multiview_flags = flags;
++    }
++  }
++
++  return TRUE;
++}
++
+ /* parse the traks.
+  * With each track we associate a new QtDemuxStream that contains all the info
+  * about the trak.
+@@ -9926,7 +9995,6 @@ qtdemux_parse_trak (GstQTDemux * qtdemux
+   GNode *colr;
+   GNode *tref;
+   GNode *udta;
+-  GNode *svmi;
+   GNode *fiel;
+ 
+   QtDemuxStream *stream = NULL;
+@@ -10095,50 +10163,9 @@ qtdemux_parse_trak (GstQTDemux * qtdemux
+   if (!(stbl = qtdemux_tree_get_child_by_type (minf, FOURCC_stbl)))
+     goto corrupt_file;
+ 
+-  /*parse svmi header if existing */
+-  svmi = qtdemux_tree_get_child_by_type (stbl, FOURCC_svmi);
+-  if (svmi) {
+-    len = QT_UINT32 ((guint8 *) svmi->data);
+-    version = QT_UINT32 ((guint8 *) svmi->data + 8);
+-    if (!version) {
+-      GstVideoMultiviewMode mode = GST_VIDEO_MULTIVIEW_MODE_NONE;
+-      GstVideoMultiviewFlags flags = GST_VIDEO_MULTIVIEW_FLAGS_NONE;
+-      guint8 frame_type, frame_layout;
+-
+-      /* MPEG-A stereo video */
+-      if (qtdemux->major_brand == FOURCC_ss02)
+-        flags |= GST_VIDEO_MULTIVIEW_FLAGS_MIXED_MONO;
+-
+-      frame_type = QT_UINT8 ((guint8 *) svmi->data + 12);
+-      frame_layout = QT_UINT8 ((guint8 *) svmi->data + 13) & 0x01;
+-      switch (frame_type) {
+-        case 0:
+-          mode = GST_VIDEO_MULTIVIEW_MODE_SIDE_BY_SIDE;
+-          break;
+-        case 1:
+-          mode = GST_VIDEO_MULTIVIEW_MODE_ROW_INTERLEAVED;
+-          break;
+-        case 2:
+-          mode = GST_VIDEO_MULTIVIEW_MODE_FRAME_BY_FRAME;
+-          break;
+-        case 3:
+-          /* mode 3 is primary/secondary view sequence, ie
+-           * left/right views in separate tracks. See section 7.2
+-           * of ISO/IEC 23000-11:2009 */
+-          GST_FIXME_OBJECT (qtdemux,
+-              "Implement stereo video in separate streams");
+-      }
+-
+-      if ((frame_layout & 0x1) == 0)
+-        flags |= GST_VIDEO_MULTIVIEW_FLAGS_RIGHT_VIEW_FIRST;
+-
+-      GST_LOG_OBJECT (qtdemux,
+-          "StereoVideo: composition type: %u, is_left_first: %u",
+-          frame_type, frame_layout);
+-      stream->multiview_mode = mode;
+-      stream->multiview_flags = flags;
+-    }
+-  }
++  /* Parse out svmi (and later st3d/sv3d) atoms */
++  if (!qtdemux_parse_stereo_svmi_atom (qtdemux, stream, stbl))
++    goto corrupt_file;
+ 
+   /* parse rest of tkhd */
+   if (stream->subtype == FOURCC_vide) {

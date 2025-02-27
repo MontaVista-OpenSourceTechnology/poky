@@ -1,0 +1,31 @@
+From 7bd439efb57388272751570be964dbee16912dd1 Mon Sep 17 00:00:00 2001
+From: Mark Nauwelaerts <mnauw@users.sourceforge.net>
+Date: Wed, 19 Jul 2017 12:38:03 +0200
+Subject: [PATCH] qtdemux: preferably send open-ended segment rather than
+ repeated segment events
+
+---
+ gst/isomp4/qtdemux.c | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+This fixes CVE-2024-47597. Dependency Patch #4.
+
+Signed-off-by: Javier Campos <jcampos@mvista.com>
+
+Index: gst-plugins-good-1.12.2/gst/isomp4/qtdemux.c
+===================================================================
+--- gst-plugins-good-1.12.2.orig/gst/isomp4/qtdemux.c
++++ gst-plugins-good-1.12.2/gst/isomp4/qtdemux.c
+@@ -3066,7 +3066,11 @@ check_update_duration (GstQTDemux * qtde
+             "Updating stream #%d duration to %" GST_TIME_FORMAT, i,
+             GST_TIME_ARGS (duration));
+         stream->duration = movdur;
+-        if (stream->dummy_segment) {
++        /* internal duration tracking state has been updated above, so */
++        /* preserve an open-ended dummy segment rather than repeatedly updating
++         * it and spamming downstream accordingly with segment events */
++        if (stream->dummy_segment &&
++            GST_CLOCK_TIME_IS_VALID (stream->segments[0].duration)) {
+           /* Update all dummy values to new duration */
+           stream->segments[0].stop_time = duration;
+           stream->segments[0].duration = duration;

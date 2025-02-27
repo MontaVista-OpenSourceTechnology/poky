@@ -1,0 +1,27 @@
+From 80f391aa3b3721c6c4e1ea439b7dbc05d2ef5504 Mon Sep 17 00:00:00 2001
+From: Seungha Yang <seungha.yang@navercorp.com>
+Date: Tue, 8 May 2018 18:22:58 +0900
+Subject: [PATCH] qtdemux: Add parentheses in macro
+
+https://bugzilla.gnome.org/show_bug.cgi?id=684790
+---
+ gst/isomp4/qtdemux.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+This fixes CVE-2024-47597. Dependency Patch #2.
+
+Signed-off-by: Javier Campos <jcampos@mvista.com>
+
+Index: gst-plugins-good-1.12.2/gst/isomp4/qtdemux.c
+===================================================================
+--- gst-plugins-good-1.12.2.orig/gst/isomp4/qtdemux.c
++++ gst-plugins-good-1.12.2/gst/isomp4/qtdemux.c
+@@ -97,7 +97,7 @@
+ 
+ #define QTDEMUX_TREE_NODE_FOURCC(n) (QT_FOURCC(((guint8 *) (n)->data) + 4))
+ 
+-#define STREAM_IS_EOS(s) (s->time_position == GST_CLOCK_TIME_NONE)
++#define STREAM_IS_EOS(s) ((s)->time_position == GST_CLOCK_TIME_NONE)
+ 
+ #define ABSDIFF(x, y) ( (x) > (y) ? ((x) - (y)) : ((y) - (x)) )
+ 

@@ -1,0 +1,267 @@
+From aca8d3243715a486af5bf5f0689610660b11d947 Mon Sep 17 00:00:00 2001
+From: Seungha Yang <seungha.yang@navercorp.com>
+Date: Tue, 8 May 2018 18:44:15 +0900
+Subject: [PATCH] qtdemux: Adjust the number of args of some functions
+
+To be used with g_list_free_full in the next patch
+
+https://bugzilla.gnome.org/show_bug.cgi?id=684790
+---
+ gst/isomp4/qtdemux.c | 68 ++++++++++++++++++++++++++--------------------------
+ 1 file changed, 34 insertions(+), 34 deletions(-)
+
+This fixes CVE-2024-47597. Dependency Patch #3.
+
+Signed-off-by: Javier Campos <jcampos@mvista.com>
+
+Index: gst-plugins-good-1.12.2/gst/isomp4/qtdemux.c
+===================================================================
+--- gst-plugins-good-1.12.2.orig/gst/isomp4/qtdemux.c
++++ gst-plugins-good-1.12.2/gst/isomp4/qtdemux.c
+@@ -260,6 +260,8 @@ struct _QtDemuxStream
+ {
+   GstPad *pad;
+ 
++  GstQTDemux *demux;
++
+   QtDemuxStreamStsdEntry *stsd_entries;
+   guint stsd_entries_length;
+   guint cur_stsd_entry_index;
+@@ -560,10 +562,8 @@ static GstCaps *qtdemux_generic_caps (Gs
+ static gboolean qtdemux_parse_samples (GstQTDemux * qtdemux,
+     QtDemuxStream * stream, guint32 n);
+ static GstFlowReturn qtdemux_expose_streams (GstQTDemux * qtdemux);
+-static void gst_qtdemux_stream_free (GstQTDemux * qtdemux,
+-    QtDemuxStream * stream);
+-static void gst_qtdemux_stream_clear (GstQTDemux * qtdemux,
+-    QtDemuxStream * stream);
++static void gst_qtdemux_stream_free (QtDemuxStream * stream);
++static void gst_qtdemux_stream_clear (QtDemuxStream * stream);
+ static void gst_qtdemux_remove_stream (GstQTDemux * qtdemux, int index);
+ static GstFlowReturn qtdemux_prepare_streams (GstQTDemux * qtdemux);
+ static void qtdemux_do_allocation (GstQTDemux * qtdemux,
+@@ -1908,11 +1908,12 @@ gst_qtdemux_find_sample (GstQTDemux * qt
+ }
+ 
+ static QtDemuxStream *
+-_create_stream (void)
++_create_stream (GstQTDemux * demux)
+ {
+   QtDemuxStream *stream;
+ 
+   stream = g_new0 (QtDemuxStream, 1);
++  stream->demux = demux;
+   /* new streams always need a discont */
+   stream->discont = TRUE;
+   /* we enable clipping for raw audio/video streams */
+@@ -1971,7 +1972,7 @@ gst_qtdemux_setcaps (GstQTDemux * demux,
+       /* TODO update when stream changes during playback */
+ 
+       if (demux->n_streams == 0) {
+-        stream = _create_stream ();
++        stream = _create_stream (demux);
+         demux->streams[demux->n_streams] = stream;
+         demux->n_streams = 1;
+         /* mss has no stsd/stsd entry, use id 0 as default */
+@@ -2100,7 +2101,7 @@ gst_qtdemux_reset (GstQTDemux * qtdemux,
+ 
+   if (hard) {
+     for (n = 0; n < qtdemux->n_streams; n++) {
+-      gst_qtdemux_stream_free (qtdemux, qtdemux->streams[n]);
++      gst_qtdemux_stream_free (qtdemux->streams[n]);
+       qtdemux->streams[n] = NULL;
+     }
+     qtdemux->n_streams = 0;
+@@ -2120,7 +2121,7 @@ gst_qtdemux_reset (GstQTDemux * qtdemux,
+   } else if (qtdemux->mss_mode) {
+     gst_flow_combiner_reset (qtdemux->flowcombiner);
+     for (n = 0; n < qtdemux->n_streams; n++)
+-      gst_qtdemux_stream_clear (qtdemux, qtdemux->streams[n]);
++      gst_qtdemux_stream_clear (qtdemux->streams[n]);
+   } else {
+     gst_flow_combiner_reset (qtdemux->flowcombiner);
+     for (n = 0; n < qtdemux->n_streams; n++) {
+@@ -2455,8 +2456,7 @@ gst_qtdemux_stbl_free (QtDemuxStream * s
+ }
+ 
+ static void
+-gst_qtdemux_stream_flush_segments_data (GstQTDemux * qtdemux,
+-    QtDemuxStream * stream)
++gst_qtdemux_stream_flush_segments_data (QtDemuxStream * stream)
+ {
+   g_free (stream->segments);
+   stream->segments = NULL;
+@@ -2465,8 +2465,7 @@ gst_qtdemux_stream_flush_segments_data (
+ }
+ 
+ static void
+-gst_qtdemux_stream_flush_samples_data (GstQTDemux * qtdemux,
+-    QtDemuxStream * stream)
++gst_qtdemux_stream_flush_samples_data (QtDemuxStream * stream)
+ {
+   g_free (stream->samples);
+   stream->samples = NULL;
+@@ -2488,7 +2487,7 @@ gst_qtdemux_stream_flush_samples_data (G
+ }
+ 
+ static void
+-gst_qtdemux_stream_clear (GstQTDemux * qtdemux, QtDemuxStream * stream)
++gst_qtdemux_stream_clear (QtDemuxStream * stream)
+ {
+   gint i;
+   if (stream->allocator)
+@@ -2530,15 +2529,15 @@ gst_qtdemux_stream_clear (GstQTDemux * q
+   g_queue_foreach (&stream->protection_scheme_event_queue,
+       (GFunc) gst_event_unref, NULL);
+   g_queue_clear (&stream->protection_scheme_event_queue);
+-  gst_qtdemux_stream_flush_segments_data (qtdemux, stream);
+-  gst_qtdemux_stream_flush_samples_data (qtdemux, stream);
++  gst_qtdemux_stream_flush_segments_data (stream);
++  gst_qtdemux_stream_flush_samples_data (stream);
+ }
+ 
+ static void
+-gst_qtdemux_stream_reset (GstQTDemux * qtdemux, QtDemuxStream * stream)
++gst_qtdemux_stream_reset (QtDemuxStream * stream)
+ {
+   gint i;
+-  gst_qtdemux_stream_clear (qtdemux, stream);
++  gst_qtdemux_stream_clear (stream);
+   for (i = 0; i < stream->stsd_entries_length; i++) {
+     QtDemuxStreamStsdEntry *entry = &stream->stsd_entries[i];
+     if (entry->caps) {
+@@ -2553,13 +2552,14 @@ gst_qtdemux_stream_reset (GstQTDemux * q
+ 
+ 
+ static void
+-gst_qtdemux_stream_free (GstQTDemux * qtdemux, QtDemuxStream * stream)
++gst_qtdemux_stream_free (QtDemuxStream * stream)
+ {
+-  gst_qtdemux_stream_reset(qtdemux, stream);
++  gst_qtdemux_stream_reset(stream);
+   gst_tag_list_unref (stream->stream_tags);
+   if (stream->pad) {
+-    gst_element_remove_pad (GST_ELEMENT_CAST (qtdemux), stream->pad);
+-    gst_flow_combiner_remove_pad (qtdemux->flowcombiner, stream->pad);
++    GstQTDemux *demux = stream->demux;
++    gst_element_remove_pad (GST_ELEMENT_CAST (demux), stream->pad);
++    gst_flow_combiner_remove_pad (demux->flowcombiner, stream->pad);
+   }
+   g_free (stream);
+ }
+@@ -2569,7 +2569,7 @@ gst_qtdemux_remove_stream (GstQTDemux *
+ {
+   g_assert (i >= 0 && i < qtdemux->n_streams && qtdemux->streams[i] != NULL);
+ 
+-  gst_qtdemux_stream_free (qtdemux, qtdemux->streams[i]);
++  gst_qtdemux_stream_free (qtdemux->streams[i]);
+   qtdemux->streams[i] = qtdemux->streams[qtdemux->n_streams - 1];
+   qtdemux->streams[qtdemux->n_streams - 1] = NULL;
+   qtdemux->n_streams--;
+@@ -3975,7 +3975,7 @@ qtdemux_parse_moof (GstQTDemux * qtdemux
+       goto lost_offset;
+ 
+     if (qtdemux->upstream_format_is_time)
+-      gst_qtdemux_stream_flush_samples_data (qtdemux, stream);
++      gst_qtdemux_stream_flush_samples_data (stream);
+ 
+     /* initialise moof sample data */
+     stream->n_samples_moof = 0;
+@@ -6562,7 +6562,7 @@ gst_qtdemux_chain (GstPad * sinkpad, Gst
+     if (!is_gap_input && demux->fragmented && demux->segment.rate < 0) {
+       gst_qtdemux_process_adapter (demux, TRUE);
+       for (i = 0; i < demux->n_streams; i++)
+-        gst_qtdemux_stream_flush_samples_data (demux, demux->streams[i]);
++        gst_qtdemux_stream_flush_samples_data (demux->streams[i]);
+     }
+   }
+ 
+@@ -10040,7 +10040,7 @@ qtdemux_parse_trak (GstQTDemux * qtdemux
+   if (!qtdemux->got_moov) {
+     if (qtdemux_find_stream (qtdemux, track_id))
+       goto existing_stream;
+-    stream = _create_stream ();
++    stream = _create_stream (qtdemux);
+     stream->track_id = track_id;
+     new_stream = TRUE;
+   } else {
+@@ -10051,7 +10051,7 @@ qtdemux_parse_trak (GstQTDemux * qtdemux
+     }
+ 
+     /* reset reused stream */
+-    gst_qtdemux_stream_reset(qtdemux, stream);
++    gst_qtdemux_stream_reset(stream);
+   }
+   /* need defaults for fragments */
+   qtdemux_parse_trex (qtdemux, stream, &dummy, &dummy, &dummy);
+@@ -10146,7 +10146,7 @@ qtdemux_parse_trak (GstQTDemux * qtdemux
+           stream->duration, stream->timescale, qtdemux->duration,
+           qtdemux->timescale);
+       if (new_stream)
+-        gst_qtdemux_stream_free (qtdemux, stream);
++        gst_qtdemux_stream_free (stream);
+       return TRUE;
+     }
+   }
+@@ -10203,7 +10203,7 @@ qtdemux_parse_trak (GstQTDemux * qtdemux
+     /* .. but skip stream with empty stsd produced by some Vivotek cameras */
+     if (stream->subtype == FOURCC_vivo) {
+       if (new_stream)
+-        gst_qtdemux_stream_free (qtdemux, stream);
++        gst_qtdemux_stream_free (stream);
+       return TRUE;
+     } else {
+       goto corrupt_file;
+@@ -12004,7 +12004,7 @@ skip_track:
+   {
+     GST_INFO_OBJECT (qtdemux, "skip disabled track");
+     if (new_stream)
+-      gst_qtdemux_stream_free (qtdemux, stream);
++      gst_qtdemux_stream_free (stream);
+     return TRUE;
+   }
+ corrupt_file:
+@@ -12012,14 +12012,14 @@ corrupt_file:
+     GST_ELEMENT_ERROR (qtdemux, STREAM, DEMUX,
+         (_("This file is corrupt and cannot be played.")), (NULL));
+     if (new_stream)
+-      gst_qtdemux_stream_free (qtdemux, stream);
++      gst_qtdemux_stream_free (stream);
+     return FALSE;
+   }
+ error_encrypted:
+   {
+     GST_ELEMENT_ERROR (qtdemux, STREAM, DECRYPT, (NULL), (NULL));
+     if (new_stream)
+-      gst_qtdemux_stream_free (qtdemux, stream);
++      gst_qtdemux_stream_free (stream);
+     return FALSE;
+   }
+ samples_failed:
+@@ -12029,7 +12029,7 @@ segments_failed:
+     /* free stbl sub-atoms */
+     gst_qtdemux_stbl_free (stream);
+     if (new_stream)
+-      gst_qtdemux_stream_free (qtdemux, stream);
++      gst_qtdemux_stream_free (stream);
+     return FALSE;
+   }
+ existing_stream:
+@@ -12037,7 +12037,7 @@ existing_stream:
+     GST_INFO_OBJECT (qtdemux, "stream with track id %i already exists",
+         track_id);
+     if (new_stream)
+-      gst_qtdemux_stream_free (qtdemux, stream);
++      gst_qtdemux_stream_free (stream);
+     return TRUE;
+   }
+ unknown_stream:
+@@ -12045,7 +12045,7 @@ unknown_stream:
+     GST_INFO_OBJECT (qtdemux, "unknown subtype %" GST_FOURCC_FORMAT,
+         GST_FOURCC_ARGS (stream->subtype));
+     if (new_stream)
+-      gst_qtdemux_stream_free (qtdemux, stream);
++      gst_qtdemux_stream_free (stream);
+     return TRUE;
+   }
+ too_many_streams:

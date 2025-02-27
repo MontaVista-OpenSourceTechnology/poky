@@ -1,0 +1,165 @@
+From 553607756bcd98d353e83b1d823663910f24f6ec Mon Sep 17 00:00:00 2001
+From: Seungha Yang <seungha.yang@navercorp.com>
+Date: Tue, 8 May 2018 20:09:10 +0900
+Subject: [PATCH] qtdemux: Create stream whenever got new moov
+
+Whenever demux got moov, demux will create new stream. Only exception is
+duplicated track-id in a moov box. In that case the first stream
+will be accepted. This patch is pre-work for rework of moov handling.
+
+https://bugzilla.gnome.org/show_bug.cgi?id=684790
+---
+ gst/isomp4/qtdemux.c | 67 ++++++++++++++++++++--------------------------------
+ 1 file changed, 25 insertions(+), 42 deletions(-)
+
+This fixes CVE-2024-47597. Dependency Patch #9.
+
+Signed-off-by: Javier Campos <jcampos@mvista.com>
+
+Index: gst-plugins-good-1.12.2/gst/isomp4/qtdemux.c
+===================================================================
+--- gst-plugins-good-1.12.2.orig/gst/isomp4/qtdemux.c
++++ gst-plugins-good-1.12.2/gst/isomp4/qtdemux.c
+@@ -10053,6 +10053,12 @@ qtdemux_parse_stereo_svmi_atom (GstQTDem
+   return TRUE;
+ }
+ 
++static gint
++qtdemux_track_id_compare_func (QtDemuxStream * stream1, QtDemuxStream * stream2)
++{
++  return (gint) stream1->track_id - (gint) stream2->track_id;
++}
++
+ /* parse the traks.
+  * With each track we associate a new QtDemuxStream that contains all the info
+  * about the trak.
+@@ -10080,7 +10086,6 @@ qtdemux_parse_trak (GstQTDemux * qtdemux
+   GNode *fiel;
+ 
+   QtDemuxStream *stream = NULL;
+-  gboolean new_stream = FALSE;
+   gchar *codec = NULL;
+   const guint8 *stsd_data;
+   const guint8 *stsd_entry_data;
+@@ -10110,22 +10115,13 @@ qtdemux_parse_trak (GstQTDemux * qtdemux
+       !gst_byte_reader_get_uint32_be (&tkhd, &track_id))
+     goto corrupt_file;
+ 
+-  if (!qtdemux->got_moov) {
+-    if (qtdemux_find_stream (qtdemux, track_id))
+-      goto existing_stream;
+-    stream = _create_stream (qtdemux, track_id);
+-    stream->track_id = track_id;
+-    new_stream = TRUE;
+-  } else {
+-    stream = qtdemux_find_stream (qtdemux, track_id);
+-    if (!stream) {
+-      GST_WARNING_OBJECT (qtdemux, "Stream not found, going to ignore it");
+-      goto skip_track;
+-    }
++  /* Check if current moov has duplicated track_id */
++  if (qtdemux_find_stream (qtdemux, track_id))
++    goto existing_stream;
++
++  stream = _create_stream (qtdemux, track_id);
++  stream->stream_tags = gst_tag_list_make_writable (stream->stream_tags);
+ 
+-    /* reset reused stream */
+-    gst_qtdemux_stream_reset(stream);
+-  }
+   /* need defaults for fragments */
+   qtdemux_parse_trex (qtdemux, stream, &dummy, &dummy, &dummy);
+ 
+@@ -10218,8 +10214,7 @@ qtdemux_parse_trak (GstQTDemux * qtdemux
+           "found, assuming preview image or something; skipping track",
+           stream->duration, stream->timescale, qtdemux->duration,
+           qtdemux->timescale);
+-      if (new_stream)
+-        gst_qtdemux_stream_free (stream);
++      gst_qtdemux_stream_free (stream);
+       return TRUE;
+     }
+   }
+@@ -10275,8 +10270,7 @@ qtdemux_parse_trak (GstQTDemux * qtdemux
+   if (stsd_len < 24) {
+     /* .. but skip stream with empty stsd produced by some Vivotek cameras */
+     if (stream->subtype == FOURCC_vivo) {
+-      if (new_stream)
+-        gst_qtdemux_stream_free (stream);
++      gst_qtdemux_stream_free (stream);
+       return TRUE;
+     } else {
+       goto corrupt_file;
+@@ -12060,36 +12054,29 @@ qtdemux_parse_trak (GstQTDemux * qtdemux
+     qtdemux_parse_udta (qtdemux, stream->stream_tags, udta);
+   }
+ 
+-  /* now we are ready to add the stream */
+-  if (!qtdemux->got_moov) {
+-    qtdemux->active_streams = g_list_append (qtdemux->active_streams, stream);
+-    qtdemux->n_streams++;
+-    GST_DEBUG_OBJECT (qtdemux, "n_streams is now %d", qtdemux->n_streams);
+-  }
++  /* Insert and sort new stream in track-id order.
++   * This will help in comparing old/new streams during stream update check */
++  qtdemux->active_streams =
++      g_list_insert_sorted (qtdemux->active_streams, stream,
++      (GCompareFunc) qtdemux_track_id_compare_func);
++  qtdemux->n_streams++;
++  GST_DEBUG_OBJECT (qtdemux, "n_streams is now %d", qtdemux->n_streams);
+ 
+   return TRUE;
+ 
+ /* ERRORS */
+-skip_track:
+-  {
+-    GST_INFO_OBJECT (qtdemux, "skip disabled track");
+-    if (new_stream)
+-      gst_qtdemux_stream_free (stream);
+-    return TRUE;
+-  }
+ corrupt_file:
+   {
+     GST_ELEMENT_ERROR (qtdemux, STREAM, DEMUX,
+         (_("This file is corrupt and cannot be played.")), (NULL));
+-    if (new_stream)
++    if (stream)
+       gst_qtdemux_stream_free (stream);
+     return FALSE;
+   }
+ error_encrypted:
+   {
+     GST_ELEMENT_ERROR (qtdemux, STREAM, DECRYPT, (NULL), (NULL));
+-    if (new_stream)
+-      gst_qtdemux_stream_free (stream);
++    gst_qtdemux_stream_free (stream);
+     return FALSE;
+   }
+ samples_failed:
+@@ -12098,24 +12085,20 @@ segments_failed:
+     /* we posted an error already */
+     /* free stbl sub-atoms */
+     gst_qtdemux_stbl_free (stream);
+-    if (new_stream)
+-      gst_qtdemux_stream_free (stream);
++    gst_qtdemux_stream_free (stream);
+     return FALSE;
+   }
+ existing_stream:
+   {
+     GST_INFO_OBJECT (qtdemux, "stream with track id %i already exists",
+         track_id);
+-    if (new_stream)
+-      gst_qtdemux_stream_free (stream);
+     return TRUE;
+   }
+ unknown_stream:
+   {
+     GST_INFO_OBJECT (qtdemux, "unknown subtype %" GST_FOURCC_FORMAT,
+         GST_FOURCC_ARGS (stream->subtype));
+-    if (new_stream)
+-      gst_qtdemux_stream_free (stream);
++    gst_qtdemux_stream_free (stream);
+     return TRUE;
+   }
+ }

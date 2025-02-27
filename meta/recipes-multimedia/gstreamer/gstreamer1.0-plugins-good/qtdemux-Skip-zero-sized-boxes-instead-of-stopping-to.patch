@@ -1,0 +1,92 @@
+
+m d4bab55077c6a77bd80cb12a8b0d28020ef412a9 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian@centricular.com>
+Date: Tue, 24 Sep 2024 09:50:34 +0300
+Subject: [PATCH] qtdemux: Skip zero-sized boxes instead of stopping to look at
+ further boxes
+
+A zero-sized box is not really a problem and can be skipped to look at any
+possibly following ones.
+
+BMD ATEM devices specifically write a zero-sized bmdc box in the sample
+description, followed by the avcC box in case of h264. Previously the avcC box
+would simply not be read at all and the file would be unplayable.
+
+Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/7564>
+---
+ subprojects/gst-plugins-good/gst/isomp4/qtdemux.c | 54 +++++++++++++++--------
+ 1 file changed, 36 insertions(+), 18 deletions(-)
+
+This fixes CVE-2024-47545. Dependency Patch #4.
+
+Note: There is not support for AV1 demuxing and VP9 codec on this version. Skipping those changes.
+
+Signed-off-by: Javier Campos <jcampos@mvista.com>
+Index: gst-plugins-good-1.12.2/gst/isomp4/qtdemux.c
+===================================================================
+--- gst-plugins-good-1.12.2.orig/gst/isomp4/qtdemux.c
++++ gst-plugins-good-1.12.2/gst/isomp4/qtdemux.c
+@@ -10554,9 +10554,12 @@ qtdemux_parse_trak (GstQTDemux * qtdemux
+               else
+                 size = len - 0x8;
+ 
+-              if (size < 1)
+-                /* No real data, so break out */
+-                break;
++              /* No real data, so skip */
++              if (size < 1) {
++                len -= 8;
++                avc_data += 8;
++                continue;
++              }
+ 
+               switch (QT_FOURCC (avc_data + 0x4)) {
+                 case FOURCC_avcC:
+@@ -10669,9 +10672,12 @@ qtdemux_parse_trak (GstQTDemux * qtdemux
+               else
+                 size = len - 0x8;
+ 
+-              if (size < 1)
+-                /* No real data, so break out */
+-                break;
++              /* No real data, so skip */
++              if (size < 1) {
++                len -= 8;
++                hevc_data += 8;
++                continue;
++              }
+ 
+               switch (QT_FOURCC (hevc_data + 0x4)) {
+                 case FOURCC_hvcC:
+@@ -11093,9 +11099,12 @@ qtdemux_parse_trak (GstQTDemux * qtdemux
+               else
+                 size = len - 8;
+ 
+-              if (size < 1)
+-                /* No real data, so break out */
+-                break;
++              /* No real data, so skip */
++              if (size < 1) {
++                len -= 8;
++                vc1_data += 8;
++                continue;
++              }
+ 
+               switch (QT_FOURCC (vc1_data + 0x4)) {
+                 case GST_MAKE_FOURCC ('d', 'v', 'c', '1'):
+@@ -11408,9 +11417,12 @@ qtdemux_parse_trak (GstQTDemux * qtdemux
+             else
+               size = len - 8;
+ 
+-            if (size < 1)
+-              /* No real data, so break out */
+-              break;
++            /* No real data, so skip */
++            if (size < 1) {
++              len -= 8;
++              wfex_data += 8;
++              continue;
++            }
+ 
+             switch (QT_FOURCC (wfex_data + 4)) {
+               case GST_MAKE_FOURCC ('w', 'f', 'e', 'x'):

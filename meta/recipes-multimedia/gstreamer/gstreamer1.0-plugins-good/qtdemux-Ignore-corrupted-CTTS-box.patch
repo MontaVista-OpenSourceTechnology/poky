@@ -1,0 +1,41 @@
+From 5d542030dbe8cdd8f21f87a196a270cc1557f06f Mon Sep 17 00:00:00 2001
+From: Seungha Yang <seungha.yang@navercorp.com>
+Date: Thu, 1 Nov 2018 20:37:12 +0900
+Subject: [PATCH] qtdemux: Ignore corrupted CTTS box
+
+If ctts (CompositionOffsetBox) has larger sample_offset
+(offset between PTS and DTS) than (2 * duration) of the stream,
+assume the ctts box to be corrupted and ignore the box.
+
+https://bugzilla.gnome.org/show_bug.cgi?id=797262
+---
+ gst/isomp4/qtdemux.c | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
+
+This fixes CVE-2024-47598. Dependency Patch #1.
+
+Signed-off-by: Javier Campos <jcampos@mvista.com>
+
+Index: gst-plugins-good-1.12.2/gst/isomp4/qtdemux.c
+===================================================================
+--- gst-plugins-good-1.12.2.orig/gst/isomp4/qtdemux.c
++++ gst-plugins-good-1.12.2/gst/isomp4/qtdemux.c
+@@ -8445,6 +8445,18 @@ qtdemux_stbl_init (GstQTDemux * qtdemux,
+ 
+         gst_byte_reader_skip_unchecked (&stream->ctts, 4);
+         offset = gst_byte_reader_get_int32_be_unchecked (&stream->ctts);
++        /* HACK: if sample_offset is larger than 2 * duration, ignore the box.
++         * slightly inaccurate PTS could be more usable than corrupted one */
++        if (G_UNLIKELY ((ABS (offset) / 2) > stream->duration)) {
++          GST_WARNING_OBJECT (qtdemux,
++              "Ignore corrupted ctts, sample_offset %" G_GINT32_FORMAT
++              " larger than duration %" G_GUINT64_FORMAT,
++              offset, stream->duration);
++
++          stream->cslg_shift = 0;
++          stream->ctts_present = FALSE;
++          return TRUE;
++        }
+ 
+         if (offset < cslg_least)
+           cslg_least = offset;

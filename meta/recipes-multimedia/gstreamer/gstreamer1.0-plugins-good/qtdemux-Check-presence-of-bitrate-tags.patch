@@ -1,0 +1,45 @@
+From d08e155ec8e3208ccb66ce5dc7452310c2e46668 Mon Sep 17 00:00:00 2001
+From: Edward Hervey <edward@centricular.com>
+Date: Thu, 23 Nov 2017 07:57:44 +0100
+Subject: [PATCH] qtdemux: Check presence of bitrate tags
+
+Check whether the tag was present before printing it out
+
+CID #1418501
+---
+ gst/isomp4/qtdemux.c | 18 +++++++++---------
+ 1 file changed, 9 insertions(+), 9 deletions(-)
+
+This fixes CVE-2024-47597. Dependency Patch #6.
+
+Signed-off-by: Javier Campos <jcampos@mvista.com>
+
+Index: gst-plugins-good-1.12.2/gst/isomp4/qtdemux.c
+===================================================================
+--- gst-plugins-good-1.12.2.orig/gst/isomp4/qtdemux.c
++++ gst-plugins-good-1.12.2/gst/isomp4/qtdemux.c
+@@ -12129,15 +12129,15 @@ gst_qtdemux_guess_bitrate (GstQTDemux *
+         /* retrieve bitrate, prefer avg then max */
+         bitrate = 0;
+         if (qtdemux->streams[i]->stream_tags) {
+-          gst_tag_list_get_uint (qtdemux->streams[i]->stream_tags,
+-              GST_TAG_MAXIMUM_BITRATE, &bitrate);
+-          GST_DEBUG_OBJECT (qtdemux, "max-bitrate: %u", bitrate);
+-          gst_tag_list_get_uint (qtdemux->streams[i]->stream_tags,
+-              GST_TAG_NOMINAL_BITRATE, &bitrate);
+-          GST_DEBUG_OBJECT (qtdemux, "nominal-bitrate: %u", bitrate);
+-          gst_tag_list_get_uint (qtdemux->streams[i]->stream_tags,
+-              GST_TAG_BITRATE, &bitrate);
+-          GST_DEBUG_OBJECT (qtdemux, "bitrate: %u", bitrate);
++          if (gst_tag_list_get_uint (qtdemux->streams[i]->stream_tags,
++                  GST_TAG_MAXIMUM_BITRATE, &bitrate))
++            GST_DEBUG_OBJECT (qtdemux, "max-bitrate: %u", bitrate);
++          if (gst_tag_list_get_uint (qtdemux->streams[i]->stream_tags,
++                  GST_TAG_NOMINAL_BITRATE, &bitrate))
++            GST_DEBUG_OBJECT (qtdemux, "nominal-bitrate: %u", bitrate);
++          if (gst_tag_list_get_uint (qtdemux->streams[i]->stream_tags,
++                  GST_TAG_BITRATE, &bitrate))
++            GST_DEBUG_OBJECT (qtdemux, "bitrate: %u", bitrate);
+         }
+         if (bitrate)
+           sum_bitrate += bitrate;
