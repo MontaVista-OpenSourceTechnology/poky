@@ -2,7 +2,7 @@ require ruby.inc
 
 DEPENDS_append_libc-musl = " libucontext"
 
-PR .= ".4"
+PR .= ".5"
 SRC_URI += " \
            file://remove_has_include_macros.patch \
            file://run-ptest \
@@ -12,6 +12,7 @@ SRC_URI += " \
            file://CVE-2021-33621.patch \
            file://CVE-2024-27281.patch \
            file://CVE-2024-27282.patch \
+           file://CVE-2025-27220.patch \
            "
 
 SRC_URI[md5sum] = "f972fb0cce662966bec10d5c5f32d042"
