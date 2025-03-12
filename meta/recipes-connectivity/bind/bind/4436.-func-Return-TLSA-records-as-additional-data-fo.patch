@@ -1,0 +1,328 @@
+From bb900e62bfb89a2dfa3e2613e30c27e88495036b Mon Sep 17 00:00:00 2001
+From: Mark Andrews <marka@isc.org>
+Date: Fri, 12 Aug 2016 10:03:23 +1000
+Subject: [PATCH] 4436.   [func]          Return TLSA records as additional
+ data for MX and SRV                         lookups. [RT #42894]
+
+---
+ CHANGES                                     |  3 +++
+ bin/tests/system/additional/ns1/mx.db       | 13 +++++++++++
+ bin/tests/system/additional/ns1/named4.conf | 35 +++++++++++++++++++++++++++++
+ bin/tests/system/additional/ns1/srv.db      | 13 +++++++++++
+ bin/tests/system/additional/tests.sh        | 33 +++++++++++++++++++++++++--
+ lib/dns/include/dns/name.h                  | 16 +++++++++++++
+ lib/dns/rdata/generic/mx_15.c               | 24 +++++++++++++++++++-
+ lib/dns/rdata/in_1/srv_33.c                 | 35 ++++++++++++++++++++++++-----
+ 8 files changed, 164 insertions(+), 8 deletions(-)
+ create mode 100644 bin/tests/system/additional/ns1/mx.db
+ create mode 100644 bin/tests/system/additional/ns1/named4.conf
+ create mode 100644 bin/tests/system/additional/ns1/srv.db
+
+This fixes CVE-2024-11187. Dependency Patch #3.
+
+Signed-off-by: Javier Campos <jcampos@mvista.com>
+
+Index: bind-9.10.5-P3/bin/tests/system/additional/ns1/mx.db
+===================================================================
+--- /dev/null
++++ bind-9.10.5-P3/bin/tests/system/additional/ns1/mx.db
+@@ -0,0 +1,13 @@
++; Copyright (C) 2016  Internet Systems Consortium, Inc. ("ISC")
++;
++; This Source Code Form is subject to the terms of the Mozilla Public
++; License, v. 2.0. If a copy of the MPL was not distributed with this
++; file, You can obtain one at http://mozilla.org/MPL/2.0/.
++
++$TTL 86400
++@	IN	SOA	ns1 hostmaster ( 2 8H 2H 4W 1D );
++		NS	ns1
++		MX	0 mail
++ns1		A	10.53.0.1
++mail		A	1.2.3.4
++_25._tcp.mail	TLSA	3 0 1 5B30F9602297D558EB719162C225088184FAA32CA45E1ED15DE58A21 D9FCE383
+Index: bind-9.10.5-P3/bin/tests/system/additional/ns1/named4.conf
+===================================================================
+--- /dev/null
++++ bind-9.10.5-P3/bin/tests/system/additional/ns1/named4.conf
+@@ -0,0 +1,35 @@
++/*
++ * Copyright (C) 2016  Internet Systems Consortium, Inc. ("ISC")
++ *
++ * This Source Code Form is subject to the terms of the Mozilla Public
++ * License, v. 2.0. If a copy of the MPL was not distributed with this
++ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
++ */
++
++options {
++	query-source address 10.53.0.1;
++	notify-source 10.53.0.1;
++	transfer-source 10.53.0.1;
++	recursion no;
++	port 5300;
++	pid-file "named.pid";
++	listen-on { 10.53.0.1; };
++	listen-on-v6 { none; };
++	notify no;
++};
++
++include "../../common/rndc.key";
++
++controls {
++	inet 10.53.0.1 port 9953 allow { any; } keys { rndc_key; };
++};
++
++zone "mx.example" {
++	type master;
++	file "mx.db";
++};
++
++zone "srv.example" {
++	type master;
++	file "srv.db";
++};
+Index: bind-9.10.5-P3/bin/tests/system/additional/ns1/srv.db
+===================================================================
+--- /dev/null
++++ bind-9.10.5-P3/bin/tests/system/additional/ns1/srv.db
+@@ -0,0 +1,13 @@
++; Copyright (C) 2016  Internet Systems Consortium, Inc. ("ISC")
++;
++; This Source Code Form is subject to the terms of the Mozilla Public
++; License, v. 2.0. If a copy of the MPL was not distributed with this
++; file, You can obtain one at http://mozilla.org/MPL/2.0/.
++
++$TTL 86400
++@	IN	SOA	ns1 hostmaster ( 2 8H 2H 4W 1D );
++		NS	ns1
++ns1		A	10.53.0.1
++_xmpp-client._tcp SRV     1 0 5222 server
++server		A	1.2.3.4
++_5222._tcp.server	TLSA	3 0 1 5B30F9602297D558EB719162C225088184FAA32CA45E1ED15DE58A21 D9FCE383
+Index: bind-9.10.5-P3/bin/tests/system/additional/tests.sh
+===================================================================
+--- bind-9.10.5-P3.orig/bin/tests/system/additional/tests.sh
++++ bind-9.10.5-P3/bin/tests/system/additional/tests.sh
+@@ -118,8 +118,9 @@ echo "I:testing with 'minimal-responses
+ minimal=no
+ dotests
+ 
+-echo "I:testing with 'minimal-any no;'"
+ n=`expr $n + 1`
++echo "I:testing with 'minimal-any no;' ($n)"
++ret=0
+ $DIG -t ANY www.rt.example @10.53.0.1 -p 5300 > dig.out.$n || ret=1
+ grep "ANSWER: 3, AUTHORITY: 1, ADDITIONAL: 2" dig.out.$n > /dev/null || ret=1
+ if [ $ret -eq 1 ] ; then
+@@ -131,13 +132,41 @@ cp ns1/named3.conf ns1/named.conf
+ $RNDC -c ../common/rndc.conf -s 10.53.0.1 -p 9953 reconfig 2>&1 | sed 's/^/I:ns1 /'
+ sleep 2
+ 
+-echo "I:testing with 'minimal-any yes;'"
+ n=`expr $n + 1`
++echo "I:testing with 'minimal-any yes;' ($n)"
++ret=0
+ $DIG -t ANY www.rt.example @10.53.0.1 -p 5300 > dig.out.$n || ret=1
+ grep "ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1" dig.out.$n > /dev/null || ret=1
+ if [ $ret -eq 1 ] ; then
+     echo "I: failed"; status=1
+ fi
++
++echo "I:reconfiguring server"
++cp ns1/named4.conf ns1/named.conf
++$RNDC -c ../common/rndc.conf -s 10.53.0.1 -p 9953 reconfig 2>&1 | sed 's/^/I:ns1 /'
++sleep 2
++
++n=`expr $n + 1`
++echo "I:testing returning TLSA records with MX query ($n)"
++ret=0
++$DIG -t mx mx.example @10.53.0.1 -p 5300 > dig.out.$n || ret=1
++grep "mx\.example\..*MX.0 mail\.mx\.example" dig.out.$n > /dev/null || ret=1
++grep "mail\.mx\.example\..*A.1\.2\.3\.4" dig.out.$n > /dev/null || ret=1
++grep "_25\._tcp\.mail\.mx\.example\..*TLSA.3 0 1 5B30F9602297D558EB719162C225088184FAA32CA45E1ED15DE58A21 D9FCE383" dig.out.$n > /dev/null || ret=1
++if [ $ret -eq 1 ] ; then
++    echo "I: failed"; status=1
++fi
++
++n=`expr $n + 1`
++echo "I:testing returning TLSA records with SRV query ($n)"
++ret=0
++$DIG -t srv _xmpp-client._tcp.srv.example @10.53.0.1 -p 5300 > dig.out.$n || ret=1
++grep "_xmpp-client\._tcp\.srv\.example\..*SRV.1 0 5222 server\.srv\.example" dig.out.$n > /dev/null || ret=1
++grep "server\.srv\.example\..*A.1\.2\.3\.4" dig.out.$n > /dev/null || ret=1
++grep "_5222\._tcp\.server\.srv\.example\..*TLSA.3 0 1 5B30F9602297D558EB719162C225088184FAA32CA45E1ED15DE58A21 D9FCE383" dig.out.$n > /dev/null || ret=1
++if [ $ret -eq 1 ] ; then
++    echo "I: failed"; status=1
++fi
+ 
+ echo "I:exit status: $status"
+ [ $status -eq 0 ] || exit 1
+Index: bind-9.10.5-P3/CHANGES
+===================================================================
+--- bind-9.10.5-P3.orig/CHANGES
++++ bind-9.10.5-P3/CHANGES
+@@ -339,6 +339,9 @@
+ 
+ 4441.	[cleanup]	Alphabetize host's help output. [RT #43031]
+ 
++4436.  [func]          Return TLSA records as additional data for MX and SRV
++                       lookups. [RT #42894]
++
+ 4435.	[tuning]	Only set IPV6_USE_MIN_MTU for UDP when the message
+ 			will not fit into a single IPv4 encapsulated IPv6
+ 			UDP packet when transmitted over a Ethernet link.
+Index: bind-9.10.5-P3/lib/dns/include/dns/name.h
+===================================================================
+--- bind-9.10.5-P3.orig/lib/dns/include/dns/name.h
++++ bind-9.10.5-P3/lib/dns/include/dns/name.h
+@@ -152,6 +152,22 @@ struct dns_name {
+ LIBDNS_EXTERNAL_DATA extern dns_name_t *dns_rootname;
+ LIBDNS_EXTERNAL_DATA extern dns_name_t *dns_wildcardname;
+ 
++#define DNS_NAME_INITNONABSOLUTE(A,B) { \
++	DNS_NAME_MAGIC, \
++	A, (sizeof(A) - 1), sizeof(B), \
++	DNS_NAMEATTR_READONLY, \
++	B, NULL, { (void *)-1, (void *)-1}, \
++	{NULL, NULL} \
++}
++
++#define DNS_NAME_INITABSOLUTE(A,B) { \
++	DNS_NAME_MAGIC, \
++	A, sizeof(A), sizeof(B), \
++	DNS_NAMEATTR_READONLY | DNS_NAME_ABSOLUTE, \
++	B, NULL, { (void *)-1, (void *)-1}, \
++	{NULL, NULL} \
++}
++
+ /*%
+  * Standard size of a wire format name
+  */
+Index: bind-9.10.5-P3/lib/dns/rdata/generic/mx_15.c
+===================================================================
+--- bind-9.10.5-P3.orig/lib/dns/rdata/generic/mx_15.c
++++ bind-9.10.5-P3/lib/dns/rdata/generic/mx_15.c
+@@ -26,6 +26,8 @@
+ 
+ #include <isc/net.h>
+ 
++#include <dns/fixedname.h>
++
+ #define RRTYPE_MX_ATTRIBUTES (0)
+ 
+ static isc_boolean_t
+@@ -251,8 +253,15 @@ freestruct_mx(ARGS_FREESTRUCT) {
+ 	mx->mctx = NULL;
+ }
+ 
++static unsigned char port25_offset[] = { 0, 3 };
++static unsigned char port25_ndata[] = "\003_25\004_tcp";
++static dns_name_t port25 =
++	 DNS_NAME_INITNONABSOLUTE(port25_ndata, port25_offset);
++
+ static inline isc_result_t
+ additionaldata_mx(ARGS_ADDLDATA) {
++	isc_result_t result;
++	dns_fixedname_t fixed;
+ 	dns_name_t name;
+ 	dns_offsets_t offsets;
+ 	isc_region_t region;
+@@ -264,7 +273,20 @@ additionaldata_mx(ARGS_ADDLDATA) {
+ 	isc_region_consume(&region, 2);
+ 	dns_name_fromregion(&name, &region);
+ 
+-	return ((add)(arg, &name, dns_rdatatype_a));
++	if (dns_name_equal(&name, dns_rootname))
++		return (ISC_R_SUCCESS);
++
++	result = (add)(arg, &name, dns_rdatatype_a);
++	if (result != ISC_R_SUCCESS)
++		return (result);
++
++	dns_fixedname_init(&fixed);
++	result = dns_name_concatenate(&port25, &name,
++				      dns_fixedname_name(&fixed), NULL);
++	if (result != ISC_R_SUCCESS)
++		return (ISC_R_SUCCESS);
++
++	return ((add)(arg, dns_fixedname_name(&fixed), dns_rdatatype_tlsa));
+ }
+ 
+ static inline isc_result_t
+Index: bind-9.10.5-P3/lib/dns/rdata/in_1/srv_33.c
+===================================================================
+--- bind-9.10.5-P3.orig/lib/dns/rdata/in_1/srv_33.c
++++ bind-9.10.5-P3/lib/dns/rdata/in_1/srv_33.c
+@@ -109,7 +109,7 @@ totext_in_srv(ARGS_TOTEXT) {
+ 	dns_rdata_toregion(rdata, &region);
+ 	num = uint16_fromregion(&region);
+ 	isc_region_consume(&region, 2);
+-	sprintf(buf, "%u", num);
++	snprintf(buf, sizeof(buf), "%u", num);
+ 	RETERR(str_totext(buf, target));
+ 	RETERR(str_totext(" ", target));
+ 
+@@ -118,7 +118,7 @@ totext_in_srv(ARGS_TOTEXT) {
+ 	 */
+ 	num = uint16_fromregion(&region);
+ 	isc_region_consume(&region, 2);
+-	sprintf(buf, "%u", num);
++	snprintf(buf, sizeof(buf), "%u", num);
+ 	RETERR(str_totext(buf, target));
+ 	RETERR(str_totext(" ", target));
+ 
+@@ -127,7 +127,7 @@ totext_in_srv(ARGS_TOTEXT) {
+ 	 */
+ 	num = uint16_fromregion(&region);
+ 	isc_region_consume(&region, 2);
+-	sprintf(buf, "%u", num);
++	snprintf(buf, sizeof(buf), "%u", num);
+ 	RETERR(str_totext(buf, target));
+ 	RETERR(str_totext(" ", target));
+ 
+@@ -302,19 +302,44 @@ freestruct_in_srv(ARGS_FREESTRUCT) {
+ 
+ static inline isc_result_t
+ additionaldata_in_srv(ARGS_ADDLDATA) {
++	char buf[sizeof("_65000._tcp")];
++	dns_fixedname_t fixed;
+ 	dns_name_t name;
+ 	dns_offsets_t offsets;
+ 	isc_region_t region;
++	isc_uint16_t port;
++	isc_result_t result;
+ 
+ 	REQUIRE(rdata->type == dns_rdatatype_srv);
+ 	REQUIRE(rdata->rdclass == dns_rdataclass_in);
+ 
+ 	dns_name_init(&name, offsets);
+ 	dns_rdata_toregion(rdata, &region);
+-	isc_region_consume(&region, 6);
++	isc_region_consume(&region, 4);
++	port = uint16_fromregion(&region);
++	isc_region_consume(&region, 2);
+ 	dns_name_fromregion(&name, &region);
+ 
+-	return ((add)(arg, &name, dns_rdatatype_a));
++	if (dns_name_equal(&name, dns_rootname))
++		return (ISC_R_SUCCESS);
++
++	result = (add)(arg, &name, dns_rdatatype_a);
++	if (result != ISC_R_SUCCESS)
++		return (result);
++
++	dns_fixedname_init(&fixed);
++	snprintf(buf, sizeof(buf), "_%u._tcp", port);
++	result = dns_name_fromstring2(dns_fixedname_name(&fixed), buf, NULL,
++				      0, NULL);
++	if (result != ISC_R_SUCCESS)
++		return (ISC_R_SUCCESS);
++
++	result = dns_name_concatenate(dns_fixedname_name(&fixed), &name,
++				      dns_fixedname_name(&fixed), NULL);
++	if (result != ISC_R_SUCCESS)
++		return (ISC_R_SUCCESS);
++ 
++	return ((add)(arg, dns_fixedname_name(&fixed), dns_rdatatype_tlsa));
+ }
+ 
+ static inline isc_result_t

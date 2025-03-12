@@ -7,7 +7,7 @@ LIC_FILES_CHKSUM = "file://COPYRIGHT;md5=dba46507446198119bcde32a4feaab43"
 
 DEPENDS = "openssl libcap"
 
-PR .= ".11"
+PR .= ".12"
 
 SRC_URI = "https://ftp.isc.org/isc/bind9/${PV}/${BPN}-${PV}.tar.gz \
            file://conf.patch \
@@ -40,6 +40,11 @@ SRC_URI = "https://ftp.isc.org/isc/bind9/${PV}/${BPN}-${PV}.tar.gz \
            file://0001-CVE-2022-2795.patch \
            file://0001-CVE-2022-38177.patch \
            file://CVE-2018-5743.patch \
+           file://Isolate-using-the-T-noaa-flag-only-for-part-of-the-r.patch \
+           file://master-minimal-any.patch \
+           file://4436.-func-Return-TLSA-records-as-additional-data-fo.patch \
+           file://fix-minimal-any-yes-to-force-TCP-UDP.patch \
+           file://CVE-2024-11187.patch \
            "
 
 UPSTREAM_CHECK_URI = "https://ftp.isc.org/isc/bind9/"

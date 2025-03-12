@@ -1,0 +1,335 @@
+From 0cbe448914be61d0f92b1e9d3adaeba87d25639d Mon Sep 17 00:00:00 2001
+From: Evan Hunt <each@isc.org>
+Date: Wed, 25 May 2016 13:54:34 -0700
+Subject: [PATCH] [master] minimal-any
+
+4371.   [func]          New "minimal-any" option reduces the size of UDP
+                        responses for qtype ANY by returning a single
+                        arbitrarily selected RRset instead of all RRsets.
+                        Thanks to Tony Finch. [RT #41615]
+---
+ CHANGES                                     |  5 ++++
+ bin/named/config.c                          |  1 +
+ bin/named/named.conf.docbook                |  2 ++
+ bin/named/query.c                           | 37 ++++++++++++++++++++++++++
+ bin/named/server.c                          |  5 ++++
+ bin/tests/system/additional/ns1/named3.conf | 40 +++++++++++++++++++++++++++++
+ bin/tests/system/additional/tests.sh        | 21 +++++++++++++++
+ doc/arm/Bv9ARM-book.xml                     | 25 ++++++++++++++++++
+ doc/arm/notes.xml                           | 10 ++++++++
+ lib/dns/include/dns/view.h                  |  1 +
+ lib/dns/view.c                              |  1 +
+ lib/isccfg/namedconf.c                      |  1 +
+ 12 files changed, 149 insertions(+)
+ create mode 100644 bin/tests/system/additional/ns1/named3.conf
+
+This fixes CVE-2024-11187. Dependency Patch #2.
+
+Signed-off-by: Javier Campos <jcampos@mvista.com>
+
+Index: bind-9.10.5-P3/bin/named/config.c
+===================================================================
+--- bind-9.10.5-P3.orig/bin/named/config.c
++++ bind-9.10.5-P3/bin/named/config.c
+@@ -138,6 +138,7 @@ options {\n\
+ #	sortlist <none>\n\
+ #	topology <none>\n\
+ 	auth-nxdomain false;\n\
++	minimal-any false;\n\
+ 	minimal-responses false;\n\
+ 	recursion true;\n\
+ 	provide-ixfr true;\n\
+Index: bind-9.10.5-P3/bin/named/named.conf.docbook
+===================================================================
+--- bind-9.10.5-P3.orig/bin/named/named.conf.docbook
++++ bind-9.10.5-P3/bin/named/named.conf.docbook
+@@ -244,6 +244,7 @@ options {
+ 	sortlist { <replaceable>address_match_element</replaceable>; ... };
+ 	topology { <replaceable>address_match_element</replaceable>; ... }; // not implemented
+ 	auth-nxdomain <replaceable>boolean</replaceable>; // default changed
++	minimal-any <replaceable>boolean</replaceable>;
+ 	minimal-responses <replaceable>boolean</replaceable>;
+ 	recursion <replaceable>boolean</replaceable>;
+ 	rrset-order {
+@@ -442,6 +443,7 @@ view <replaceable>string</replaceable> <
+ 	sortlist { <replaceable>address_match_element</replaceable>; ... };
+ 	topology { <replaceable>address_match_element</replaceable>; ... }; // not implemented
+ 	auth-nxdomain <replaceable>boolean</replaceable>; // default changed
++	minimal-any <replaceable>boolean</replaceable>;
+ 	minimal-responses <replaceable>boolean</replaceable>;
+ 	recursion <replaceable>boolean</replaceable>;
+ 	rrset-order {
+Index: bind-9.10.5-P3/bin/named/query.c
+===================================================================
+--- bind-9.10.5-P3.orig/bin/named/query.c
++++ bind-9.10.5-P3/bin/named/query.c
+@@ -7885,6 +7885,11 @@ query_find(ns_client_t *client, dns_fetc
+ #endif
+ 
+ 	if (type == dns_rdatatype_any) {
++		/*
++		 * For minimal-any, we only add records that
++		 * match this type or cover this type.
++		 */
++		dns_rdatatype_t onetype = 0;
+ #ifdef ALLOW_FILTER_AAAA
+ 		isc_boolean_t have_aaaa, have_a, have_sig;
+ 
+@@ -7948,6 +7953,21 @@ query_find(ns_client_t *client, dns_fetc
+ 				 * ANY queries.
+ 				 */
+ 				dns_rdataset_disassociate(rdataset);
++			} else if (client->view->minimal_any &&
++				   !TCP(client) && !WANTDNSSEC(client) &&
++				   qtype == dns_rdatatype_any &&
++				   (rdataset->type == dns_rdatatype_sig ||
++				    rdataset->type == dns_rdatatype_rrsig)) {
++				CTRACE(ISC_LOG_DEBUG(5), "query_find: "
++				       "minimal-any skip signature");
++				dns_rdataset_disassociate(rdataset);
++			} else if (client->view->minimal_any &&
++				   !TCP(client) && onetype != 0 &&
++				   rdataset->type != onetype &&
++				   rdataset->covers != onetype) {
++				CTRACE(ISC_LOG_DEBUG(5), "query_find: "
++				       "minimal-any skip rdataset");
++				dns_rdataset_disassociate(rdataset);
+ 			} else if ((qtype == dns_rdatatype_any ||
+ 			     rdataset->type == qtype) && rdataset->type != 0) {
+ #ifdef ALLOW_FILTER_AAAA
+@@ -7967,6 +7987,15 @@ query_find(ns_client_t *client, dns_fetc
+ 					name = (fname != NULL) ? fname : tname;
+ 					query_prefetch(client, name, rdataset);
+ 				}
++				/*
++				 * Remember the first RRtype we find so we
++				 * can skip others with minimal-any.
++				 */
++				if (rdataset->type == dns_rdatatype_sig ||
++				    rdataset->type == dns_rdatatype_rrsig)
++					onetype = rdataset->covers;
++				else
++					onetype = rdataset->type;
+ 				query_addrrset(client,
+ 					       fname != NULL ? &fname : &tname,
+ 					       &rdataset, NULL,
+@@ -8668,6 +8697,14 @@ ns_query_start(ns_client_t *client) {
+ 		client->query.attributes |= (NS_QUERYATTR_NOAUTHORITY |
+ 					     NS_QUERYATTR_NOADDITIONAL);
+ 
++	/*
++	 * Maybe turn on minimal responses for ANY queries.
++	 */
++	if (qtype == dns_rdatatype_any &&
++	    client->view->minimal_any && !TCP(client))
++		client->query.attributes |= (NS_QUERYATTR_NOAUTHORITY |
++					     NS_QUERYATTR_NOADDITIONAL);
++
+ 	/*
+ 	 * Turn on minimal responses for EDNS/UDP bufsize 512 queries.
+ 	 */
+Index: bind-9.10.5-P3/bin/named/server.c
+===================================================================
+--- bind-9.10.5-P3.orig/bin/named/server.c
++++ bind-9.10.5-P3/bin/named/server.c
+@@ -3414,6 +3414,11 @@ configure_view(dns_view_t *view, dns_vie
+ 	view->auth_nxdomain = cfg_obj_asboolean(obj);
+ 
+ 	obj = NULL;
++	result = ns_config_get(maps, "minimal-any", &obj);
++	INSIST(result == ISC_R_SUCCESS);
++	view->minimal_any = cfg_obj_asboolean(obj);
++
++	obj = NULL;
+ 	result = ns_config_get(maps, "minimal-responses", &obj);
+ 	INSIST(result == ISC_R_SUCCESS);
+ 	view->minimalresponses = cfg_obj_asboolean(obj);
+Index: bind-9.10.5-P3/bin/tests/system/additional/ns1/named3.conf
+===================================================================
+--- /dev/null
++++ bind-9.10.5-P3/bin/tests/system/additional/ns1/named3.conf
+@@ -0,0 +1,40 @@
++/*
++ * Copyright (C) 2016  Internet Systems Consortium, Inc. ("ISC")
++ *
++ * Permission to use, copy, modify, and/or distribute this software for any
++ * purpose with or without fee is hereby granted, provided that the above
++ * copyright notice and this permission notice appear in all copies.
++ *
++ * THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH
++ * REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
++ * AND FITNESS.  IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT,
++ * INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
++ * LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE
++ * OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
++ * PERFORMANCE OF THIS SOFTWARE.
++ */
++
++options {
++	query-source address 10.53.0.1;
++	notify-source 10.53.0.1;
++	transfer-source 10.53.0.1;
++	recursion no;
++	additional-from-auth no;
++	port 5300;
++	pid-file "named.pid";
++	listen-on { 10.53.0.1; };
++	listen-on-v6 { none; };
++	notify no;
++	minimal-any yes;
++};
++
++include "../../common/rndc.key";
++
++controls {
++	inet 10.53.0.1 port 9953 allow { any; } keys { rndc_key; };
++};
++
++zone "rt.example" {
++	type master;
++	file "rt.db";
++};
+Index: bind-9.10.5-P3/bin/tests/system/additional/tests.sh
+===================================================================
+--- bind-9.10.5-P3.orig/bin/tests/system/additional/tests.sh
++++ bind-9.10.5-P3/bin/tests/system/additional/tests.sh
+@@ -118,5 +118,26 @@ echo "I:testing with 'minimal-responses
+ minimal=no
+ dotests
+ 
++echo "I:testing with 'minimal-any no;'"
++n=`expr $n + 1`
++$DIG -t ANY www.rt.example @10.53.0.1 -p 5300 > dig.out.$n || ret=1
++grep "ANSWER: 3, AUTHORITY: 1, ADDITIONAL: 2" dig.out.$n > /dev/null || ret=1
++if [ $ret -eq 1 ] ; then
++    echo "I: failed"; status=1
++fi
++
++echo "I:reconfiguring server"
++cp ns1/named3.conf ns1/named.conf
++$RNDC -c ../common/rndc.conf -s 10.53.0.1 -p 9953 reconfig 2>&1 | sed 's/^/I:ns1 /'
++sleep 2
++
++echo "I:testing with 'minimal-any yes;'"
++n=`expr $n + 1`
++$DIG -t ANY www.rt.example @10.53.0.1 -p 5300 > dig.out.$n || ret=1
++grep "ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1" dig.out.$n > /dev/null || ret=1
++if [ $ret -eq 1 ] ; then
++    echo "I: failed"; status=1
++fi
++
+ echo "I:exit status: $status"
+ [ $status -eq 0 ] || exit 1
+Index: bind-9.10.5-P3/CHANGES
+===================================================================
+--- bind-9.10.5-P3.orig/CHANGES
++++ bind-9.10.5-P3/CHANGES
+@@ -1,3 +1,8 @@
++4371.  [func]          New "minimal-any" option reduces the size of UDP
++                       responses for qtype ANY by returning a single
++                       arbitrarily selected RRset instead of all RRsets.
++                       Thanks to Tony Finch. [RT #41615]
++
+ 5817.  [security]     The rules for acceptance of records into the cache
+                       have been tightened to prevent the possibility of
+                       poisoning if forwarders send records outside
+Index: bind-9.10.5-P3/doc/arm/Bv9ARM-book.xml
+===================================================================
+--- bind-9.10.5-P3.orig/doc/arm/Bv9ARM-book.xml
++++ bind-9.10.5-P3/doc/arm/Bv9ARM-book.xml
+@@ -4391,6 +4391,7 @@ badresp:1,adberr:0,findfail:0,valfail:0]
+   [ <command>has-old-clients</command> <replaceable>yes_or_no</replaceable> ; ]
+   [ <command>host-statistics</command> <replaceable>yes_or_no</replaceable> ; ]
+   [ <command>host-statistics-max</command> <replaceable>number</replaceable> ; ]
++  [ <command>minimal-any</command> <replaceable>yes_or_no</replaceable>; ]
+   [ <command>minimal-responses</command> <replaceable>yes_or_no</replaceable> ; ]
+   [ <command>multiple-cnames</command> <replaceable>yes_or_no</replaceable> ; ]
+   [ <command>notify</command> ( <replaceable>yes_or_no</replaceable> | <option>explicit</option> | <option>master-only</option> ) ; ]
+@@ -5876,6 +5877,30 @@ options {
+ 	    </varlistentry>
+ 
+ 	    <varlistentry>
++	      <term><command>minimal-any</command></term>
++	      <listitem>
++		<para>
++		  If set to <userinput>yes</userinput>, then when
++		  generating a positive response to a query of type
++		  ANY over UDP, the server will reply with only one
++		  of the RRsets for the query name, and its covering
++		  RRSIGs if any, instead of replying with all known
++		  RRsets for the name.  Similarly, a query for type
++		  RRSIG will be answered with the RRSIG records covering
++		  only one type. This can reduce the impact of some kinds
++		  of attack traffic, without harming legitimate
++		  clients.  (Note, however, that the RRset returned is the
++		  first one found in the database; it is not necessarily
++		  the smallest available RRset.)
++		  Additionally, <option>minimal-responses</option> is
++		  turned on for these queries, so no unnecessary records
++		  will be added to the authority or additional sections.
++		  The default is <userinput>no</userinput>.
++		</para>
++	    </listitem>
++	  </varlistentry>
++
++	    <varlistentry>
+ 	      <term><command>multiple-cnames</command></term>
+ 	      <listitem>
+ 		<para>
+Index: bind-9.10.5-P3/doc/arm/notes.xml
+===================================================================
+--- bind-9.10.5-P3.orig/doc/arm/notes.xml
++++ bind-9.10.5-P3/doc/arm/notes.xml
+@@ -100,6 +100,16 @@
+ 	  [RT #45181]
+ 	</para>
+       </listitem>
++      <listitem>
++	<para>
++	  The new <command>minimal-any</option> reduces the size of
++	  answers to UDP queries for type ANY by implementing one of
++	  the strategies in "draft-ietf-dnsop-refuse-any": returning
++	  a single arbitrarily-selected RRset that matches the query
++	  name rather than returning all of the matching RRsets.
++	  Thanks to Tony Finch for the contribution. [RT #41615]
++	</para>
++      </listitem>
+     </itemizedlist>
+   </section>
+ 
+Index: bind-9.10.5-P3/lib/dns/include/dns/view.h
+===================================================================
+--- bind-9.10.5-P3.orig/lib/dns/include/dns/view.h
++++ bind-9.10.5-P3/lib/dns/include/dns/view.h
+@@ -124,6 +124,7 @@ struct dns_view {
+ 	isc_boolean_t			auth_nxdomain;
+ 	isc_boolean_t			additionalfromcache;
+ 	isc_boolean_t			additionalfromauth;
++	isc_boolean_t			minimal_any;
+ 	isc_boolean_t			minimalresponses;
+ 	isc_boolean_t			enablednssec;
+ 	isc_boolean_t			enablevalidation;
+Index: bind-9.10.5-P3/lib/dns/view.c
+===================================================================
+--- bind-9.10.5-P3.orig/lib/dns/view.c
++++ bind-9.10.5-P3/lib/dns/view.c
+@@ -166,6 +166,7 @@ dns_view_create(isc_mem_t *mctx, dns_rda
+ 	view->enablednssec = ISC_TRUE;
+ 	view->enablevalidation = ISC_TRUE;
+ 	view->acceptexpired = ISC_FALSE;
++	view->minimal_any = ISC_FALSE;
+ 	view->minimalresponses = ISC_FALSE;
+ 	view->transfer_format = dns_one_answer;
+ 	view->cacheacl = NULL;
+Index: bind-9.10.5-P3/lib/isccfg/namedconf.c
+===================================================================
+--- bind-9.10.5-P3.orig/lib/isccfg/namedconf.c
++++ bind-9.10.5-P3/lib/isccfg/namedconf.c
+@@ -1598,6 +1598,7 @@ view_clauses[] = {
+ 	{ "max-recursion-queries", &cfg_type_uint32, 0 },
+ 	{ "max-udp-size", &cfg_type_uint32, 0 },
+ 	{ "min-roots", &cfg_type_uint32, CFG_CLAUSEFLAG_NOTIMP },
++	{ "minimal-any", &cfg_type_boolean, 0 },
+ 	{ "minimal-responses", &cfg_type_boolean, 0 },
+ 	{ "prefetch", &cfg_type_prefetch, 0 },
+ 	{ "preferred-glue", &cfg_type_astring, 0 },
