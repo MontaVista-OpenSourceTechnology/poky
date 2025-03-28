@@ -15,6 +15,8 @@ DEPENDS = "libxml2"
 
 SRC_URI = "http://xmlsoft.org/sources/libxslt-${PV}.tar.gz \
            file://CVE-2021-30560.patch \
+           file://CVE-2024-55549.patch \
+           file://CVE-2025-24855.patch \
           "
 
 SRC_URI[md5sum] = "db8765c8d076f1b6caafd9f2542a304a"
