@@ -48,8 +48,14 @@ SRC_URI = "${SRC_URI_BASE} \
            file://CVE-2020-27792.patch \
            file://CVE-2023-28879.patch \
            file://0001-Bug-706897-Copy-pcx-buffer-overrun-fix-from-devices-.patch \
+           file://CVE-2025-27830.patch \
+           file://CVE-2025-27832.patch \
+           file://CVE-2025-27835.patch \
+           file://CVE-2025-27836-pre1.patch \
+           file://CVE-2025-27836-1.patch \
+           file://CVE-2025-27836-2.patch \
            "
-PR .= ".4"
+PR .= ".5"
 SRC_URI_class-native = "${SRC_URI_BASE} \
                         file://ghostscript-9.21-native-fix-disable-system-libtiff.patch \
                         file://base-genht.c-add-a-preprocessor-define-to-allow-fope.patch \
