@@ -14,11 +14,16 @@ PE = "1"
 # repo during parse
 SRCREV = "303f8fed261020c1cb7da32dad63b610bf6873dd"
 
+PR .= ".1"
 SRC_URI = "git://source.denx.de/u-boot/u-boot.git;protocol=https;branch=master \
            file://remove-redundant-yyloc-global.patch \
            file://CVE-2020-8432.patch \
            file://CVE-2020-10648-1.patch \
            file://CVE-2020-10648-2.patch \
+           file://CVE-2024-57256.patch \
+           file://CVE-2024-57258-1.patch \
+           file://CVE-2024-57258-2.patch \
+           file://CVE-2024-57258-3.patch \
           "
           
 S = "${WORKDIR}/git"
