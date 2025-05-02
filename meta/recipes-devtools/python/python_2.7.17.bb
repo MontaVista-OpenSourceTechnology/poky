@@ -33,7 +33,10 @@ SRC_URI += " \
            file://CVE-2023-24329.patch \
            file://fix-indentation-CVE-2023-24329.patch \
            file://CVE-2022-48565.patch \
+           file://CVE-2024-50602-1.patch \
+           file://CVE-2024-50602-2.patch \
 "
+PR .= ".1"
 
 S = "${WORKDIR}/Python-${PV}"
 
