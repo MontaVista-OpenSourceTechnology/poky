@@ -19,7 +19,9 @@ SRC_URI = "${SAVANNAH_NONGNU_MIRROR}/${BPN}/${BP}.tar.xz \
            file://CVE-2022-27405.patch \
            file://CVE-2022-27406.patch \
            file://CVE-2023-2004.patch \
+           file://CVE-2025-27363.patch \
           "
+PR .= ".1"
 SRC_URI[md5sum] = "bd42e75127f8431923679480efb5ba8f"
 SRC_URI[sha256sum] = "16dbfa488a21fe827dc27eaf708f42f7aa3bb997d745d31a19781628c36ba26f"
 
