@@ -47,6 +47,7 @@ SRC_URI = "http://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-${PV}.tar
 	   file://0002-CVE-2023-48795.patch \
 	   file://0003-CVE-2023-48795.patch \
 	   file://0001-Segmentation-fault-caused-due-to-the-function-input_.patch \
+	   file://CVE-2025-32728.patch \
            "
 
 PAM_SRC_URI = "file://sshd"
