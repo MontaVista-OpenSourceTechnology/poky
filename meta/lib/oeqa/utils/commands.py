@@ -285,7 +285,14 @@ def get_bb_vars(variables=None, target=None, postconfig=None):
     return values
 
 def get_bb_var(var, target=None, postconfig=None):
-    return get_bb_vars([var], target, postconfig)[var]
+    if postconfig:
+        return bitbake("-e %s" % target or "", postconfig=postconfig).output
+    else:
+        # Fast-path for the non-postconfig case
+        cmd = ["bitbake-getvar", "--value", var]
+        if target:
+            cmd.extend(["--recipe", target])
+        return subprocess.run(cmd, check=True, text=True, stdout=subprocess.PIPE).stdout.strip()
 
 def get_test_layer(bblayers=None):
     if bblayers is None:
