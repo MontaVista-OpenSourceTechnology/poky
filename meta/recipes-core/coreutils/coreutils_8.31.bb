@@ -19,6 +19,7 @@ SRC_URI = "${GNU_MIRROR}/coreutils/${BP}.tar.xz \
            file://disable-ls-output-quoting.patch \
            file://0001-local.mk-fix-cross-compiling-problem.patch \
            file://run-ptest \
+	   file://CVE-2025-5278.patch \
           "
 
 SRC_URI_append_libc-musl = "file://strtod_fix_clash_with_strtold.patch"
