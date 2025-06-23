@@ -39,7 +39,15 @@ SRC_URI = "${KERNELORG_MIRROR}/software/scm/git/git-${PV}.tar.gz;name=tarball \
 	   file://CVE-2024-32002.patch \
 	   file://CVE-2024-32021.patch \
 	   file://CVE-2024-32465.patch \
+	   file://CVE-2022-29187-1.patch \
+	   file://CVE-2022-29187-2.patch \
+	   file://CVE-2022-29187-3.patch \
+	   file://CVE-2022-29187-4.patch \
+	   file://CVE-2022-29187-5.patch \
+	   file://CVE-2022-29187-6.patch \
+	   file://CVE-2024-32004.patch \
            "
+PR .= ".1"
 S = "${WORKDIR}/git-${PV}"
 
 LIC_FILES_CHKSUM = "file://COPYING;md5=7c0d7ef03a7eb04ce795b0f60e68e7e1"
