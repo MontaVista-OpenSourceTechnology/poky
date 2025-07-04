@@ -10,8 +10,10 @@ SRC_URI = "https://www.sudo.ws/dist/sudo-${PV}.tar.gz \
            file://CVE-2023-28486_CVE-2023-28487-2.patch \
            file://CVE-2023-42465-pre.patch \
            file://CVE-2023-42465.patch \
+           file://CVE-2025-32462.patch \
            "
 
+PR .= ".1"
 PAM_SRC_URI = "file://sudo.pam"
 
 SRC_URI[md5sum] = "a7318202ba391079a0e32933f0fb8bd6"
