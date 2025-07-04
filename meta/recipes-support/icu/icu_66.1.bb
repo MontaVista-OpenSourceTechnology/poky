@@ -28,7 +28,9 @@ SRC_URI = "${BASE_SRC_URI};name=code \
            file://fix-install-manx.patch \
            file://0001-icu-Added-armeb-support.patch \
            file://CVE-2020-10531.patch \
+           file://CVE-2025-5222.patch \
            "
+PR .= ".1"
 
 SRC_URI_append_class-target = "\
            file://0001-Disable-LDFLAGSICUDT-for-Linux.patch \
