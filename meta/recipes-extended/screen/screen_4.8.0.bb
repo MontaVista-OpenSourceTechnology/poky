@@ -24,9 +24,10 @@ SRC_URI = "${GNU_MIRROR}/screen/screen-${PV}.tar.gz \
            file://CVE-2021-26937.patch \
            file://CVE-2023-24626.patch \
            file://CVE-2025-46805.patch \
+           file://CVE-2025-46802.patch \
           "
 
-PR .= ".1"
+PR .= ".2"
 SRC_URI[md5sum] = "d276213d3acd10339cd37848b8c4ab1e"
 SRC_URI[sha256sum] = "6e11b13d8489925fde25dfb0935bf6ed71f9eb47eff233a181e078fde5655aa1"
 
