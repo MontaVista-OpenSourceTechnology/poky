@@ -35,6 +35,7 @@ SRC_URI = "https://www.gnupg.org/ftp/gcrypt/gnutls/v${SHRT_VER}/gnutls-${PV}.tar
            file://CVE-2024-12243-pre2.patch \
            file://CVE-2024-12243.patch \
            file://CVE-2025-32990.patch \
+           file://CVE-2025-32988.patch \
 "
 
 PR .= ".1"
