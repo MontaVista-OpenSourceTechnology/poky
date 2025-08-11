@@ -17,8 +17,14 @@ SRC_URI = "http://xmlsoft.org/sources/libxslt-${PV}.tar.gz \
            file://CVE-2021-30560.patch \
            file://CVE-2024-55549.patch \
            file://CVE-2025-24855.patch \
+           file://CVE-2023-40403-001.patch \
+           file://CVE-2023-40403-002.patch \
+           file://CVE-2023-40403-003.patch \
+           file://CVE-2023-40403-004.patch \
+           file://CVE-2023-40403-005.patch \
           "
 
+PR .= ".1"
 SRC_URI[md5sum] = "db8765c8d076f1b6caafd9f2542a304a"
 SRC_URI[sha256sum] = "98b1bd46d6792925ad2dfe9a87452ea2adebf69dcb9919ffd55bf926a7f93f7f"
 
