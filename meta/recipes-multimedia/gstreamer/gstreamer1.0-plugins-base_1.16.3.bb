@@ -29,8 +29,10 @@ SRC_URI = " \
             file://CVE-2024-47615-2.patch \
             file://CVE-2024-47835.patch \
             file://CVE-2025-47808.patch \
+            file://CVE-2025-47806.patch \
+            file://CVE-2025-47807.patch \
             "
-PR .= ".5"
+PR .= ".6"
 SRC_URI[md5sum] = "e3ddb1bae9fb510b49a295f212f1e6e4"
 SRC_URI[sha256sum] = "9f02678b0bbbcc9eff107d3bd89d83ce92fec2154cd607c7c8bd34dc7fee491c"
 
