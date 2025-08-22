@@ -8,7 +8,7 @@ LIC_FILES_CHKSUM = "file://COPYRIGHT;md5=34da3db46fab7501992f9615d7e158cf"
 
 CVE_PRODUCT = "libtiff"
 
-PR .= ".4"
+PR .= ".5"
 
 SRC_URI = "http://download.osgeo.org/libtiff/tiff-${PV}.tar.gz \
            file://CVE-2020-35523.patch  \
@@ -59,6 +59,7 @@ SRC_URI = "http://download.osgeo.org/libtiff/tiff-${PV}.tar.gz \
            file://CVE-2023-52356.patch \
 	   file://CVE-2024-7006.patch \
            file://CVE-2025-8851.patch \
+           file://CVE-2025-8176.patch \
           "
 SRC_URI[md5sum] = "2165e7aba557463acc0664e71a3ed424"
 SRC_URI[sha256sum] = "5d29f32517dadb6dbcd1255ea5bbc93a2b54b94fbf83653b4d65c7d6775b8634"
