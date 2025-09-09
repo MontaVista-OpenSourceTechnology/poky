@@ -7,7 +7,7 @@ FILESEXTRAPATHS_prepend := "${FILE_DIRNAME}/go-${GO_BASEVERSION}:"
 
 LIC_FILES_CHKSUM = "file://LICENSE;md5=5d4950ecb7b26d2c5e4e7b4e0dd74707"
 
-PR .= ".13"
+PR .= ".14"
 
 SRC_URI += "\
     file://0001-allow-CC-and-CXX-to-have-multiple-words.patch \
@@ -101,6 +101,7 @@ SRC_URI += "\
     file://CVE-2024-24791.patch \
     file://CVE-2025-22871.patch \
     file://CVE-2023-39323.patch \
+    file://CVE-2025-47907.patch \
 "
 
 SRC_URI_append_libc-musl = " file://0009-ld-replace-glibc-dynamic-linker-with-musl.patch"
