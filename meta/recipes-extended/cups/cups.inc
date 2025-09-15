@@ -26,9 +26,11 @@ SRC_URI = "https://github.com/apple/cups/releases/download/v${PV}/${BP}-source.t
 	   file://CVE-2024-47175-3.patch \
 	   file://CVE-2024-47175-4.patch \
 	   file://CVE-2024-47175-5.patch \
+	   file://CVE-2025-58060.patch \
+	   file://CVE-2025-58364.patch \
            "
 
-PR .= ".1"
+PR .= ".2"
 UPSTREAM_CHECK_URI = "https://github.com/apple/cups/releases"
 UPSTREAM_CHECK_REGEX = "cups-(?P<pver>\d+\.\d+(\.\d+)?)-source.tar"
 
