@@ -23,6 +23,13 @@ EXTRA_OEMESON = "-Dgnome_proxy=disabled"
 GNOMEBASEBUILDCLASS = "meson"
 inherit gnomebase gettext upstream-version-is-even gio-module-cache
 
+PR .= ".1"
+
+SRC_URI += "\
+            file://CVE-2025-60018.patch \
+            file://CVE-2025-60019.patch \
+           "
+
 FILES_${PN} += "\
                 ${libdir}/gio/modules/libgio*.so \
                 ${datadir}/dbus-1/services/ \
