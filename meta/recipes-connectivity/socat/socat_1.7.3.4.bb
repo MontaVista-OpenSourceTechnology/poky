@@ -11,7 +11,10 @@ LICENSE = "GPL-2.0-with-OpenSSL-exception"
 LIC_FILES_CHKSUM = "file://COPYING;md5=b234ee4d69f5fce4486a80fdaf4a4263 \
                     file://README;beginline=257;endline=287;md5=338c05eadd013872abb1d6e198e10a3f"
 
+PR .= ".1"
+
 SRC_URI = "http://www.dest-unreach.org/socat/download/socat-${PV}.tar.bz2 \
+           file://CVE-2024-54661.patch \
 "
 
 SRC_URI[md5sum] = "3cca4f8cd9d2d1caabd9cc099451bac9"
