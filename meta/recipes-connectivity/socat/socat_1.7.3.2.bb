@@ -11,11 +11,13 @@ LICENSE = "GPL-2.0+-with-OpenSSL-exception"
 LIC_FILES_CHKSUM = "file://COPYING;md5=b234ee4d69f5fce4486a80fdaf4a4263 \
                     file://README;beginline=257;endline=287;md5=338c05eadd013872abb1d6e198e10a3f"
 
+PR .= ".1"
 
 SRC_URI = "http://www.dest-unreach.org/socat/download/socat-${PV}.tar.bz2 \
            file://Makefile.in-fix-for-parallel-build.patch \
            file://0001-define-NETDB_INTERNAL-to-1-if-not-available.patch \
            file://0001-Access-c_ispeed-and-c_ospeed-via-APIs.patch \
+           file://CVE-2024-54661.patch \
 "
 
 SRC_URI[md5sum] = "607a24c15bd2cb54e9328bfbbd3a1ae9"
