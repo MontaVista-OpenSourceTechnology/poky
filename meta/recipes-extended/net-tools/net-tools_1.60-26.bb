@@ -18,8 +18,11 @@ SRC_URI = "http://snapshot.debian.org/archive/debian/20050312T000000Z/pool/main/
            file://0001-lib-inet6.c-INET6_rresolve-various-fixes.patch \
            file://net-tools-fix-building-with-linux-4.8.patch \
            file://0001-added-ull-prefix-to-unsigned-long-long-constants-to-.patch \
+           file://CVE-2025-46836-1.patch \
+           file://CVE-2025-46836-2.patch \
           "
 
+PR .= ".1"
 # for this package we're mostly interested in tracking debian patches,
 # and not in the upstream version where all development has effectively stopped
 UPSTREAM_CHECK_REGEX = "(?P<pver>((\d+\.*)+)-((\d+\.*)+))\.(diff|debian\.tar)\.(gz|xz)"
