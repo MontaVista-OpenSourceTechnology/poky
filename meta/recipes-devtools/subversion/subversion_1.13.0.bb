@@ -14,8 +14,10 @@ SRC_URI = "${APACHE_MIRROR}/${BPN}/${BPN}-${PV}.tar.bz2 \
            file://serfmacro.patch \
            file://CVE-2020-17525.patch \
            file://CVE-2021-28544.patch \
+           file://CVE-2024-46901.patch \
            "
 
+PR .= ".1"
 SRC_URI[md5sum] = "3004b4dae18bf45a0b6ea4ef8820064d"
 SRC_URI[sha256sum] = "bc50ce2c3faa7b1ae9103c432017df98dfd989c4239f9f8270bb3a314ed9e5bd"
 
