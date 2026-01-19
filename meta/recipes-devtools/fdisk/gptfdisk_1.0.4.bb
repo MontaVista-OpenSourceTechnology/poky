@@ -7,7 +7,12 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=59530bdf33659b29e73d4adb9f9f6552"
 
 DEPENDS = "util-linux"
 
-SRC_URI = "${SOURCEFORGE_MIRROR}/${BPN}/${PV}/${BP}.tar.gz"
+SRC_URI = "${SOURCEFORGE_MIRROR}/${BPN}/${PV}/${BP}.tar.gz \
+           file://CVE-2020-0256.patch \
+           file://CVE-2021-0308.patch \
+           "
+
+PR .= ".1"
 SRC_URI[md5sum] = "5ecc3c44913bb6b53d3708d1ac7ac295"
 SRC_URI[sha256sum] = "b663391a6876f19a3cd901d862423a16e2b5ceaa2f4a3b9bb681e64b9c7ba78d"
 
