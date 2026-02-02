@@ -30,9 +30,11 @@ SRC_URI = "${GNU_MIRROR}/inetutils/inetutils-${PV}.tar.gz \
            file://CVE-2020-10188.patch \
            file://CVE-2019-0053-p1.patch \
            file://CVE-2019-0053-p2.patch \
+           file://CVE-2026-24061-1.patch \
+           file://CVE-2026-24061-2.patch \
 "
 
-PR .= ".2"
+PR .= ".3"
 SRC_URI[md5sum] = "04852c26c47cc8c6b825f2b74f191f52"
 SRC_URI[sha256sum] = "be8f75eff936b8e41b112462db51adf689715658a1b09e0d6b05d11ec92cc616"
 
