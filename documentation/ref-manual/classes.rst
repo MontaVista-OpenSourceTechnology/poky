@@ -3363,9 +3363,9 @@ The variables used by this class are:
    rebuilding the FIT image containing the kernel.
 
 See U-Boot's documentation for details about `verified boot
-<https://source.denx.de/u-boot/u-boot/-/blob/master/doc/uImage.FIT/verified-boot.txt>`__
+<https://docs.u-boot.org/en/latest/usage/fit/verified-boot.html>`__
 and the `signature process
-<https://source.denx.de/u-boot/u-boot/-/blob/master/doc/uImage.FIT/signature.txt>`__.
+<https://docs.u-boot.org/en/latest/usage/fit/signature.html>`__.
 
 See also the description of :ref:`ref-classes-kernel-fitimage` class, which this class
 imitates.
