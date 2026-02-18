@@ -71,10 +71,8 @@ supported on the following distributions:
 -  Fedora 41
 -  Rocky Linux 8
 -  Rocky Linux 9
--  Ubuntu 20.04 (LTS)
 -  Ubuntu 22.04 (LTS)
 -  Ubuntu 24.04 (LTS)
--  Ubuntu 24.10
 
 The following distribution versions are still tested, even though the
 organizations publishing them no longer make updates publicly available:
@@ -86,7 +84,6 @@ organizations publishing them no longer make updates publicly available:
 
 -  Fedora 39
 -  Fedora 40
--  Ubuntu 20.04 (LTS)
 
 Note that the Yocto Project doesn't have access to private updates
 that some of these versions may have. Therefore, our testing has
@@ -103,7 +100,9 @@ tested on former revisions of "&DISTRO_NAME;", but no longer are:
 -  Fedora 38
 -  OpenSUSE Leap 15.4
 -  Ubuntu 18.04
+-  Ubuntu 20.04
 -  Ubuntu 23.04
+-  Ubuntu 24.10
 
 .. note::
 
