@@ -98,7 +98,7 @@ contact us with other suggestions.
    function of a particular part of the workflow gives you an idea of what might
    be going wrong.
 
-   .. image:: figures/yp-how-it-works-new-diagram.png
+   .. image:: overview-manual/svg/yp-flow-diagram.*
 
 #. **Know that you can generate a dependency graph and learn how to do it:**
    A dependency graph shows dependencies between recipes, tasks, and targets.
