@@ -564,12 +564,12 @@ variable to specify the format:
 
       PACKAGE_CLASSES ?= "package_packageformat"
 
-   where packageformat can be "ipk", "rpm",
-   "deb", or "tar" which are the supported package formats.
+   where packageformat can be "ipk", "rpm", or
+   "deb" which are the supported package formats.
 
    .. note::
 
-      Because the Yocto Project supports four different package formats,
+      Because the Yocto Project supports three different package formats,
       you can set the variable with more than one argument. However, the
       OpenEmbedded build system only uses the first argument when
       creating an image or Software Development Kit (SDK).
