@@ -64,6 +64,7 @@ supported on the following distributions:
 
 -  AlmaLinux 8
 -  AlmaLinux 9
+-  CentOS Stream 9
 -  Debian 11
 -  Debian 12
 -  Fedora 39
