@@ -9,6 +9,7 @@ DEPENDS += "expat"
 SRC_URI = "http://www.cpan.org/modules/by-module/XML/XML-Parser-${PV}.tar.gz \
            file://ptest-perl/run-ptest \
            file://0001-CheckLib.pm-do-not-attempt-to-run-a-cross-executable.patch \
+           file://CVE-2006-10003.patch \
            "
 SRC_URI[md5sum] = "80bb18a8e6240fcf7ec2f7b57601c170"
 SRC_URI[sha256sum] = "d331332491c51cccfb4cb94ffc44f9cd73378e618498d4a37df9e043661c515d"
