@@ -1,6 +1,6 @@
 require ncurses.inc
 
-PR .= "1"
+PR .= "2"
 SRC_URI += "file://0001-tic-hang.patch \
            file://0002-configure-reproducible.patch \
            file://0003-gen-pkgconfig.in-Do-not-include-LDFLAGS-in-generated.patch \
@@ -9,6 +9,7 @@ SRC_URI += "file://0001-tic-hang.patch \
            file://CVE-2023-29491.patch \
            file://CVE-2023-50495.patch \
            file://CVE-2023-45918.patch \
+           file://CVE-2025-69720.patch \
            "
 # commit id corresponds to the revision in package version
 SRCREV = "a669013cd5e9d6434e5301348ea51baf306c93c4"
