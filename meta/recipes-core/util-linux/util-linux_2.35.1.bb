@@ -1,5 +1,7 @@
 require util-linux.inc
 
+PR .= ".1"
+
 SRC_URI += "file://configure-sbindir.patch \
             file://runuser.pamd \
             file://runuser-l.pamd \
@@ -21,6 +23,7 @@ SRC_URI += "file://configure-sbindir.patch \
             file://CVE-2024-28085-pre3.patch \
             file://CVE-2024-28085-pre4.patch \
             file://CVE-2024-28085.patch \
+            file://CVE-2026-3184.patch \
 "
 SRC_URI[md5sum] = "7f64882f631225f0295ca05080cee1bf"
 SRC_URI[sha256sum] = "d9de3edd287366cd908e77677514b9387b22bc7b88f45b83e1922c3597f1d7f9"
