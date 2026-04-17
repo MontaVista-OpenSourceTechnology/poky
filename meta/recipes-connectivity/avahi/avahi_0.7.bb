@@ -1,6 +1,6 @@
 require avahi.inc
 
-PR .= ".1"
+PR .= ".2"
 
 SRC_URI += "file://00avahi-autoipd \
            file://99avahi-autoipd \
@@ -10,6 +10,8 @@ SRC_URI += "file://00avahi-autoipd \
            file://CVE-2024-52615.patch \
            file://CVE-2025-68471.patch \
            file://CVE-2026-34933.patch \
+           file://CVE-2025-68276.patch \
+           file://CVE-2025-68468.patch \
            "
 
 inherit update-rc.d systemd useradd
