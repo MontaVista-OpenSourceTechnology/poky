@@ -4,7 +4,7 @@ DESCRIPTION = "'Bad' GStreamer plugins and helper libraries "
 HOMEPAGE = "https://gstreamer.freedesktop.org/"
 BUGTRACKER = "https://gitlab.freedesktop.org/gstreamer/gst-plugins-bad/-/issues"
 
-PR .= ".2"
+PR .= ".3"
 SRC_URI = " \
     https://gstreamer.freedesktop.org/src/gst-plugins-bad/gst-plugins-bad-${PV}.tar.xz \
     file://0001-meson-build-gir-even-when-cross-compiling-if-introsp.patch \
@@ -17,6 +17,7 @@ SRC_URI = " \
     file://CVE-2023-40476.patch \
     file://CVE-2023-44446.patch \
     file://CVE-2023-37329.patch \
+    file://CVE-2026-3082.patch \
 "
 SRC_URI[md5sum] = "8969ea1aec3411c13d0e7dd27ccaaef1"
 SRC_URI[sha256sum] = "84efe57011658f0a53a5d5b20f64ef109f5105dccb0808c21e069e946673514d"
