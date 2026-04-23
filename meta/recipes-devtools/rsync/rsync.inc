@@ -5,9 +5,12 @@ SECTION = "console/network"
 
 DEPENDS = "popt"
 
+PR .= ".1"
+
 SRC_URI = "https://download.samba.org/pub/${BPN}/src/${BP}.tar.gz \
            file://rsyncd.conf \
            file://CVE-2022-29154.patch \
+           file://CVE-2026-41035.patch \
            "
 
 inherit autotools
