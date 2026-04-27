@@ -27,6 +27,7 @@ SRC_URI = "${GNOME_MIRROR}/${BPN}/${MAJ_VER}/${BPN}-${PV}.tar.xz \
            file://CVE-2020-29385.patch \
            file://CVE-2021-20240.patch \
            file://CVE-2021-46829.patch \
+           file://CVE-2026-5201.patch \
            "
 
 SRC_URI_append_class-target = " \
