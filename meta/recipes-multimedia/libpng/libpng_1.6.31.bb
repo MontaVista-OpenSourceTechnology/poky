@@ -8,7 +8,7 @@ DEPENDS = "zlib"
 
 LIBV = "16"
 
-PR .= ".2"
+PR .= ".3"
 
 SRC_URI = "${SOURCEFORGE_MIRROR}/project/${BPN}/${BPN}${LIBV}/${PV}/${BP}.tar.xz \
            file://CVE-2018-14550.patch \
@@ -21,6 +21,7 @@ SRC_URI = "${SOURCEFORGE_MIRROR}/project/${BPN}/${BPN}${LIBV}/${PV}/${BP}.tar.xz
            file://CVE-2017-12652_p6.patch \
            file://CVE-2017-12652_p7.patch \
            file://CVE-2017-12652_p8.patch \
+           file://CVE-2026-34757.patch \
 	  "
 
 SRC_URI[md5sum] = "1b34eab440263e32cfa39d19413fad54"
