@@ -6,7 +6,7 @@ require util-linux.inc
 OLDHOST = ""
 OLDHOST_class-native = "file://util-linux-native-qsort.patch"
 
-PR = "r3.1"
+PR = "r3.2"
 
 SRC_URI += "file://configure-sbindir.patch \
             file://runuser.pamd \
@@ -26,6 +26,7 @@ SRC_URI += "file://configure-sbindir.patch \
             file://lib-randutils-don-t-break-on-EAGAIN-use-usleep.patch \
             file://0001-CVE-2022-0563.patch \
             file://CVE-2021-37600.patch \
+            file://CVE-2026-27456.patch \
 "
 SRC_URI[md5sum] = "eaa3429150268027908a1b8ae6ee9a62"
 SRC_URI[sha256sum] = "c208a4ff6906cb7f57940aa5bc3a6eed146e50a7cc0a092f52ef2ab65057a08d"
