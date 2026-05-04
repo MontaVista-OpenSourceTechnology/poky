@@ -23,9 +23,10 @@ SRC_URI = "git://github.com/vim/vim.git;branch=master;protocol=https \
            file://CVE-2026-28419.patch \
            file://CVE-2026-34982.patch \
            file://CVE-2026-34714.patch \
+           file://CVE-2026-39881.patch \
            "
 
-PV .= ".1684"
+PV .= ".1684.1"
 SRCREV = "b922b30cfe4c044c83bac3cc908084ed20a83598"
 
 # Do not consider .z in x.y.z, as that is updated with every commit
