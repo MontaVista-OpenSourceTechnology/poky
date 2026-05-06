@@ -8,6 +8,8 @@ SECTION = "console/utils"
 LICENSE = "Apache-2.0"
 DEPENDS = "libpng jpeg dbus zlib libusb1"
 
+PR .= ".1"
+
 SRC_URI = "https://github.com/OpenPrinting/cups/releases/download/v${PV}/cups-${PV}-source.tar.gz \
            file://0001-use-echo-only-in-init.patch \
            file://0002-don-t-try-to-run-generated-binaries.patch \
@@ -30,6 +32,10 @@ SRC_URI = "https://github.com/OpenPrinting/cups/releases/download/v${PV}/cups-${
            file://CVE-2025-58436.patch \
            file://CVE-2025-61915.patch \
            file://0001-conf.c-Fix-stopping-scheduler-on-unknown-directive.patch \
+           file://CVE-2026-41079.patch \
+           file://CVE-2026-39314.patch \
+           file://CVE-2026-39316.patch \
+           file://CVE-2026-34990.patch \
            "
 
 UPSTREAM_CHECK_URI = "https://github.com/OpenPrinting/cups/releases"
