@@ -61,8 +61,8 @@ following requirements:
 
    -  Git &MIN_GIT_VERSION; or greater
    -  tar &MIN_TAR_VERSION; or greater
-   -  Python &MIN_PYTHON_VERSION; or greater.
-   -  gcc &MIN_GCC_VERSION; or greater.
+   -  Python &MIN_PYTHON_VERSION; or greater
+   -  gcc &MIN_GCC_VERSION; or greater
    -  GNU make &MIN_MAKE_VERSION; or greater
 
 If your build host does not satisfy all of the above version
