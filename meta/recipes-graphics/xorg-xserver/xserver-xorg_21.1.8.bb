@@ -1,5 +1,7 @@
 require xserver-xorg.inc
 
+PR .= ".1"
+
 SRC_URI += "file://0001-xf86pciBus.c-use-Intel-ddx-only-for-pre-gen4-hardwar.patch \
            file://0001-Avoid-duplicate-definitions-of-IOPortBase.patch \
            file://CVE-2023-5367.patch \
@@ -48,6 +50,8 @@ SRC_URI += "file://0001-xf86pciBus.c-use-Intel-ddx-only-for-pre-gen4-hardwar.pat
            file://CVE-2025-62230-1.patch \
            file://CVE-2025-62230-2.patch \
            file://CVE-2025-62231.patch \
+           file://CVE-2026-34001.patch \
+           file://CVE-2026-33999.patch \
            "
 SRC_URI[sha256sum] = "38aadb735650c8024ee25211c190bf8aad844c5f59632761ab1ef4c4d5aeb152"
 
