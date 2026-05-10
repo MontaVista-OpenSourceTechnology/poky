@@ -26,12 +26,6 @@ platforms as well as software stacks that can be maintained and scaled.
 .. image:: svg/key-dev-elements.*
     :width: 100%
 
-For further introductory information on the Yocto Project, you might be
-interested in this
-`article <https://www.embedded.com/why-the-yocto-project-for-my-iot-project/>`__
-by Drew Moseley and in this short introductory
-`video <https://www.youtube.com/watch?v=utZpKM7i5Z4>`__.
-
 The remainder of this section overviews advantages and challenges tied
 to the Yocto Project.
 
