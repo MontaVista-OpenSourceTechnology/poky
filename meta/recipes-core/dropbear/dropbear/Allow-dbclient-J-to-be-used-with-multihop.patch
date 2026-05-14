@@ -1,0 +1,139 @@
+From 7894254afa9b1d3a836911b7ccea1fe18391b881 Mon Sep 17 00:00:00 2001
+From: Matt Johnston <matt@ucc.asn.au>
+Date: Fri, 1 Apr 2022 12:17:02 +0800
+Subject: [PATCH] Allow dbclient -J to be used with multihop
+
+Based on a patch from Hans Harder.
+
+This also tidies formatting and un-needed parts
+---
+ cli-runopts.c | 65 +++++++++++++++++++++++++----------------------------------
+ 1 file changed, 28 insertions(+), 37 deletions(-)
+
+This fixes CVE-2025-47203. Dependency Patch #10.
+
+Signed-off-by: Javier Campos <jcampos@mvista.com>
+
+Index: dropbear-2017.75/cli-runopts.c
+===================================================================
+--- dropbear-2017.75.orig/cli-runopts.c
++++ dropbear-2017.75/cli-runopts.c
+@@ -527,11 +527,11 @@ static void loadidentityfile(const char*
+ static char*
+ multihop_passthrough_args() {
+ 	char *ret;
+-	int total;
+-	unsigned int len = 0;
++	unsigned int len, total;
+ 	m_list_elem *iter;
+ 	/* Fill out -i, -y, -W options that make sense for all
+ 	 * the intermediate processes */
++	len = 30; /* space for "-q -y -y -W <size>\0" */
+ #ifdef ENABLE_CLI_PUBKEY_AUTH
+ 	for (iter = cli_opts.privkeys->first; iter; iter = iter->next)
+ 	{
+@@ -540,44 +540,36 @@ multihop_passthrough_args() {
+ 	}
+ #endif /* ENABLE_CLI_PUBKEY_AUTH */
+ 
+-	len += 30; /* space for -W <size>, terminator. */
++	if (cli_opts.proxycmd) {
++		/* "-J 'cmd'" */
++		len += 6 + strlen(cli_opts.proxycmd);
++	}
++
+ 	ret = m_malloc(len);
+ 	total = 0;
+ 
+-	if (cli_opts.no_hostkey_check)
+-	{
+-		int written = snprintf(ret+total, len-total, "-y -y ");
+-		total += written;
++	if (cli_opts.no_hostkey_check) {
++		total += m_snprintf(ret+total, len-total, "-y -y ");
++	} else if (cli_opts.always_accept_key) {
++		total += m_snprintf(ret+total, len-total, "-y ");
+ 	}
+-	else if (cli_opts.always_accept_key)
+-	{
+-		int written = snprintf(ret+total, len-total, "-y ");
+-		total += written;
++
++	if (cli_opts.proxycmd) {
++		total += m_snprintf(ret+total, len-total, "-J '%s' ", cli_opts.proxycmd);
+ 	}
+ 
+-	if (opts.recv_window != DEFAULT_RECV_WINDOW)
+-	{
+-		int written = snprintf(ret+total, len-total, "-W %u ", opts.recv_window);
+-		total += written;
++	if (opts.recv_window != DEFAULT_RECV_WINDOW) {
++		total += m_snprintf(ret+total, len-total, "-W %u ", opts.recv_window);
+ 	}
+ 
+ #ifdef ENABLE_CLI_PUBKEY_AUTH
+ 	for (iter = cli_opts.privkeys->first; iter; iter = iter->next)
+ 	{
+ 		sign_key * key = (sign_key*)iter->item;
+-		const size_t size = len - total;
+-		int written = snprintf(ret+total, size, "-i %s ", key->filename);
+-		dropbear_assert((unsigned int)written < size);
+-		total += written;
++		total += m_snprintf(ret+total, len-total, "-i %s ", key->filename);
+ 	}
+ #endif /* ENABLE_CLI_PUBKEY_AUTH */
+ 
+-	/* if args were passed, total will be not zero, and it will have a space at the end, so remove that */
+-	if (total > 0) 
+-	{
+-		total--;
+-	}
+-
+ 	return ret;
+ }
+ 
+@@ -591,6 +583,9 @@ multihop_passthrough_args() {
+  *   dbclient -J "dbclient -B madako:22 wrt" madako
+  * etc for as many hosts as we want.
+  *
++ * Note that "-J" arguments aren't actually used, instead
++ * below sets cli_opts.proxycmd directly.
++ *
+  * Ports for hosts can be specified as host/port.
+  */
+ static void parse_multihop_hostname(const char* orighostarg, const char* argv0) {
+@@ -609,7 +604,7 @@ static void parse_multihop_hostname(cons
+ 			&& strchr(cli_opts.username, '@')) {
+ 		unsigned int len = strlen(orighostarg) + strlen(cli_opts.username) + 2;
+ 		hostbuf = m_malloc(len);
+-		snprintf(hostbuf, len, "%s@%s", cli_opts.username, orighostarg);
++		m_snprintf(hostbuf, len, "%s@%s", cli_opts.username, orighostarg);
+ 	} else {
+ 		hostbuf = m_strdup(orighostarg);
+ 	}
+@@ -632,19 +627,18 @@ static void parse_multihop_hostname(cons
+ 		/* Set up the proxycmd */
+ 		unsigned int cmd_len = 0;
+ 		char *passthrough_args = multihop_passthrough_args();
+-		if (cli_opts.proxycmd) {
+-			dropbear_exit("-J can't be used with multihop mode");
+-		}
+ 		if (cli_opts.remoteport == NULL) {
+ 			cli_opts.remoteport = "22";
+ 		}
+-		cmd_len = strlen(argv0) + strlen(remainder) 
++		cmd_len = strlen(argv0) + strlen(remainder)
+ 			+ strlen(cli_opts.remotehost) + strlen(cli_opts.remoteport)
+ 			+ strlen(passthrough_args)
+ 			+ 30;
+-		cli_opts.proxycmd = m_malloc(cmd_len);
+-		snprintf(cli_opts.proxycmd, cmd_len, "%s -B %s:%s %s %s", 
+-				argv0, cli_opts.remotehost, cli_opts.remoteport, 
++		/* replace proxycmd. old -J arguments have been copied
++		   to passthrough_args */
++		cli_opts.proxycmd = m_realloc(cli_opts.proxycmd, cmd_len);
++		m_snprintf(cli_opts.proxycmd, cmd_len, "%s -B %s:%s %s %s",
++				argv0, cli_opts.remotehost, cli_opts.remoteport,
+ 				passthrough_args, remainder);
+ #ifndef DISABLE_ZLIB
+ 		/* The stream will be incompressible since it's encrypted. */

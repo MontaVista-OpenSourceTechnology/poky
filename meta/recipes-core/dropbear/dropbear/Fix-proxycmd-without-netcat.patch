@@ -1,0 +1,75 @@
+From 5cc0127000db5f7567b54d0495fb91a8e452fe09 Mon Sep 17 00:00:00 2001
+From: Konstantin Demin <rockdrilla@gmail.com>
+Date: Fri, 9 May 2025 22:39:35 +0300
+Subject: [PATCH] Fix proxycmd without netcat
+
+fixes e5a0ef27c2 "Execute multihop commands directly, no shell"
+
+Signed-off-by: Konstantin Demin <rockdrilla@gmail.com>
+---
+ src/cli-main.c | 12 +++++++++++-
+ 1 file changed, 11 insertions(+), 1 deletion(-)
+
+This fixes CVE-2025-47203. This fixes a regression.
+
+Signed-off-by: Javier Campos <jcampos@mvista.com>
+
+Index: dropbear-2017.75/cli-main.c
+===================================================================
+--- dropbear-2017.75.orig/cli-main.c
++++ dropbear-2017.75/cli-main.c
+@@ -75,7 +75,11 @@ int main(int argc, char ** argv) {
+ 
+ 	pid_t proxy_cmd_pid = 0;
+ #ifdef ENABLE_CLI_PROXYCMD
+-	if (cli_opts.proxycmd || cli_opts.proxyexec) {
++	if (cli_opts.proxycmd
++#ifdef ENABLE_CLI_MULTIHOP
++		|| cli_opts.proxyexec
++#endif
++	) {
+ 		cli_proxy_cmd(&sock_in, &sock_out, &proxy_cmd_pid);
+ 		if (signal(SIGINT, kill_proxy_sighandler) == SIG_ERR ||
+ 			signal(SIGTERM, kill_proxy_sighandler) == SIG_ERR ||
+@@ -152,11 +156,13 @@ static void shell_proxy_cmd(const void *
+ 	dropbear_exit("Failed to run '%s'\n", cmd);
+ }
+ 
++#ifdef ENABLE_CLI_MULTIHOP
+ static void exec_proxy_cmd(const void *unused) {
+ 	(void)unused;
+ 	run_command(cli_opts.proxyexec[0], cli_opts.proxyexec, ses.maxfd);
+ 	dropbear_exit("Failed to run '%s'\n", cli_opts.proxyexec[0]);
+ }
++#endif
+ 
+ static void cli_proxy_cmd(int *sock_in, int *sock_out, pid_t *pid_out) {
+ 	char * cmd_arg = NULL;
+@@ -187,9 +193,11 @@ static void cli_proxy_cmd(int *sock_in,
+ 		cmd_arg = m_malloc(shell_cmdlen);
+ 		snprintf(cmd_arg, shell_cmdlen, "exec %s", cli_opts.proxycmd);
+ 		exec_fn = shell_proxy_cmd;
++#ifdef ENABLE_CLI_MULTIHOP
+ 	} else {
+ 		/* No shell */
+ 		exec_fn = exec_proxy_cmd;
++#endif
+ 	}
+ 
+ 	ret = spawn_command(exec_fn, cmd_arg, sock_out, sock_in, NULL, pid_out);
+@@ -201,6 +209,7 @@ static void cli_proxy_cmd(int *sock_in,
+ cleanup:
+ 	m_free(cli_opts.proxycmd);
+ 	m_free(cmd_arg);
++#ifdef ENABLE_CLI_MULTIHOP
+ 	if (cli_opts.proxyexec) {
+ 		char **a = NULL;
+ 		for (a = cli_opts.proxyexec; *a; a++) {
+@@ -208,6 +217,7 @@ cleanup:
+ 		}
+ 		m_free(cli_opts.proxyexec);
+ 	}
++#endif
+ }
+ 
+ static void kill_proxy_sighandler(int UNUSED(signo)) {

@@ -1,0 +1,68 @@
+From 1656db9e58e7e8188e4ca27ae4892b14949c56a5 Mon Sep 17 00:00:00 2001
+From: Matt Johnston <matt@ucc.asn.au>
+Date: Sun, 18 Feb 2018 15:12:15 +0800
+Subject: [PATCH] Add dbclient '-J &fd' option for a file descriptor
+
+Based on patch by Harald Becker
+---
+ cli-main.c | 15 +++++++++++++++
+ dbclient.1 | 11 +++++++++++
+ 2 files changed, 26 insertions(+)
+
+This fixes CVE-2025-47203. Dependency Patch #3.
+
+Signed-off-by: Javier Campos <jcampos@mvista.com>
+
+Index: dropbear-2017.75/cli-main.c
+===================================================================
+--- dropbear-2017.75.orig/cli-main.c
++++ dropbear-2017.75/cli-main.c
+@@ -158,6 +158,21 @@ static void cli_proxy_cmd(int *sock_in,
+ 	size_t ex_cmdlen;
+ 	int ret;
+ 
++	/* File descriptor "-j &3" */
++	if (*cli_opts.proxycmd == '&') {
++		char *p = cli_opts.proxycmd + 1;
++		int sock = strtoul(p, &p, 10);
++		/* must be a single number, and not stdin/stdout/stderr */
++		if (sock > 2 && sock < 1024 && *p == '\0') {
++			*sock_in = sock;
++			*sock_out = sock;
++			return;
++		}
++	}
++
++	/* Normal proxycommand */
++
++	/* So that spawn_command knows which shell to run */
+ 	fill_passwd(cli_opts.own_user);
+ 
+ 	ex_cmdlen = strlen(cli_opts.proxycmd) + 6; /* "exec " + command + '\0' */
+Index: dropbear-2017.75/dbclient.1
+===================================================================
+--- dropbear-2017.75.orig/dbclient.1
++++ dropbear-2017.75/dbclient.1
+@@ -111,11 +111,22 @@ if 0 disables keepalives. If no response
+ .B \-I \fIidle_timeout
+ Disconnect the session if no traffic is transmitted or received for \fIidle_timeout\fR seconds.
+ .TP
++
++.\" TODO: how to avoid a line break between these two -J arguments?
+ .B \-J \fIproxy_command
++.TP
++.B \-J \fI&fd
++.br
+ Use the standard input/output of the program \fIproxy_command\fR rather than using
+ a normal TCP connection. A hostname should be still be provided, as this is used for
+ comparing saved hostkeys. This command will be executed as "exec proxy_command ..." with the
+ default shell.
++
++The second form &fd will make dbclient use the numeric file descriptor as a socket. This
++can be used for more complex tunnelling scenarios. Example usage with socat is
++
++socat EXEC:'dbclient -J &38 ev',fdin=38,fdout=38 TCP4:host.example.com:22
++
+ .TP
+ .B \-B \fIendhost:endport
+ "Netcat-alike" mode, where Dropbear will connect to the given host, then create a

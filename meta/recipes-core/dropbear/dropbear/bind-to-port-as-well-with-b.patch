@@ -1,0 +1,295 @@
+From e4ac7ea1ca910e0d245232a8ab16415f252b006b Mon Sep 17 00:00:00 2001
+From: Matt Johnston <matt@ucc.asn.au>
+Date: Fri, 26 Jan 2018 00:27:48 +0800
+Subject: [PATCH] bind to port as well with -b
+
+---
+ cli-main.c    |  7 ++++---
+ cli-runopts.c | 18 +++++++++++++++--
+ cli-tcpfwd.c  |  2 +-
+ dbclient.1    |  6 +++++-
+ netio.c       | 62 +++++++++++++++++++++++++++++++++++++++--------------------
+ netio.h       |  2 +-
+ runopts.h     |  1 +
+ svr-tcpfwd.c  |  2 +-
+ 8 files changed, 70 insertions(+), 30 deletions(-)
+
+This fixes CVE-2025-47203. Dependency Patch #2.
+
+Signed-off-by: Javier Campos <jcampos@mvista.com>
+
+Index: dropbear-2017.75/cli-main.c
+===================================================================
+--- dropbear-2017.75.orig/cli-main.c
++++ dropbear-2017.75/cli-main.c
+@@ -66,8 +66,8 @@ int main(int argc, char ** argv) {
+ 	}
+ #endif
+ 
+-	TRACE(("user='%s' host='%s' port='%s' bind_address='%s'", cli_opts.username,
+-				cli_opts.remotehost, cli_opts.remoteport, cli_opts.bind_address))
++	TRACE(("user='%s' host='%s' port='%s' bind_address='%s' bind_port='%s'", cli_opts.username,
++				cli_opts.remotehost, cli_opts.remoteport, cli_opts.bind_address, cli_opts.bind_port))
+ 
+ 	if (signal(SIGPIPE, SIG_IGN) == SIG_ERR) {
+ 		dropbear_exit("signal() error");
+@@ -86,7 +86,8 @@ int main(int argc, char ** argv) {
+ 	} else
+ #endif
+ 	{
+-		progress = connect_remote(cli_opts.remotehost, cli_opts.remoteport, cli_connected, &ses, cli_opts.bind_address);
++		progress = connect_remote(cli_opts.remotehost, cli_opts.remoteport,
++			cli_connected, &ses, cli_opts.bind_address, cli_opts.bind_port);
+ 		sock_in = sock_out = -1;
+ 	}
+ 
+Index: dropbear-2017.75/cli-runopts.c
+===================================================================
+--- dropbear-2017.75.orig/cli-runopts.c
++++ dropbear-2017.75/cli-runopts.c
+@@ -92,7 +92,7 @@ static void printhelp() {
+ 					"-c <cipher list> Specify preferred ciphers ('-c help' to list options)\n"
+ 					"-m <MAC list> Specify preferred MACs for packet verification (or '-m help')\n"
+ #endif
+-					"-b    bind_address\n"
++					"-b    [bind_address][:bind_port]\n"
+ 					"-V    Version\n"
+ #ifdef DEBUG_TRACE
+ 					"-v    verbose (compiled with DEBUG_TRACE)\n"
+@@ -131,6 +131,7 @@ void cli_getopts(int argc, char ** argv)
+ 	char* keepalive_arg = NULL;
+ 	char* idle_timeout_arg = NULL;
+ 	char *host_arg = NULL;
++	char *bind_arg = NULL;
+ 	char c;
+ 
+ 	/* see printhelp() for options */
+@@ -168,6 +169,7 @@ void cli_getopts(int argc, char ** argv)
+ 	cli_opts.proxycmd = NULL;
+ #endif
+ 	cli_opts.bind_address = NULL;
++	cli_opts.bind_port = NULL;
+ #ifndef DISABLE_ZLIB
+ 	opts.compress_mode = DROPBEAR_COMPRESS_ON;
+ #endif
+@@ -316,7 +318,7 @@ void cli_getopts(int argc, char ** argv)
+ 					exit(EXIT_SUCCESS);
+ 					break;
+ 				case 'b':
+-					next = &cli_opts.bind_address;
++					next = &bind_arg;
+ 					break;
+ 				default:
+ 					fprintf(stderr,
+@@ -422,6 +424,18 @@ void cli_getopts(int argc, char ** argv)
+ 		cli_opts.remoteport = "22";
+ 	}
+ 
++	if (bind_arg) {
++		/* split [host][:port] */
++		char *port = strrchr(bind_arg, ':');
++		if (port) {
++			cli_opts.bind_port = m_strdup(port+1);
++			*port = '\0';
++		}
++		if (strlen(bind_arg) > 0) {
++			cli_opts.bind_address = m_strdup(bind_arg);
++		}
++	}
++
+ 	/* If not explicitly specified with -t or -T, we don't want a pty if
+ 	 * there's a command, but we do otherwise */
+ 	if (cli_opts.wantpty == 9) {
+Index: dropbear-2017.75/cli-tcpfwd.c
+===================================================================
+--- dropbear-2017.75.orig/cli-tcpfwd.c
++++ dropbear-2017.75/cli-tcpfwd.c
+@@ -274,7 +274,7 @@ static int newtcpforwarded(struct Channe
+ 	}
+ 	
+ 	snprintf(portstring, sizeof(portstring), "%u", fwd->connectport);
+-	channel->conn_pending = connect_remote(fwd->connectaddr, portstring, channel_connect_done, channel, NULL);
++	channel->conn_pending = connect_remote(fwd->connectaddr, portstring, channel_connect_done, channel, NULL, NULL);
+ 
+ 	channel->prio = DROPBEAR_CHANNEL_PRIO_UNKNOWABLE;
+ 	
+Index: dropbear-2017.75/dbclient.1
+===================================================================
+--- dropbear-2017.75.orig/dbclient.1
++++ dropbear-2017.75/dbclient.1
+@@ -144,8 +144,8 @@ Can be used to give options in the forma
+ useful for specifying options for which there is no separate command-line flag.
+ For full details of the options listed below, and their possible values, see
+ ssh_config(5).
++The following options have currently been implemented:
+ 
+-For now following options have been implemented:
+ .RS
+ .TP
+ .B ExitOnForwardFailure
+@@ -158,6 +158,10 @@ Send dbclient log messages to syslog in
+ .B \-s 
+ The specified command will be requested as a subsystem, used for sftp. Dropbear doesn't implement sftp itself but the OpenSSH sftp client can be used eg \fIsftp -S dbclient user@host\fR
+ .TP
++.B \-b \fI[address][:port]
++Bind to a specific local address when connecting to the remote host. This can be used to choose from
++multiple outgoing interfaces. Either address or port (or both) can be given.
++.TP
+ .B \-V
+ Print the version
+ 
+Index: dropbear-2017.75/netio.c
+===================================================================
+--- dropbear-2017.75.orig/netio.c
++++ dropbear-2017.75/netio.c
+@@ -19,7 +19,7 @@ struct dropbear_progress_connection {
+ 	int sock;
+ 
+ 	char* errstring;
+-	struct addrinfo *bind_addrinfo;
++	char *bind_address, *bind_port;
+ };
+ 
+ /* Deallocate a progress connection. Removes from the pending list if iter!=NULL.
+@@ -31,7 +31,8 @@ static void remove_connect(struct dropbe
+ 	m_free(c->remotehost);
+ 	m_free(c->remoteport);
+ 	m_free(c->errstring);
+-	if (c->bind_addrinfo) freeaddrinfo(c->bind_addrinfo);
++	m_free(c->bind_address);
++	m_free(c->bind_port);
+ 	m_free(c);
+ 
+ 	if (iter) {
+@@ -53,6 +54,7 @@ void cancel_connect(struct dropbear_prog
+ 
+ static void connect_try_next(struct dropbear_progress_connection *c) {
+ 	struct addrinfo *r;
++	int err;
+ 	int res = 0;
+ 	int fastopen = 0;
+ #ifdef DROPBEAR_CLIENT_TCP_FAST_OPEN
+@@ -68,11 +70,38 @@ static void connect_try_next(struct drop
+ 			continue;
+ 		}
+ 
+-		if (c->bind_addrinfo) {
+-			if (bind(c->sock, c->bind_addrinfo->ai_addr, c->bind_addrinfo->ai_addrlen) < 0) {
++		if (c->bind_address || c->bind_port) {
++			/* bind to a source port/address */
++			struct addrinfo hints;
++			struct addrinfo *bindaddr = NULL;
++			memset(&hints, 0, sizeof(hints));
++			hints.ai_socktype = SOCK_STREAM;
++			hints.ai_family = r->ai_family;
++			hints.ai_flags = AI_PASSIVE;
++
++			err = getaddrinfo(c->bind_address, c->bind_port, &hints, &bindaddr);
++			if (err) {
++				int len = 100 + strlen(gai_strerror(err));
++				m_free(c->errstring);
++				c->errstring = (char*)m_malloc(len);
++				snprintf(c->errstring, len, "Error resolving bind address '%s' (port %s). %s",
++						c->bind_address, c->bind_port, gai_strerror(err));
++				TRACE(("Error resolving bind: %s", gai_strerror(err)))
++				close(c->sock);
++				c->sock = -1;
++				continue;
++			}
++			res = bind(c->sock, bindaddr->ai_addr, bindaddr->ai_addrlen);
++			freeaddrinfo(bindaddr);
++			bindaddr = NULL;
++			if (res < 0) {
+ 				/* failure */
++				int keep_errno = errno;
++				int len = 300;
+ 				m_free(c->errstring);
+-				c->errstring = m_strdup(strerror(errno));
++				c->errstring = m_malloc(len);
++				snprintf(c->errstring, len, "Error binding local address '%s' (port %s). %s",
++						c->bind_address, c->bind_port, strerror(keep_errno));
+ 				close(c->sock);
+ 				c->sock = -1;
+ 				continue;
+@@ -143,7 +172,8 @@ static void connect_try_next(struct drop
+ 
+ /* Connect via TCP to a host. */
+ struct dropbear_progress_connection *connect_remote(const char* remotehost, const char* remoteport,
+-	connect_callback cb, void* cb_data, char* bind_address)
++	connect_callback cb, void* cb_data,
++	const char* bind_address, const char* bind_port)
+ {
+ 	struct dropbear_progress_connection *c = NULL;
+ 	int err;
+@@ -155,7 +185,6 @@ struct dropbear_progress_connection *con
+ 	c->sock = -1;
+ 	c->cb = cb;
+ 	c->cb_data = cb_data;
+-	c->bind_addrinfo = NULL;
+ 
+ 	list_append(&ses.conn_pending, c);
+ 
+@@ -175,20 +204,11 @@ struct dropbear_progress_connection *con
+ 		c->res_iter = c->res;
+ 	}
+ 	
+-	if (NULL != bind_address) {
+-		memset(&hints, 0, sizeof(hints));
+-		hints.ai_socktype = SOCK_STREAM;
+-		hints.ai_family = AF_UNSPEC;
+-		err = getaddrinfo(bind_address, NULL, &hints, &c->bind_addrinfo);
+-		if (err) {
+-			int len;
+-			len = 100 + strlen(gai_strerror(err));
+-			c->errstring = (char*)m_malloc(len);
+-			snprintf(c->errstring, len, "Error resolving '%s'. %s", 
+-					bind_address, gai_strerror(err));
+-			TRACE(("Error resolving: %s", gai_strerror(err)))
+-			c->res_iter = NULL;
+-		}
++	if (bind_address) {
++		c->bind_address = m_strdup(bind_address);
++	}
++	if (bind_port) {
++		c->bind_port = m_strdup(bind_port);
+ 	}
+ 
+ 	return c;
+Index: dropbear-2017.75/netio.h
+===================================================================
+--- dropbear-2017.75.orig/netio.h
++++ dropbear-2017.75/netio.h
+@@ -29,7 +29,7 @@ typedef void(*connect_callback)(int resu
+ 
+ /* Always returns a progress connection, if it fails it will call the callback at a later point */
+ struct dropbear_progress_connection * connect_remote (const char* remotehost, const char* remoteport,
+-	connect_callback cb, void *cb_data, char* bind_address);
++	connect_callback cb, void *cb_data, const char* bind_address, const char* bind_port);
+ 
+ /* Sets up for select() */
+ void set_connect_fds(fd_set *writefd);
+Index: dropbear-2017.75/runopts.h
+===================================================================
+--- dropbear-2017.75.orig/runopts.h
++++ dropbear-2017.75/runopts.h
+@@ -166,6 +166,7 @@ typedef struct cli_runopts {
+ 	char *proxycmd;
+ #endif
+ 	char *bind_address;
++	char *bind_port;
+ } cli_runopts;
+ 
+ extern cli_runopts cli_opts;
+Index: dropbear-2017.75/svr-tcpfwd.c
+===================================================================
+--- dropbear-2017.75.orig/svr-tcpfwd.c
++++ dropbear-2017.75/svr-tcpfwd.c
+@@ -270,7 +270,7 @@ static int newtcpdirect(struct Channel *
+ 	}
+ 
+ 	snprintf(portstring, sizeof(portstring), "%u", destport);
+-	channel->conn_pending = connect_remote(desthost, portstring, channel_connect_done, channel, NULL);
++	channel->conn_pending = connect_remote(desthost, portstring, channel_connect_done, channel, NULL, NULL);
+ 
+ 	channel->prio = DROPBEAR_CHANNEL_PRIO_UNKNOWABLE;
+ 	

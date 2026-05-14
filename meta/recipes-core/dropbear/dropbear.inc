@@ -25,6 +25,21 @@ SRC_URI = "http://matt.ucc.asn.au/dropbear/releases/dropbear-${PV}.tar.bz2 \
            file://dropbearkey.service \
            file://dropbear@.service \
            file://dropbear.socket \
+           file://cli_bind_address_connect.patch \
+           file://bind-to-port-as-well-with-b.patch \
+           file://Add-dbclient-J-fd-option-for-a-file-descriptor.patch \
+           file://Add-c-command-option-to-force-a-specific-command.patch \
+           file://Add-manpage-and-log-for-forced_command.patch \
+           file://Some-minor-manpage-improvements.patch \
+           file://cli-runopts.c-add-PasswordAuthentication-option.patch \
+           file://cli-runopts.c-add-BatchMode-option.patch \
+           file://Add-m_snprintf-that-won-t-return-negative.patch \
+           file://Allow-dbclient-J-to-be-used-with-multihop.patch \
+           file://add-o-BatchMode-and-also-forward-this-when-multihop-.patch \
+           file://Handle-arbitrary-length-paths-and-commands-in-multih.patch \
+           file://Pointer-parameter-could-be-declared-as-pointing-to-c.patch \
+           file://CVE-2025-47203.patch \
+           file://Fix-proxycmd-without-netcat.patch \
            ${@bb.utils.contains('DISTRO_FEATURES', 'pam', '${PAM_SRC_URI}', '', d)} "
 
 PAM_SRC_URI = "file://0005-dropbear-enable-pam.patch \

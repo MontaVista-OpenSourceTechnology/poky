@@ -1,0 +1,52 @@
+From 103036c5465614b817d2d4644b8e84e6173b0a1f Mon Sep 17 00:00:00 2001
+From: Matt Johnston <matt@ucc.asn.au>
+Date: Tue, 12 Apr 2016 21:05:40 +0800
+Subject: [PATCH] Add manpage and log for forced_command
+
+---
+ dropbear.8    | 5 +++++
+ svr-runopts.c | 4 ++++
+ 2 files changed, 9 insertions(+)
+
+This fixes CVE-2025-47203. Dependency Patch #5.
+
+Signed-off-by: Javier Campos <jcampos@mvista.com>
+
+Index: dropbear-2017.75/dropbear.8
+===================================================================
+--- dropbear-2017.75.orig/dropbear.8
++++ dropbear-2017.75/dropbear.8
+@@ -91,6 +91,10 @@ if 0 disables keepalives. If no response
+ .B \-I \fIidle_timeout
+ Disconnect the session if no traffic is transmitted or received for \fIidle_timeout\fR seconds.
+ .TP
++.B \-c \fIforced_command
++Disregard the command provided by the user and always run \fIforced_command\fR. This also
++overrides any authorized_keys command= option.
++.TP
+ .B \-V
+ Print the version
+ 
+@@ -129,6 +133,7 @@ same functionality with other means even
+ .TP
+ .B command=\fR"\fIforced_command\fR"
+ Disregard the command provided by the user and always run \fIforced_command\fR.
++The -c command line option overrides this.
+ 
+ The authorized_keys file and its containing ~/.ssh directory must only be
+ writable by the user, otherwise Dropbear will not allow a login using public
+Index: dropbear-2017.75/svr-runopts.c
+===================================================================
+--- dropbear-2017.75.orig/svr-runopts.c
++++ dropbear-2017.75/svr-runopts.c
+@@ -351,6 +351,10 @@ void svr_getopts(int argc, char ** argv)
+ 		}
+ 		opts.idle_timeout_secs = val;
+ 	}
++
++	if (svr_opts.forced_command) {
++		dropbear_log(LOG_INFO, "Forced command set to '%s'", svr_opts.forced_command);
++	}
+ }
+ 
+ static void addportandaddress(const char* spec) {

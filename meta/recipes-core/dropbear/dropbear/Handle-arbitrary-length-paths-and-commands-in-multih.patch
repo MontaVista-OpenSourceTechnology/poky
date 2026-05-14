@@ -1,0 +1,65 @@
+From 697b1f86c0b2b0caf12e9e32bab29161093ab5d4 Mon Sep 17 00:00:00 2001
+From: Matt Johnston <matt@ucc.asn.au>
+Date: Mon, 1 Apr 2024 11:50:26 +0800
+Subject: [PATCH] Handle arbitrary length paths and commands in
+ multihop_passthrough_args()
+
+---
+ src/cli-runopts.c | 30 +++++++++++++++++++++---------
+ 1 file changed, 21 insertions(+), 9 deletions(-)
+
+This fixes CVE-2025-47203. Dependency Patch #12.
+
+Signed-off-by: Javier Campos <jcampos@mvista.com>
+
+Index: dropbear-2017.75/cli-runopts.c
+===================================================================
+--- dropbear-2017.75.orig/cli-runopts.c
++++ dropbear-2017.75/cli-runopts.c
+@@ -524,15 +524,29 @@ static void loadidentityfile(const char*
+ 
+ #ifdef ENABLE_CLI_MULTIHOP
+ 
+-static char*
+-multihop_passthrough_args() {
+-	char *ret, args[256];
++/* Fill out -i, -y, -W options that make sense for all
++ * the intermediate processes */
++static char* multihop_passthrough_args(void) {
++	char *args = NULL;
+ 	unsigned int len, total;
+ 	m_list_elem *iter;
+-	/* Fill out -i, -y, -W options that make sense for all
+-	  * the intermediate processes */
++	/* Sufficient space for non-string args */
++	len = 100;
++
++	/* String arguments have arbitrary length, so determine space required */
++	if (cli_opts.proxycmd) {
++		len += strlen(cli_opts.proxycmd);
++	}
++	for (iter = cli_opts.privkeys->first; iter; iter = iter->next)
++	{
++		sign_key * key = (sign_key*)iter->item;
++		len += 4 + strlen(key->filename);
++	}
++
++	args = m_malloc(len);
+ 	total = 0;
+-	len = 255;
++
++	/* Create new argument string */
+ 
+ 	if (cli_opts.no_hostkey_check) {
+ 		total += m_snprintf(args+total, len-total, "-y -y ");
+@@ -560,9 +574,7 @@ multihop_passthrough_args() {
+ 	}
+ #endif /* ENABLE_CLI_PUBKEY_AUTH */
+ 
+-	ret = m_malloc(total + 1);
+-	strcpy(ret,args);
+-	return ret;
++	return args;
+ }
+ 
+ /* Sets up 'onion-forwarding' connections. This will spawn
