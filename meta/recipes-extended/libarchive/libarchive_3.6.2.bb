@@ -28,7 +28,7 @@ PACKAGECONFIG[zstd] = "--with-zstd,--without-zstd,zstd,"
 
 EXTRA_OECONF += "--enable-largefile --without-iconv"
 
-PR .= ".1"
+PR .= ".2"
 SRC_URI = "http://libarchive.org/downloads/libarchive-${PV}.tar.gz \
            file://0001-pax-writer-fix-multiple-security-vulnerabilities.patch \
            file://CVE-2024-26256.patch \
@@ -54,6 +54,7 @@ SRC_URI = "http://libarchive.org/downloads/libarchive-${PV}.tar.gz \
            file://CVE-2026-4111-1.patch \
            file://CVE-2026-4111-2.patch \
            file://CVE-2026-4426.patch \
+           file://CVE-2026-5121.patch \
            "
 UPSTREAM_CHECK_URI = "http://libarchive.org/"
 
