@@ -937,7 +937,7 @@ root filesystem on the target, and must *not* make a reference to the variable
 .. note::
 
    The list of files for a package is defined using the override syntax by
-   separating :term:`FILES` and the package name by a semi-colon (``:``).
+   separating :term:`FILES` and the package name by a colon (``:``).
 
 A given file can only ever be in one package. By iterating from the leftmost to
 rightmost package in :term:`PACKAGES`, each file matching one of the patterns
