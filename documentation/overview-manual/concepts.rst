@@ -11,6 +11,14 @@ workflow,
 cross-development toolchains, shared state cache, and so forth are
 explained.
 
+.. note::
+
+   Throughout this section, many variables and their meanings are
+   introduced. If, in the context of a :term:`Build Directory`,
+   you want to examine the value of any of these variables, you can
+   use the ``bitbake-getvar`` command, explained in the
+   ":ref:`dev-manual/debugging:viewing variable values`" section.
+
 Yocto Project Components
 ========================
 
