@@ -293,7 +293,7 @@ Tips and Guidelines for Writing Recipes
    - then, copy ``X.orig`` back to ``X``,
    - and, finally, modify ``X``.
 
-   This ensures if rerun the task always has the same end result and the
+   This ensures that rerunning the task always produces the same end result and the
    original file can be preserved to reuse. It also guards against an
    interrupted build corrupting the file.
 
@@ -403,7 +403,7 @@ CVE patches
 ===========
 
 In order to have a better control of vulnerabilities, patches that fix CVEs must
-contain a ``CVE:`` tag. This tag list all CVEs fixed by the patch. If more than
+contain a ``CVE:`` tag. This tag should list all CVEs fixed by the patch. If more than
 one CVE is fixed, separate them using spaces.
 
 CVE Examples
