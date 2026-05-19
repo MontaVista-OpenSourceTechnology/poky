@@ -427,7 +427,8 @@ configurations into their own layer. Settings you provide in
 in your ``conf/local.conf`` file in the :term:`Build Directory`.
 
 The following list provides some explanation and references for what you
-typically find in a distribution layer:
+typically find in a distribution layer (recall that
+:yocto_git:`meta-poky </meta-yocto/tree/meta-poky>` is such a layer):
 
 -  *classes*, *classes-global*, *classes-recipe:* Class files (``.bbclass``)
    hold common functionality that
