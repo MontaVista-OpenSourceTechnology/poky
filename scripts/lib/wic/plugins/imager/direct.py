@@ -134,7 +134,7 @@ class DirectPlugin(ImagerPlugin):
                 device_name = "LABEL=%s" % part.label
             else:
                 # mmc device partitions are named mmcblk0p1, mmcblk0p2..
-                prefix = 'p' if  part.disk.startswith('mmcblk') else ''
+                prefix = 'p' if  part.disk.startswith('mmcblk') or part.disk.startswith('nvme0n1') else ''
                 device_name = "/dev/%s%s%d" % (part.disk, prefix, part.realnum)
 
             opts = part.fsopts if part.fsopts else "defaults"
