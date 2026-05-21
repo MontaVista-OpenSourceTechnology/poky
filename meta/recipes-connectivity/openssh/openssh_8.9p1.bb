@@ -41,7 +41,9 @@ SRC_URI = "http://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-${PV}.tar
            file://CVE-2025-32728.patch \
            file://CVE-2025-61985.patch \
            file://CVE-2025-61984.patch \
+           file://CVE-2026-35385.patch \
            "
+PR .= ".1"
 SRC_URI[sha256sum] = "fd497654b7ab1686dac672fb83dfb4ba4096e8b5ffcdaccd262380ae58bec5e7"
 
 # This CVE is specific to OpenSSH with the pam opie which we don't build/use here
