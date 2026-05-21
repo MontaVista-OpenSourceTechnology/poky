@@ -1302,7 +1302,7 @@ to build, and U-Boot configurations.
 
 The following list provides some explanation for the statements found in
 the example reference machine configuration file for the BeagleBone
-development boards. Realize that much more can be defined as part of a
+development board. Realize that much more can be defined as part of a
 machine's configuration file. In general, you can learn about related
 variables that this example does not have by locating the variables in
 the ":ref:`ref-manual/variables:variables glossary`" in the Yocto
@@ -1376,7 +1376,7 @@ Project Reference Manual.
 
 -  :term:`PREFERRED_VERSION_linux-yocto <PREFERRED_VERSION>`:
    Defines the version of the recipe used to build the kernel, which is
-   "6.12" in this case.
+   "6.18%" in this case.
 
 -  :term:`KERNEL_IMAGETYPE`:
    The type of kernel to build for the device. In this case, the
@@ -1435,35 +1435,27 @@ The kernel recipe used to build the kernel image for the BeagleBone
 device was established in the machine configuration::
 
    PREFERRED_PROVIDER_virtual/kernel ?= "linux-yocto"
-   PREFERRED_VERSION_linux-yocto ?= "6.1%"
+   PREFERRED_VERSION_linux-yocto ?= "6.18%"
 
 The ``meta-yocto-bsp/recipes-kernel/linux`` directory in the layer contains
 metadata used to build the kernel. In this case, a kernel append file
-(i.e. ``linux-yocto_6.1.bbappend``) is used to override an established
-kernel recipe (i.e. ``linux-yocto_6.1.bb``), which is located in
-:yocto_git:`/poky/tree/meta/recipes-kernel/linux`.
+(i.e. ``linux-yocto_6.18.bbappend``) is used to override an established
+kernel recipe (i.e. ``linux-yocto_6.18.bb``), which is located in
+:oe_git:`/openembedded-core/tree/meta/recipes-kernel/linux`.
 
 The contents of the append file are::
 
-   KBRANCH:genericx86  = "v6.1/standard/base"
-   KBRANCH:genericx86-64  = "v6.1/standard/base"
-   KBRANCH:beaglebone-yocto = "v6.1/standard/beaglebone"
-
-   KMACHINE:genericx86 ?= "common-pc"
-   KMACHINE:genericx86-64 ?= "common-pc-64"
-   KMACHINE:beaglebone-yocto ?= "beaglebone"
-
-   SRCREV_machine:genericx86 ?= "6ec439b4b456ce929c4c07fe457b5d6a4b468e86"
-   SRCREV_machine:genericx86-64 ?= "6ec439b4b456ce929c4c07fe457b5d6a4b468e86"
-   SRCREV_machine:beaglebone-yocto ?= "423e1996694b61fbfc8ec3bf062fc6461d64fde1"
-
+   COMPATIBLE_MACHINE:genericarm64 = "genericarm64"
+   COMPATIBLE_MACHINE:beaglebone-yocto = "beaglebone-yocto"
    COMPATIBLE_MACHINE:genericx86 = "genericx86"
    COMPATIBLE_MACHINE:genericx86-64 = "genericx86-64"
-   COMPATIBLE_MACHINE:beaglebone-yocto = "beaglebone-yocto"
 
-   LINUX_VERSION:genericx86 = "6.1.30"
-   LINUX_VERSION:genericx86-64 = "6.1.30"
-   LINUX_VERSION:beaglebone-yocto = "6.1.20"
+   KMACHINE:beaglebone-yocto ?= "beaglebone"
+   KMACHINE:genericx86 ?= "common-pc"
+   KMACHINE:genericx86-64 ?= "common-pc-64"
+
+   KBRANCH:genericarm64 ?= "v6.18/standard/genericarm64"
+   SRCREV_machine:genericarm64 ?= "5cd75b0b5da06045acdd0c66e50656ab82cb880f"
 
 This particular append file works for all the machines that are
 part of the ``meta-yocto-bsp`` layer. The relevant statements are
