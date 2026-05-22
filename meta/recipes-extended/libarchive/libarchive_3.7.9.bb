@@ -81,4 +81,9 @@ ALTERNATIVE:bsdcpio = "cpio"
 ALTERNATIVE_LINK_NAME[cpio] = "${base_bindir}/cpio"
 ALTERNATIVE_TARGET[cpio] = "${bindir}/bsdcpio"
 
+python() {
+    if not bb.utils.filter('CFLAGS', '-fsanitize=pointer-overflow -fsanitize-trap=pointer-overflow', d):
+        d.setVarFlag("CVE_STATUS", "CVE-2026-5745", "not-applicable-config: sanitize is disabled")
+}
+
 BBCLASSEXTEND = "native nativesdk"
