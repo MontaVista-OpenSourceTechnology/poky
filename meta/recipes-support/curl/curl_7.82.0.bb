@@ -9,7 +9,7 @@ SECTION = "console/network"
 LICENSE = "curl"
 LIC_FILES_CHKSUM = "file://COPYING;md5=190c514872597083303371684954f238"
 
-PR .= ".2"
+PR .= ".3"
 
 SRC_URI = "https://curl.se/download/${BP}.tar.xz \
            file://CVE-2022-22576.patch \
@@ -83,6 +83,10 @@ SRC_URI = "https://curl.se/download/${BP}.tar.xz \
            file://CVE-2026-6276.patch \
            file://CVE-2026-4873.patch \
            file://CVE-2026-7168.patch \
+           file://CVE-2026-6253.patch \
+           file://CVE-2026-6429-pre1.patch \
+           file://CVE-2026-6429-pre2.patch \
+           file://CVE-2026-6429.patch \
            "
 SRC_URI[sha256sum] = "0aaa12d7bd04b0966254f2703ce80dd5c38dbbd76af0297d3d690cdce58a583c"
 
