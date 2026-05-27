@@ -19,7 +19,11 @@ SRC_URI = "https://gstreamer.freedesktop.org/src/gst-plugins-bad/gst-plugins-bad
            file://CVE-2023-50186.patch \
            file://CVE-2025-3887-1.patch \
            file://CVE-2025-3887-2.patch \
+           file://CVE-2026-3082.patch \
            "
+
+PR .= ".1"
+
 SRC_URI[sha256sum] = "87251beebfd1325e5118cc67774061f6e8971761ca65a9e5957919610080d195"
 
 S = "${WORKDIR}/gst-plugins-bad-${PV}"
