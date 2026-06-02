@@ -19,7 +19,7 @@ DEPENDS:append:libc-musl = " argp-standalone"
 
 SHRT_VER = "${@d.getVar('PV').split('.')[0]}.${@d.getVar('PV').split('.')[1]}"
 
-PR .= ".4"
+PR .= ".5"
 
 SRC_URI = "https://www.gnupg.org/ftp/gcrypt/gnutls/v${SHRT_VER}/gnutls-${PV}.tar.xz \
            file://arm_eabi.patch \
@@ -50,7 +50,22 @@ SRC_URI = "https://www.gnupg.org/ftp/gcrypt/gnutls/v${SHRT_VER}/gnutls-${PV}.tar
            file://CVE-2026-33845-pre.patch \
            file://CVE-2026-33845-1.patch \
            file://CVE-2026-33845-2.patch \
-           file://CVE-2026-42011.patch \
+           file://CVE-2025-14831-1.patch \
+           file://CVE-2025-14831-2.patch \
+           file://CVE-2025-14831-3.patch \
+           file://CVE-2025-14831-4.patch \
+           file://CVE-2025-14831-5.patch \
+           file://CVE-2025-14831-6.patch \
+           file://CVE-2025-14831-7.patch \
+           file://CVE-2025-14831-8.patch \
+           file://CVE-2025-14831-9.patch \
+           file://CVE-2026-42011-1.patch \
+           file://CVE-2026-42011-2.patch \
+           file://CVE-2026-42012-1.patch \
+           file://CVE-2026-42012-2.patch \
+           file://CVE-2026-42012-3.patch \
+           file://CVE-2026-42012-4.patch \
+           file://CVE-2026-42012-5.patch \
            "
 
 SRC_URI[sha256sum] = "e6adbebcfbc95867de01060d93c789938cf89cc1d1f6ef9ef661890f6217451f"
