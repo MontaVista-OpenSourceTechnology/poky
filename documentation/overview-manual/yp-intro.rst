@@ -781,7 +781,9 @@ helpful for getting started:
    their code available to other application developers. For information
    on the eSDK, see the :doc:`/sdk-manual/index` manual.
 
--  *Layer:* A collection of related recipes. Layers allow you to
+-  *Layer:* A collection of related metadata, which could include any of
+   recipes, machine configuration files, distro configuration files
+   and/or class files. Layers allow you to
    consolidate related metadata to customize your build. Layers also
    isolate information used when building for multiple architectures.
    Layers are hierarchical in their ability to override previous
