@@ -56,31 +56,21 @@ original reporter in the loop. There is also sometimes some coordination for
 handling patches, backporting patches etc, or just understanding the problem
 or what caused it.
 
-When the fix is publicly available, the YP security team member or the
-package maintainer sends patches against the YP code base, following usual
-procedures, including public code review.
-
-What Yocto Security Team does when it receives a security vulnerability
-=======================================================================
-
-The YP Security Team team performs a quick analysis and would usually report
-the flaw to the upstream project. Normally the upstream project analyzes the
-problem. If they deem it a real security problem in their software, they
-develop and release a fix following their own security policy. They may want
-to include the original reporter in the loop. There is also sometimes some
-coordination for handling patches, backporting patches etc, or just
-understanding the problem or what caused it.
-
 The security policy of the upstream project might include a notification to
 Linux distributions or other important downstream projects in advance to
 discuss coordinated disclosure. These mailing lists are normally non-public.
 
 When the upstream project releases a version with the fix, they are responsible
-for contacting `Mitre <https://www.cve.org/>`__ to get a CVE number assigned and
-the CVE record published.
+for contacting an appropriate CVE Numbering Authority (CNA), such as `Mitre
+<https://cveform.mitre.org/>`__, to get a CVE number assigned and the CVE
+record published.
+
+When the fix is publicly available, the YP security team member or the
+package maintainer sends patches against the YP code base, following usual
+procedures, including public code review.
 
 If an upstream project does not respond quickly
-===============================================
+-----------------------------------------------
 
 If an upstream project does not fix the problem in a reasonable time,
 the Yocto's Security Team will contact other interested parties (usually
