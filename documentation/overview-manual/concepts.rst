@@ -1144,7 +1144,7 @@ host part is the part of the SDK that runs on the
 :term:`SDKMACHINE`.
 
 The :ref:`ref-tasks-populate_sdk_ext` task helps create the extensible SDK and
-handles host and target parts differently than its counter part does for
+handles host and target parts differently than its counterpart does for
 the standard SDK. For the extensible SDK, the task encapsulates the
 build system, which includes everything needed (host and target) for the
 SDK.
