@@ -779,7 +779,8 @@ and the :term:`FILESPATH` variable
 to locate applicable patch files.
 
 Default processing for patch files assumes the files have either
-``*.patch`` or ``*.diff`` file types. You can use :term:`SRC_URI` parameters
+``*.patch`` or ``*.diff`` file types (or a compressed form of those
+file types). You can use :term:`SRC_URI` parameters
 to change the way the build system recognizes patch files. See the
 :ref:`ref-tasks-patch` task for more
 information.
