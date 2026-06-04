@@ -1825,7 +1825,8 @@ adding shared state wrapping to a task is as simple as this
        sstate_setscene(d)
    }
    addtask do_deploy_setscene
-   do_deploy[dirs] = "${DEPLOYDIR} ${B}"
+   do_deploy[dirs] = "${B}"
+   do_deploy[cleandirs] = "${DEPLOYDIR}"
    do_deploy[stamp-extra-info] = "${MACHINE_ARCH}"
 
 The following list explains the previous example:
@@ -1870,9 +1871,16 @@ The following list explains the previous example:
    information, see the ":ref:`bitbake-user-manual/bitbake-user-manual-execution:setscene`"
    section in the BitBake User Manual.
 
--  The ``do_deploy[dirs] = "${DEPLOYDIR} ${B}"`` line creates ``${DEPLOYDIR}``
-   and ``${B}`` before the :ref:`ref-tasks-deploy` task runs, and also sets the
-   current working directory of :ref:`ref-tasks-deploy` to ``${B}``. For more
+-  The ``do_deploy[dirs] = "${B}"`` line creates the directory ``${B}``
+   before the :ref:`ref-tasks-deploy` task runs, and also sets the
+   current working directory of :ref:`ref-tasks-deploy` to ``${B}``.
+   (If the directory already exists, it is left as is.) For more
+   information, see the ":ref:`bitbake-user-manual/bitbake-user-manual-metadata:variable flags`"
+   section in the BitBake User Manual.
+
+-  The ``do_deploy[cleandirs] = "${DEPLOYDIR}"`` line creates the *empty*
+   directory ``${DEPLOYDIR}`` before the :ref:`ref-tasks-deploy` task runs.
+   (If the directory already exists, it is deleted and recreated empty.) For more
    information, see the ":ref:`bitbake-user-manual/bitbake-user-manual-metadata:variable flags`"
    section in the BitBake User Manual.
 
