@@ -80,6 +80,8 @@ SRC_URI =  "${GLIBC_GIT_URI};branch=${SRCBRANCH};name=glibc \
            file://CVE-2026-5450.patch \
            file://CVE-2026-5435-01.patch \
            file://CVE-2026-5435-02.patch \
+	   file://CVE-2026-4438.patch \
+	   file://CVE-2026-4046.patch \
            "
 S = "${WORKDIR}/git"
 B = "${WORKDIR}/build-${TARGET_SYS}"
