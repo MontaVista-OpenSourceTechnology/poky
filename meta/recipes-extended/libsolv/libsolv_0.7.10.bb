@@ -10,7 +10,10 @@ DEPENDS = "expat zlib"
 
 SRC_URI = "git://github.com/openSUSE/libsolv.git;branch=master;protocol=https \
            file://CVE-2021-3200.patch \
+           file://CVE-2026-9149.patch \
 "
+
+PR .= ".1"
 
 SRCREV = "605dd2645ef899e2b7c95709476fb51e28d7e378"
 
