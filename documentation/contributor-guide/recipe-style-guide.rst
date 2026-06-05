@@ -28,7 +28,7 @@ file name. It is recommended to use released versions of software as these are
 revisions that upstream are expecting people to use.
 
 Recipe versions should always compare and sort correctly so that upgrades work
-as expected. With conventional versions such as ``1.4`` upgrading ``to 1.5``
+as expected. With conventional versions such as ``1.4`` upgrading to ``1.5``
 this happens naturally, but some versions don't sort. For example,
 ``1.5 Release Candidate 2`` could be written as ``1.5rc2`` but this sorts after
 ``1.5``, so upgrades from feeds won't happen correctly.
@@ -82,7 +82,7 @@ Recipe formatting
 Variable Formatting
 -------------------
 
--  Variable assignment should a space around each side of the operator, e.g.
+-  Variable assignment should include a space around each side of the operator, e.g.
    ``FOO = "bar"``, not ``FOO="bar"``.
 
 -  Double quotes should be used on the right-hand side of the assignment,
