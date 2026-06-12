@@ -47,6 +47,8 @@ NATIVESDKFIXES_class-nativesdk = "\
            file://0007-nativesdk-glibc-Make-relocatable-install-for-locales.patch \
 "
 
+PR .= ".1"
+
 SRC_URI =  "${GLIBC_GIT_URI};branch=${SRCBRANCH};name=glibc \
            file://etc/ld.so.conf \
            file://generate-supported.mk \
@@ -97,6 +99,7 @@ SRC_URI =  "${GLIBC_GIT_URI};branch=${SRCBRANCH};name=glibc \
            file://CVE-2024-33601_33602.patch \
 	   file://0001-CVE-2025-0395.patch \
 	   file://0002-CVE-2025-4802.patch \
+           file://CVE-2026-0861.patch \
            "
 S = "${WORKDIR}/git"
 B = "${WORKDIR}/build-${TARGET_SYS}"
