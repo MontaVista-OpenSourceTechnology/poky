@@ -7,7 +7,7 @@ LIC_FILES_CHKSUM = "file://Copying;md5=5b122a36d0f6dc55279a0ebc69f3c60b \
                     file://Artistic;md5=71a4d5d9acc18c0952a6df2218bb68da \
                     "
 
-PR .= ".2"
+PR .= ".3"
 SRC_URI = "https://www.cpan.org/src/5.0/perl-${PV}.tar.gz;name=perl \
            https://github.com/arsv/perl-cross/releases/download/1.3.1/perl-cross-1.3.1.tar.gz;name=perl-cross \
            file://perl-rdepends.txt \
@@ -51,7 +51,14 @@ S = "${WORKDIR}/perl-${PV}"
 
 # This is windows only issue.
 # https://ubuntu.com/security/CVE-2023-47039
-CVE_CHECK_WHITELIST += "CVE-2023-47039"
+
+# we do not use the vendorered zlib
+# https://nvd.nist.gov/vuln/detail/CVE-2026-4176
+
+CVE_CHECK_WHITELIST += "CVE-2023-47039 CVE-2026-4176"
+
+# Link Compress-Raw-Zlib to the system zlib instead of a vendored copy
+EXTRA_OEMAKE += "BUILD_ZLIB=False ZLIB_INCLUDE=${STAGING_INCDIR} ZLIB_LIB=${STAGING_LIBDIR}"
 
 inherit upstream-version-is-even update-alternatives
 
