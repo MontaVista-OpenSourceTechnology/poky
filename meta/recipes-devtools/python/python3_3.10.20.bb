@@ -41,9 +41,11 @@ SRC_URI = "http://www.python.org/ftp/python/${PV}/Python-${PV}.tar.xz \
            file://CVE-2026-6100.patch \
            file://CVE-2025-15367.patch \
            file://CVE-2025-15366.patch \
+           file://CVE-2026-3644.patch \
+           file://CVE-2026-4224.patch \
            "
 
-PR .= ".2"
+PR .= ".3"
 SRC_URI:append:class-native = " \
            file://0001-Lib-sysconfig.py-use-prefix-value-from-build-configu.patch \
            file://0001-distutils-sysconfig-append-STAGING_LIBDIR-python-sys.patch \
