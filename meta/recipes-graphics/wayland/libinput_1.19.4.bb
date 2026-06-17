@@ -15,7 +15,11 @@ DEPENDS = "libevdev udev mtdev libcheck"
 SRC_URI = "http://www.freedesktop.org/software/${BPN}/${BP}.tar.xz \
            file://run-ptest \
            file://determinism.patch \
+           file://CVE-2026-50292-01.patch \
+           file://CVE-2026-50292-02.patch \
            "
+PR .= ".1"
+
 SRC_URI[sha256sum] = "ff33a570b5a936c81e6c08389a8581c2665311d026ce3d225c88d09c49f9b440"
 
 UPSTREAM_CHECK_REGEX = "libinput-(?P<pver>\d+\.\d+\.(?!9\d+)\d+)"
