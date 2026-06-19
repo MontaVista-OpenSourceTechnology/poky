@@ -15,7 +15,11 @@ DEPENDS = "libevdev udev mtdev"
 SRC_URI = "http://www.freedesktop.org/software/${BPN}/${BP}.tar.xz \
            file://determinism.patch \
            file://CVE-2022-1215.patch \
+           file://CVE-2026-50292-01.patch \
+           file://CVE-2026-50292-02.patch \
            "
+PR .= ".1"
+
 SRC_URI[md5sum] = "eb6bd2907ad33d53954d70dfb881a643"
 SRC_URI[sha256sum] = "971c3fbfb624f95c911adeb2803c372e4e3647d1b98f278f660051f834597747"
 
