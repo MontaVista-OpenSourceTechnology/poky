@@ -8,6 +8,7 @@ LIC_FILES_CHKSUM = "file://Copying;md5=5b122a36d0f6dc55279a0ebc69f3c60b \
                     "
 
 
+PR .= ".1"
 SRC_URI = "https://www.cpan.org/src/5.0/perl-${PV}.tar.gz;name=perl \
            file://perl-rdepends.txt \
            file://0001-Somehow-this-module-breaks-through-the-perl-wrapper-.patch \
@@ -53,6 +54,11 @@ export ENC2XS_NO_COMMENTS = "1"
 CVE_CHECK_IGNORE:append = " CVE-2023-47100"
 # This is fixed in 5.34.2 via https://github.com/Perl/perl5/commit/12c313ce49b36160a7ca2e9b07ad5bd92ee4a010
 CVE_CHECK_IGNORE:append = " CVE-2023-47038"
+# we do not use the vendorered zlib
+# https://nvd.nist.gov/vuln/detail/CVE-2026-4176
+CVE_CHECK_IGNORE:append = " CVE-2026-4176"
+# Link Compress-Raw-Zlib to the system zlib instead of a vendored copy
+EXTRA_OEMAKE += "BUILD_ZLIB=False ZLIB_INCLUDE=${STAGING_INCDIR} ZLIB_LIB=${STAGING_LIBDIR}"
 
 do_configure:prepend() {
     cp -rfp ${STAGING_DATADIR_NATIVE}/perl-cross/* ${S}
