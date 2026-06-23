@@ -17,8 +17,12 @@ BBCLASSEXTEND = "native nativesdk"
 
 inherit ptest
 
+PR .= ".1"
+
 SRC_URI += " \
 	file://run-ptest \
+        file://CVE-2026-23490.patch \
+        file://CVE-2026-30922.patch \
 "
 
 RDEPENDS:${PN}-ptest += " \
