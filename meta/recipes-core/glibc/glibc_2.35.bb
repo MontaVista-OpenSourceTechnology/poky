@@ -78,10 +78,12 @@ SRC_URI =  "${GLIBC_GIT_URI};branch=${SRCBRANCH};name=glibc \
            file://0003-sunrpc-suppress-gcc-os-warning-on-user2netname.patch \
            file://0001-stdlib-Add-single-threaded-fast-path-to-rand.patch \
            file://CVE-2026-5450.patch \
+           file://CVE-2026-5435-01.patch \
+           file://CVE-2026-5435-02.patch \
            "
 S = "${WORKDIR}/git"
 B = "${WORKDIR}/build-${TARGET_SYS}"
-PR .= ".1"
+PR .= ".2"
 
 PACKAGES_DYNAMIC = ""
 
