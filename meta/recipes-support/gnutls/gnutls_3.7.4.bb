@@ -19,7 +19,7 @@ DEPENDS:append:libc-musl = " argp-standalone"
 
 SHRT_VER = "${@d.getVar('PV').split('.')[0]}.${@d.getVar('PV').split('.')[1]}"
 
-PR .= ".5"
+PR .= ".6"
 
 SRC_URI = "https://www.gnupg.org/ftp/gcrypt/gnutls/v${SHRT_VER}/gnutls-${PV}.tar.xz \
            file://arm_eabi.patch \
@@ -41,15 +41,26 @@ SRC_URI = "https://www.gnupg.org/ftp/gcrypt/gnutls/v${SHRT_VER}/gnutls-${PV}.tar
            file://CVE-2025-32990.patch \
            file://CVE-2025-6395.patch \
            file://CVE-2025-9820.patch \
-           file://CVE-2026-42009.patch \
            file://CVE-2026-42015.patch \
-           file://CVE-2026-33846.patch \
            file://CVE-2026-42010.patch \
            file://CVE-2026-42014.patch \
            file://CVE-2026-5260.patch \
-           file://CVE-2026-33845-pre.patch \
+           file://CVE-2026-33846-1.patch \
+           file://CVE-2026-33846-2.patch \
+           file://CVE-2026-33846-3.patch \
+           file://CVE-2026-33846-4.patch \
+           file://CVE-2026-33846-5.patch \
+           file://CVE-2026-33846-6.patch \
+           file://CVE-2026-33846-7.patch \
+           file://CVE-2026-42009-1.patch \
+           file://CVE-2026-42009-2.patch \
            file://CVE-2026-33845-1.patch \
            file://CVE-2026-33845-2.patch \
+           file://CVE-2026-33845-3.patch \
+           file://CVE-2026-33845-4.patch \
+           file://CVE-2026-33845-5.patch \
+           file://CVE-2026-33845-6.patch \
+           file://CVE-2026-33845-7.patch \
            file://CVE-2025-14831-1.patch \
            file://CVE-2025-14831-2.patch \
            file://CVE-2025-14831-3.patch \
@@ -66,6 +77,11 @@ SRC_URI = "https://www.gnupg.org/ftp/gcrypt/gnutls/v${SHRT_VER}/gnutls-${PV}.tar
            file://CVE-2026-42012-3.patch \
            file://CVE-2026-42012-4.patch \
            file://CVE-2026-42012-5.patch \
+           file://CVE-2026-3833-1.patch \
+           file://CVE-2026-3833-2.patch \
+           file://CVE-2026-42013-1.patch \
+           file://CVE-2026-42013-2.patch \
+           file://CVE-2026-42013-3.patch \
            "
 
 SRC_URI[sha256sum] = "e6adbebcfbc95867de01060d93c789938cf89cc1d1f6ef9ef661890f6217451f"
