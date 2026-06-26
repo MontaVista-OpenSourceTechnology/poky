@@ -54,10 +54,22 @@ SRC_URI = "https://www.gnupg.org/ftp/gcrypt/gnutls/v${SHRT_VER}/gnutls-${PV}.tar
            file://CVE-2026-33845-6.patch \
            file://CVE-2026-33845-7.patch \
            file://CVE-2026-42010.patch \
-           file://CVE-2026-42011.patch \
+           file://CVE-2025-14831-1.patch \
+           file://CVE-2025-14831-2.patch \
+           file://CVE-2025-14831-3.patch \
+           file://CVE-2025-14831-4.patch \
+           file://CVE-2025-14831-5.patch \
+           file://CVE-2025-14831-6.patch \
+           file://CVE-2025-14831-7.patch \
+           file://CVE-2025-14831-8.patch \
+           file://CVE-2025-14831-9.patch \
+           file://CVE-2026-3833-1.patch \
+           file://CVE-2026-3833-2.patch \
+           file://CVE-2026-42011-1.patch \
+           file://CVE-2026-42011-2.patch \
 "
 
-PR .= ".6"
+PR .= ".7"
 SRC_URI[sha256sum] = "5630751adec7025b8ef955af4d141d00d252a985769f51b4059e5affa3d39d63"
 
 inherit autotools texinfo pkgconfig gettext lib_package gtk-doc
