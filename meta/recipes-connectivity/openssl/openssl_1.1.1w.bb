@@ -11,7 +11,7 @@ LIC_FILES_CHKSUM = "file://LICENSE;md5=d343e62fc9c833710bbbed25f27364c8"
 
 DEPENDS = "hostperl-runtime-native"
 
-PR .= ".9"
+PR .= ".10"
 SRC_URI = "http://www.openssl.org/source/openssl-${PV}.tar.gz \
            file://run-ptest \
            file://0001-skip-test_symbol_presence.patch \
@@ -47,6 +47,11 @@ SRC_URI = "http://www.openssl.org/source/openssl-${PV}.tar.gz \
            file://CVE-2026-28388.patch \
            file://CVE-2026-45447-1.patch \
            file://CVE-2026-45447-2.patch \
+           file://CVE-2026-34180.patch \
+           file://CVE-2026-9076-1.patch \
+           file://CVE-2026-9076-2.patch \
+           file://CVE-2026-7383-1.patch \
+           file://CVE-2026-7383-2.patch \
            "
 
 SRC_URI_append_class-nativesdk = " \
