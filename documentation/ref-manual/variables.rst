@@ -3522,7 +3522,7 @@ system and gives an overview of their function and contents.
          GROUPADD_PARAM:${PN} = "-g 880 group1; -g 890 group2"
 
       For information on the standard Linux shell command
-      ``groupadd``, see https://linux.die.net/man/8/groupadd.
+      ``groupadd``, see :manpage:`groupadd(8)`.
 
    :term:`GROUPMEMS_PARAM`
       When inheriting the :ref:`ref-classes-useradd` class,
@@ -5842,7 +5842,7 @@ system and gives an overview of their function and contents.
       See the :term:`KERNEL_MODULE_AUTOLOAD` variable for more information.
 
    :term:`module_conf`
-      Specifies `modprobe.d <https://linux.die.net/man/5/modprobe.d>`__
+      Specifies :manpage:`modprobe.d(5)`
       syntax lines for inclusion in the ``/etc/modprobe.d/modname.conf``
       file.
 
@@ -10514,7 +10514,7 @@ system and gives an overview of their function and contents.
 
       For information on the
       standard Linux shell command ``useradd``, see
-      https://linux.die.net/man/8/useradd.
+      :manpage:`useradd(8)`.
 
    :term:`USERADD_UID_TABLES`
       Specifies a password file to use for obtaining static user
