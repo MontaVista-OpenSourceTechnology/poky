@@ -17,6 +17,13 @@ BBCLASSEXTEND = "native"
 
 SRC_URI[sha256sum] = "aa7c6f211cf7215c0ab4819ed893dc98034363d7b930b844bb43603c2e10b53e"
 
+PR .= ".1"
+SRC_URI += " \
+           file://CVE-2026-56001.patch \
+           file://CVE-2026-56002.patch \
+           file://CVE-2026-56003.patch \
+"
+
 PACKAGECONFIG ??= "${@bb.utils.filter('DISTRO_FEATURES', 'ipv6', d)}"
 PACKAGECONFIG[ipv6] = "--enable-ipv6,--disable-ipv6,"
 
