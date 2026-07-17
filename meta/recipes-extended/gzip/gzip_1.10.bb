@@ -2,9 +2,12 @@ require gzip.inc
 
 LICENSE = "GPLv3+"
 
+PR .= ".1"
 SRC_URI = "${GNU_MIRROR}/gzip/${BP}.tar.gz \
            file://run-ptest \
            file://CVE-2022-1271.patch \
+           file://CVE-2026-41991.patch \
+           file://CVE-2026-41992.patch \
           "
 SRC_URI_append_class-target = " file://wrong-path-fix.patch"
 
