@@ -12,7 +12,7 @@ RSUGGESTS:${PN} = "diffutils"
 LICENSE = "Vim"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=d1a651ab770b45d41c0f8cb5a8ca930e"
 
-PR .= ".5"
+PR .= ".6"
 
 SRC_URI = "git://github.com/vim/vim.git;branch=master;protocol=https \
            file://disable_acl_header_check.patch \
@@ -40,9 +40,12 @@ SRC_URI = "git://github.com/vim/vim.git;branch=master;protocol=https \
            file://CVE-2026-52860.patch \
            file://CVE-2026-47167.patch \
            file://CVE-2026-47162.patch \
+           file://CVE-2026-59856.patch \
+           file://CVE-2026-59858.patch \
            "
 
-PV .= ".1684.2"
+PE = "1"
+PV .= ".1683"
 SRCREV = "b922b30cfe4c044c83bac3cc908084ed20a83598"
 
 # Do not consider .z in x.y.z, as that is updated with every commit
