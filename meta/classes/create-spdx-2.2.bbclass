@@ -1043,7 +1043,9 @@ def combine_spdx(d, rootfs_name, rootfs_deploydir, rootfs_spdxid, packages, spdx
                     })
 
                 for ref in doc.externalDocumentRefs:
-                    ref_path = deploy_dir_spdx / "by-namespace" / ref.spdxDocument.replace("/", "_")
+                    ref_path = oe.sbom.doc_find_by_namespace(deploy_dir_spdx, ref.spdxDocument)
+                    if not ref_path:
+                        bb.fatal("Cannot find any SPDX file for document %s" % ref.spdxDocument)
                     collect_spdx_document(ref_path)
 
             collect_spdx_document(image_spdx_path)

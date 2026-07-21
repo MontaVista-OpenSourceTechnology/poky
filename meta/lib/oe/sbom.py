@@ -5,6 +5,8 @@
 #
 
 import collections
+import os
+import re
 
 DepRecipe = collections.namedtuple("DepRecipe", ("doc", "doc_sha1", "recipe"))
 DepSource = collections.namedtuple("DepSource", ("doc", "doc_sha1", "recipe", "file"))
@@ -38,6 +40,54 @@ def get_sdk_spdxid(sdk):
     return "SPDXRef-SDK-%s" % sdk
 
 
+def doc_path_by_namespace(spdx_deploy, doc_namespace):
+    return spdx_deploy / "by-namespace" / doc_namespace.replace("/", "_")
+
+
+def _doc_name_from_namespace(doc_namespace):
+    namespace_name = doc_namespace.rsplit("/", 1)[-1]
+    uuid_suffix = re.compile(
+        r"(.+)-[0-9a-f]{8}-"
+        r"[0-9a-f]{4}-"
+        r"[0-9a-f]{4}-"
+        r"[0-9a-f]{4}-"
+        r"[0-9a-f]{12}$"
+    )
+    match = uuid_suffix.match(namespace_name)
+    if match:
+        return match.group(1)
+    return None
+
+
+def doc_find_by_namespace(spdx_deploy, doc_namespace):
+    path = doc_path_by_namespace(spdx_deploy, doc_namespace)
+    if path.exists():
+        return path
+
+    doc_name = _doc_name_from_namespace(doc_namespace)
+    if doc_name:
+        for subdir in ("recipes", "packages", "runtime"):
+            candidate = spdx_deploy / subdir / (doc_name + ".spdx.json")
+            if candidate.exists():
+                return candidate
+
+    for subdir in ("recipes", "packages", "runtime"):
+        search_dir = spdx_deploy / subdir
+        if not search_dir.exists():
+            continue
+
+        for candidate in search_dir.glob("*.spdx.json"):
+            try:
+                doc, _ = read_doc(candidate)
+            except (OSError, ValueError):
+                continue
+
+            if doc.documentNamespace == doc_namespace:
+                return candidate
+
+    return None
+
+
 def write_doc(d, spdx_doc, subdir, spdx_deploy=None, indent=None):
     from pathlib import Path
 
@@ -49,7 +99,7 @@ def write_doc(d, spdx_doc, subdir, spdx_deploy=None, indent=None):
     with dest.open("wb") as f:
         doc_sha1 = spdx_doc.to_json(f, sort_keys=True, indent=indent)
 
-    l = spdx_deploy / "by-namespace" / spdx_doc.documentNamespace.replace("/", "_")
+    l = doc_path_by_namespace(spdx_deploy, spdx_doc.documentNamespace)
     l.parent.mkdir(exist_ok=True, parents=True)
     l.symlink_to(os.path.relpath(dest, l.parent))
 
