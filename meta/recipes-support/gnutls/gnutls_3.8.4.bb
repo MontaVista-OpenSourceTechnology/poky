@@ -43,10 +43,6 @@ SRC_URI = "https://www.gnupg.org/ftp/gcrypt/gnutls/v${SHRT_VER}/gnutls-${PV}.tar
            file://CVE-2025-14831-7.patch \
            file://CVE-2025-14831-8.patch \
            file://CVE-2025-14831-9.patch \
-           file://CVE-2026-33846-pre.patch \
-           file://CVE-2026-33846.patch \
-           file://CVE-2026-33845-pre.patch \
-           file://CVE-2026-33845.patch \
            file://CVE-2026-3833.patch \
            file://CVE-2026-42015.patch \
            file://CVE-2026-42014.patch \
@@ -57,6 +53,8 @@ SRC_URI = "https://www.gnupg.org/ftp/gcrypt/gnutls/v${SHRT_VER}/gnutls-${PV}.tar
            file://CVE-2026-42009_p2.patch \
            file://CVE-2026-42011_p1.patch \
            file://CVE-2026-42011_p2.patch \
+           file://CVE-2026-33846.patch \
+           file://CVE-2026-33845.patch \
            "
 
 SRC_URI[sha256sum] = "2bea4e154794f3f00180fa2a5c51fe8b005ac7a31cd58bd44cdfa7f36ebc3a9b"
