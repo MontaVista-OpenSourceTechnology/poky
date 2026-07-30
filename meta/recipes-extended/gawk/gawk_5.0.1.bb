@@ -15,10 +15,15 @@ PACKAGECONFIG ??= "readline"
 PACKAGECONFIG[readline] = "--with-readline,--without-readline,readline"
 PACKAGECONFIG[mpfr] = "--with-mpfr,--without-mpfr, mpfr"
 
+PR .= ".1"
 SRC_URI = "${GNU_MIRROR}/gawk/gawk-${PV}.tar.gz \
            file://remove-sensitive-tests.patch \
            file://run-ptest \
            file://CVE-2023-4156.patch \
+           file://CVE-2026-40467.patch \
+           file://CVE-2026-40468.patch \
+           file://CVE-2026-40553-01.patch \
+           file://CVE-2026-40553-02.patch \
 "
 
 SRC_URI[md5sum] = "c5441c73cc451764055ee65e9a4292bb"
