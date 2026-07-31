@@ -32,7 +32,7 @@ PACKAGECONFIG[mbedtls] = "--with-mbedtls,--without-mbedtls,mbedtls,"
 
 EXTRA_OECONF += "--enable-largefile"
 
-PR .= ".6"
+PR .= ".7"
 SRC_URI = "http://libarchive.org/downloads/libarchive-${PV}.tar.gz \
            file://CVE-2021-36976-1.patch \
            file://CVE-2021-36976-2.patch \
@@ -47,6 +47,7 @@ SRC_URI = "http://libarchive.org/downloads/libarchive-${PV}.tar.gz \
            file://CVE-2025-60753.patch \
            file://CVE-2026-4111.patch \
            file://CVE-2026-4424.patch \
+           file://CVE-2026-5121.patch \
 "
 
 SRC_URI[md5sum] = "d953ed6b47694dadf0e6042f8f9ff451"
