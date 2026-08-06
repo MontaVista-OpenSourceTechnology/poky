@@ -7,7 +7,7 @@ LIC_FILES_CHKSUM = "file://Copying;md5=5b122a36d0f6dc55279a0ebc69f3c60b \
                     file://Artistic;md5=71a4d5d9acc18c0952a6df2218bb68da \
                     "
 
-PR .= ".5"
+PR .= ".6"
 SRC_URI = "https://www.cpan.org/src/5.0/perl-${PV}.tar.gz;name=perl \
            https://github.com/arsv/perl-cross/releases/download/1.3.1/perl-cross-1.3.1.tar.gz;name=perl-cross \
            file://perl-rdepends.txt \
@@ -36,6 +36,8 @@ SRC_URI = "https://www.cpan.org/src/5.0/perl-${PV}.tar.gz;name=perl \
            file://CVE-2023-31486-0002.patch \
            file://CVE-2026-8376.patch \
            file://CVE-2026-42496.patch \
+           file://CVE-2026-57432-01.patch \
+           file://CVE-2026-57432-02.patch \
            "
 SRC_URI_append_class-native = " \
            file://perl-configpm-switch.patch \
