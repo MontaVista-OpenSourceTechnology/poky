@@ -14,6 +14,13 @@ inherit pypi python_setuptools_build_meta
 
 SRC_URI[sha256sum] = "f9b9ddc0761c125d5780eab2d64be4873fc6817c2899cbcb34b02344bdc7bc54"
 
+PR .= ".1"
+SRC_URI += " \
+	    file://CVE-2026-42284.patch \
+	    file://CVE-2026-44243-01.patch \
+	    file://CVE-2026-44243-02.patch \
+	    "
+
 DEPENDS += " ${PYTHON_PN}-gitdb"
 
 RDEPENDS:${PN} += " \
