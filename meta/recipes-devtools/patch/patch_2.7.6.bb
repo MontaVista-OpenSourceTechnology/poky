@@ -1,6 +1,8 @@
 require patch.inc
 LICENSE = "GPL-3.0-only"
 
+PR .= ".1"
+
 SRC_URI += "file://0001-Unset-need_charset_alias-when-building-for-musl.patch \
             file://0002-Fix-segfault-with-mangled-rename-patch.patch \
             file://0003-Allow-input-files-to-be-missing-for-ed-style-patches.patch \
@@ -11,6 +13,8 @@ SRC_URI += "file://0001-Unset-need_charset_alias-when-building-for-musl.patch \
             file://0001-Don-t-leak-temporary-file-on-failed-ed-style-patch.patch \
             file://0001-Don-t-leak-temporary-file-on-failed-multi-file-ed.patch \
             file://CVE-2019-20633.patch \
+            file://CVE-2026-56288.patch \
+            file://CVE-2026-56289.patch \
 "
 
 SRC_URI[md5sum] = "4c68cee989d83c87b00a3860bcd05600"
