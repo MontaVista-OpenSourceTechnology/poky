@@ -13,9 +13,10 @@ SRC_URI = "http://www.libssh2.org/download/${BP}.tar.gz \
            file://CVE-2020-22218.patch \
 	   file://CVE-2023-48795.patch \
 	   file://CVE-2026-7598.patch \
+	   file://CVE-2026-58050.patch \
            "
 
-PR .= ".1"
+PR .= ".2"
 SRC_URI[sha256sum] = "2d64e90f3ded394b91d3a2e774ca203a4179f69aebee03003e5a6fa621e41d51"
 
 inherit autotools pkgconfig ptest
