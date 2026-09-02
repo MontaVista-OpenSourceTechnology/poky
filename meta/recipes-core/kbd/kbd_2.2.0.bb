@@ -19,8 +19,10 @@ SRC_URI = "${KERNELORG_MIRROR}/linux/utils/${BPN}/${BP}.tar.xz \
            file://0001-analyze.l-add-missing-string-format.patch \
            file://0001-Use-DATADIR-and-append-i386-to-fix-libkbdfile-test08.patch \
            file://fix_cflags.patch \
+           file://CVE-2026-72693.patch \
            "
 
+PR .= ".1"
 SRC_URI[md5sum] = "d1d7ae0b5fb875dc082731e09cd0c8bc"
 SRC_URI[sha256sum] = "21a1bc5f6fb3b18ce9fdd717e4533368060a3182a39c7155eaf7ec0f5f83e9f7"
 
