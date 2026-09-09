@@ -52,7 +52,8 @@ LOCALE_SECTION ?= ''
 ALL_MULTILIB_PACKAGE_ARCHS = "${@all_multilib_tune_values(d, 'PACKAGE_ARCHS')}"
 
 # rpm is used for the per-file dependency identification
-PACKAGE_DEPENDS += "rpm-native"
+# dwarfsrcfiles is used to map packaged ELF files back to their source files
+PACKAGE_DEPENDS += "rpm-native dwarfsrcfiles-native"
 
 
 # If your postinstall can execute at rootfs creation time rather than on
@@ -334,6 +335,33 @@ def checkbuildpath(file, d):
 
     return False
 
+def parse_debugsources_from_dwarfsrcfiles_output(output):
+    sources = set()
+
+    for line in output.splitlines():
+        if line.startswith("\t"):
+            sources.add(os.path.normpath(line.split()[0]))
+
+    return sources
+
+def source_info(file, d):
+    import subprocess
+
+    cmd = ["dwarfsrcfiles", file]
+    try:
+        output = subprocess.check_output(cmd, universal_newlines=True, stderr=subprocess.STDOUT)
+        retval = 0
+    except subprocess.CalledProcessError as exc:
+        output = exc.output
+        retval = exc.returncode
+
+    # 255 means that one compilation unit could not be completely parsed.
+    if retval != 0 and retval != 255:
+        bb.fatal("dwarfsrcfiles failed with exit code %s (cmd was %s)%s" %
+                 (retval, cmd, ":\n%s" % output if output else ""))
+
+    return sorted(parse_debugsources_from_dwarfsrcfiles_output(output))
+
 def splitdebuginfo(file, debugfile, debugsrcdir, sourcefile, d):
     # Function to split a single file into two components, one is the stripped
     # target system binary, the other contains any debugging information. The
@@ -357,8 +385,12 @@ def splitdebuginfo(file, debugfile, debugsrcdir, sourcefile, d):
         newmode = origmode | stat.S_IWRITE | stat.S_IREAD
         os.chmod(file, newmode)
 
-    # We need to extract the debug src information here...
+    sources = []
+
+    # Record the sources associated with this binary before its debug data is
+    # split, while retaining Rocko's debugedit-generated aggregate source list.
     if debugsrcdir:
+        sources = source_info(file, d)
         cmd = "'%s' -i -l '%s' '%s'" % (debugedit, sourcefile, file)
         (retval, output) = oe.utils.getstatusoutput(cmd)
         if retval:
@@ -380,7 +412,7 @@ def splitdebuginfo(file, debugfile, debugsrcdir, sourcefile, d):
     if newmode:
         os.chmod(file, origmode)
 
-    return 0
+    return sources
 
 def copydebugsources(debugsrcdir, d):
     # The debug src information written out to sourcefile is further procecessed
@@ -1001,6 +1033,7 @@ python split_and_strip_files () {
     # First lets process debug splitting
     #
     if (d.getVar('INHIBIT_PACKAGE_DEBUG_SPLIT') != '1'):
+        pkg_debug_sources = {}
         for file in elffiles:
             src = file[len(dvar):]
             dest = debuglibdir + os.path.dirname(src) + debugdir + "/" + os.path.basename(src) + debugappend
@@ -1010,7 +1043,9 @@ python split_and_strip_files () {
             bb.utils.mkdirhier(os.path.dirname(fpath))
             #bb.note("Split %s -> %s" % (file, fpath))
             # Only store off the hard link reference if we successfully split!
-            splitdebuginfo(file, fpath, debugsrcdir, sourcefile, d)
+            pkg_debug_sources[src] = splitdebuginfo(file, fpath, debugsrcdir, sourcefile, d)
+
+        d.setVar("PKGDEBUGSOURCES", pkg_debug_sources)
 
         # Hardlink our debug symbols to the other hardlink copies
         for ref in inodes:
@@ -1355,12 +1390,15 @@ python emit_pkgdata() {
         write_extra_pkgs(global_variants, pn, packages, pkgdatadir)
 
     workdir = d.getVar('WORKDIR')
+    pkgdebugsource = d.getVar("PKGDEBUGSOURCES") or {}
 
     for pkg in packages.split():
         pkgval = d.getVar('PKG_%s' % pkg)
         if pkgval is None:
             pkgval = pkg
             d.setVar('PKG_%s' % pkg, pkg)
+
+        extended_data = {"files_info": {}}
 
         pkgdestpkg = os.path.join(pkgdest, pkg)
         files = {}
@@ -1369,7 +1407,11 @@ python emit_pkgdata() {
         for f in pkgfiles[pkg]:
             relpth = os.path.relpath(f, pkgdestpkg)
             fstat = os.lstat(f)
-            files[os.sep + relpth] = fstat.st_size
+            fpath = os.sep + relpth
+            files[fpath] = fstat.st_size
+            extended_data["files_info"][fpath] = {"size": fstat.st_size}
+            if fpath in pkgdebugsource:
+                extended_data["files_info"][fpath]["debugsrc"] = pkgdebugsource[fpath]
             if fstat.st_ino not in seen:
                 seen.add(fstat.st_ino)
                 total_size += fstat.st_size
@@ -1414,6 +1456,10 @@ python emit_pkgdata() {
         sf.write('%s_%s: %d\n' % ('PKGSIZE', pkg, total_size))
         sf.close()
 
+        subdata_extended_file = pkgdatadir + "/extended/%s.json" % pkg
+        with open(subdata_extended_file, "w") as f:
+            json.dump(extended_data, f, sort_keys=True, separators=(",", ":"))
+
         # Symlinks needed for rprovides lookup
         if rprov:
             for p in rprov.strip().split():
@@ -1443,7 +1489,7 @@ python emit_pkgdata() {
 
     bb.utils.unlockfile(lf)
 }
-emit_pkgdata[dirs] = "${PKGDESTWORK}/runtime ${PKGDESTWORK}/runtime-reverse ${PKGDESTWORK}/runtime-rprovides"
+emit_pkgdata[dirs] = "${PKGDESTWORK}/runtime ${PKGDESTWORK}/runtime-reverse ${PKGDESTWORK}/runtime-rprovides ${PKGDESTWORK}/extended"
 
 ldconfig_postinst_fragment() {
 if [ x"$D" = "x" ]; then
