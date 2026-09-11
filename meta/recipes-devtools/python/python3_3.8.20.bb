@@ -52,8 +52,10 @@ SRC_URI = "http://www.python.org/ftp/python/${PV}/Python-${PV}.tar.xz \
            file://CVE-2026-0672.patch \
            file://CVE-2026-3644.patch \
            file://CVE-2026-4224.patch \
+           file://CVE-2026-15308.patch \
+           file://CVE-2026-11972.patch \
            "
-PR .= ".14"
+PR .= ".15"
 SRC_URI_append_class-native = " \
            file://0001-distutils-sysconfig-append-STAGING_LIBDIR-python-sys.patch \
            file://12-distutils-prefix-is-inside-staging-area.patch \
