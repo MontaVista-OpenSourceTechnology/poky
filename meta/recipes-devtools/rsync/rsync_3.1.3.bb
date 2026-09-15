@@ -30,9 +30,10 @@ SRC_URI = "https://download.samba.org/pub/${BPN}/src/${BP}.tar.gz \
            file://CVE-2024-12747.patch \
            file://CVE-2025-10158.patch \
            file://CVE-2026-41035.patch \
+           file://CVE-2026-43618.patch \
 "
 
-PR .= ".5"
+PR .= ".6"
 SRC_URI[md5sum] = "1581a588fde9d89f6bc6201e8129afaf"
 SRC_URI[sha256sum] = "55cc554efec5fdaad70de921cd5a5eeb6c29a95524c715f3bbf849235b0800c0"
 
