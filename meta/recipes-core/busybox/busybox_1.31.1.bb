@@ -67,8 +67,9 @@ SRC_URI = "https://busybox.net/downloads/busybox-${PV}.tar.bz2;name=tarball \
            file://CVE-2025-46394-02.patch \
            file://CVE-2026-26157-CVE-2026-26158-01.patch \
            file://CVE-2026-26157-CVE-2026-26158-02.patch \
+           file://CVE-2025-60876.patch \
            "
-PR .= ".3"
+PR .= ".4"
 SRC_URI_append_libc-musl = " file://musl.cfg "
 
 SRC_URI[tarball.md5sum] = "70913edaf2263a157393af07565c17f0"
