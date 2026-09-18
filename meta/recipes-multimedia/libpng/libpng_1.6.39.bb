@@ -26,11 +26,17 @@ SRC_URI = "\
            file://CVE-2026-22801.patch \
            file://CVE-2026-25646.patch \
            file://CVE-2026-33636.patch \
+           file://CVE-2026-33416-pre1.patch \
+           file://CVE-2026-33416-1.patch \
+           file://CVE-2026-33416-2.patch \
+           file://CVE-2026-33416-3.patch \
+           file://CVE-2026-33416-4.patch \
+           file://CVE-2026-33416-5.patch \
 "
 
 SRC_URI[sha256sum] = "1f4696ce70b4ee5f85f1e1623dc1229b210029fa4b7aee573df3e2ba7b036937"
 
-PR .= ".1"
+PR .= ".2"
 
 MIRRORS += "${SOURCEFORGE_MIRROR}/${BPN}/${BPN}${LIBV}/ ${SOURCEFORGE_MIRROR}/${BPN}/${BPN}${LIBV}/older-releases/"
 
