@@ -12,32 +12,13 @@ DEPENDS = "popt"
 
 SRC_URI = "https://download.samba.org/pub/${BPN}/src/${BP}.tar.gz \
            file://rsyncd.conf \
+           file://rsync-3.2.7-sec-patches3.patch \
            file://makefile-no-rebuild.patch \
            file://determism.patch \
            file://0001-Add-missing-prototypes-to-function-declarations.patch \
-           file://CVE-2024-12084-0001.patch \
-           file://CVE-2024-12084-0002.patch \
-           file://CVE-2024-12085.patch \
-           file://CVE-2024-12086-0001.patch \
-           file://CVE-2024-12086-0002.patch \
-           file://CVE-2024-12086-0003.patch \
-           file://CVE-2024-12086-0004.patch \
-           file://CVE-2024-12087-0001.patch \
-           file://CVE-2024-12087-0002.patch \
-           file://CVE-2024-12087-0003.patch \
-           file://CVE-2024-12088.patch \
-           file://CVE-2024-12747.patch \
-           file://CVE-2025-10158.patch \
-           file://CVE-2026-41035.patch \
-           file://CVE-2026-43620.patch \
-           file://CVE-2026-45232.patch \
-           file://CVE-2026-43618.patch \
-	   file://CVE-2026-29518_p1.patch \
-	   file://CVE-2026-29518_p2.patch \
-	   file://CVE-2026-29518_p3.patch \
            "
 
-PR .= ".3"
+PR .= ".4"
 SRC_URI[sha256sum] = "4e7d9d3f6ed10878c58c5fb724a67dacf4b6aac7340b13e488fb2dc41346f2bb"
 
 # -16548 required for v3.1.3pre1. Already in v3.1.3.
