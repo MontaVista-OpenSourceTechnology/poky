@@ -36,9 +36,11 @@ SRC_URI = "https://github.com/libexpat/libexpat/releases/download/R_${VERSION_TA
 	   file://CVE-2026-25210-03.patch \
 	   file://CVE-2026-32776.patch \
            file://CVE-2026-32778.patch \
+           file://CVE-2026-45186-prep.patch \
+           file://CVE-2026-45186.patch \
            "
 
-PR .= ".2"
+PR .= ".3"
 UPSTREAM_CHECK_URI = "https://github.com/libexpat/libexpat/releases/"
 
 SRC_URI[sha256sum] = "6f0e6e01f7b30025fa05c85fdad1e5d0ec7fd35d9f61b22f34998de11969ff67"
