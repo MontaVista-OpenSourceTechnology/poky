@@ -8,7 +8,7 @@ LIC_FILES_CHKSUM = "file://COPYRIGHT;md5=89a97ebbf713f7125fe5c02223d3ae95"
 
 DEPENDS = "openssl libcap zlib"
 
-PR .= ".6"
+PR .= ".7"
 
 SRC_URI = "https://ftp.isc.org/isc/bind9/${PV}/${BPN}-${PV}.tar.gz \
            file://conf.patch \
@@ -39,6 +39,12 @@ SRC_URI = "https://ftp.isc.org/isc/bind9/${PV}/${BPN}-${PV}.tar.gz \
            file://CVE-2024-1737-01.patch \
            file://CVE-2024-1737-02.patch \
            file://CVE-2024-1737-03.patch \
+           file://CVE-2026-11721.patch \
+           file://CVE-2026-11721-test.patch \
+           file://CVE-2026-11622.patch \
+           file://CVE-2026-13204.patch \
+           file://CVE-2026-13321-01.patch \
+           file://CVE-2026-13321-02.patch \
            "
 
 SRC_URI[sha256sum] = "0d8efbe7ec166ada90e46add4267b7e7c934790cba9bd5af6b8380a4fbfb5aff"
