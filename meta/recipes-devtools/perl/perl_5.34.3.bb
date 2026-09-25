@@ -8,7 +8,7 @@ LIC_FILES_CHKSUM = "file://Copying;md5=5b122a36d0f6dc55279a0ebc69f3c60b \
                     "
 
 
-PR .= ".2"
+PR .= ".3"
 SRC_URI = "https://www.cpan.org/src/5.0/perl-${PV}.tar.gz;name=perl \
            file://perl-rdepends.txt \
            file://0001-Somehow-this-module-breaks-through-the-perl-wrapper-.patch \
@@ -26,6 +26,7 @@ SRC_URI = "https://www.cpan.org/src/5.0/perl-${PV}.tar.gz;name=perl \
            file://CVE-2026-42496.patch \
            file://CVE-2026-57432.patch \
            file://CVE-2026-48962.patch \
+           file://CVE-2026-13221.patch \
            "
 SRC_URI:append:class-native = " \
            file://perl-configpm-switch.patch \
