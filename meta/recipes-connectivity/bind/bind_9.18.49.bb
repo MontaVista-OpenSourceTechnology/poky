@@ -20,6 +20,12 @@ SRC_URI = "https://ftp.isc.org/isc/bind9/${PV}/${BPN}-${PV}.tar.xz \
            file://0001-avoid-start-failure-with-bind-user.patch \
            file://CVE-2026-19667-1.patch \
            file://CVE-2026-19667-2.patch \
+           file://CVE-2026-13204-01.patch \
+           file://CVE-2026-13204-02.patch \
+           file://CVE-2026-13204-03.patch \
+           file://CVE-2026-13321-01.patch \
+           file://CVE-2026-13321-02.patch \
+           file://CVE-2026-13321-03.patch \
            "
 
 SRC_URI[sha256sum] = "c43ce4548ebed788cd9df63658a7de105ceafba43fcd63fa352b1093e525cd24"
