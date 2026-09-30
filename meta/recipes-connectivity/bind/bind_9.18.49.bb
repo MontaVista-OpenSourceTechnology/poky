@@ -29,9 +29,13 @@ SRC_URI = "https://ftp.isc.org/isc/bind9/${PV}/${BPN}-${PV}.tar.xz \
            file://CVE-2026-11331-01.patch \
            file://CVE-2026-11331-02.patch \
            file://CVE-2026-11331-03.patch \
+           file://CVE-2026-11622.patch \
+           file://CVE-2026-11721-01.patch \
+           file://CVE-2026-11721-02.patch \
+           file://CVE-2026-11721-03.patch \
            "
 
-PR .= ".3"
+PR .= ".4"
 SRC_URI[sha256sum] = "c43ce4548ebed788cd9df63658a7de105ceafba43fcd63fa352b1093e525cd24"
 
 UPSTREAM_CHECK_URI = "https://ftp.isc.org/isc/bind9/"
