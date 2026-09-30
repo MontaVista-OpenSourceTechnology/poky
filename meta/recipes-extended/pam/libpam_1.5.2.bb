@@ -35,8 +35,10 @@ SRC_URI = "https://github.com/linux-pam/linux-pam/releases/download/v${PV}/Linux
            file://CVE-2025-6020-02.patch \
            file://CVE-2025-6020-03.patch \
            file://CVE-2024-10963.patch \
+           file://CVE-2026-54411.patch \
            "
 
+PR .= ".1"
 SRC_URI[sha256sum] = "e4ec7131a91da44512574268f493c6d8ca105c87091691b8e9b56ca685d4f94d"
 
 DEPENDS = "bison-native flex flex-native cracklib libxml2-native virtual/crypt"
