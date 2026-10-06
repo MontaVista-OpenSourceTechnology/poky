@@ -37,9 +37,13 @@ SRC_URI = "git://github.com/libexpat/libexpat.git;protocol=https;branch=master \
 	   file://CVE-2026-25210-3.patch \
 	   file://CVE-2026-24515.patch \
 	   file://CVE-2025-59375.patch \
+	   file://CVE-2026-45186_p1.patch \
+	   file://CVE-2026-45186_p2.patch \
+	   file://CVE-2026-45186_p3.patch \
+	   file://CVE-2026-45186_p4.patch \
          "
 
-PR .= ".6"
+PR .= ".7"
 SRCREV = "a7bc26b69768f7fb24f0c7976fae24b157b85b13"
 
 inherit autotools lib_package
