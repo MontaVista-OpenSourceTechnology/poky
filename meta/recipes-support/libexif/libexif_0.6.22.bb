@@ -15,9 +15,10 @@ SRC_URI = "https://github.com/libexif/libexif/releases/download/libexif-${@versi
            file://CVE-2020-0452.patch \
            file://CVE-2026-32775.patch \
            file://CVE-2026-40386.patch \
+           file://CVE-2026-40385.patch \
            "
 
-PR .= ".2"
+PR .= ".3"
 
 SRC_URI[sha256sum] = "5048f1c8fc509cc636c2f97f4b40c293338b6041a5652082d5ee2cf54b530c56"
 
