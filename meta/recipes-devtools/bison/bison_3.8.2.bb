@@ -41,6 +41,11 @@ CACHED_CONFIGUREVARS += "${@bb.utils.contains('PACKAGECONFIG', 'readline', '', '
 # The automatic m4 path detection gets confused, so force the right value
 acpaths = "-I ./m4"
 
+do_configure:prepend() {
+    touch -r ${S}/src/parse-gram.y \
+        ${S}/src/parse-gram.c ${S}/src/parse-gram.h
+}
+
 do_compile:prepend() {
 	for i in mfcalc calc++ rpcalc; do mkdir -p ${B}/examples/$i; done
 }
