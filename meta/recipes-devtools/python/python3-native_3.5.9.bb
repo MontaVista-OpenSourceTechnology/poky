@@ -66,7 +66,7 @@ do_configure_append() {
 # Regenerate all of the generated files
 # This ensures that pgen and friends get created during the compile phase
 do_compile_prepend() {
-    oe_runmake regen-all
+    oe_runmake -j1 regen-all
 }
 
 do_install() {
