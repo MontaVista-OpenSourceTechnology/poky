@@ -16,8 +16,10 @@ SRC_URI = "http://downloads.yoctoproject.org/mirror/sources/pcre2-${PV}.tar.bz2 
            file://CVE-2022-1586-regression.patch \
 	    file://CVE-2022-1587.patch \
 	    file://CVE-2022-41409.patch \
+	    file://CVE-2026-103111.patch \
 "
 
+PR .= ".1"
 SRC_URI[md5sum] = "d280b62ded13f9ccf2fac16ee5286366"
 SRC_URI[sha256sum] = "74c473ffaba9e13db6951fd146e0143fe9887852ce73406a03277af1d9b798ca"
 
