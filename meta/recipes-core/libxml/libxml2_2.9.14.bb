@@ -50,6 +50,7 @@ SRC_URI += "http://www.w3.org/XML/Test/xmlts20080827.tar;subdir=${BP};name=testt
            file://CVE-2026-0992-03.patch \
            file://CVE-2026-1757.patch \
            file://CVE-2026-11979.patch \
+           file://CVE-2026-86140.patch \
            "
 
 PR .= ".2"
