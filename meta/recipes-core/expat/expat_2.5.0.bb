@@ -34,11 +34,31 @@ SRC_URI = "https://github.com/libexpat/libexpat/releases/download/R_${VERSION_TA
 	   file://CVE-2026-25210-01.patch \
 	   file://CVE-2026-25210-02.patch \
 	   file://CVE-2026-25210-03.patch \
+	   file://CVE-2023-52425.patch \
+	   file://CVE-2024-8176.patch \
+	   file://CVE-2026-50219-1.patch \
+	   file://CVE-2026-50219-2.patch \
+	   file://CVE-2026-50219-3.patch \
+	   file://CVE-2026-50219-4.patch \
+	   file://CVE-2025-59375-1.patch \
+	   file://CVE-2025-59375-2.patch \
+	   file://CVE-2025-59375-3.patch \
+	   file://CVE-2025-59375-4.patch \
+	   file://CVE-2025-59375-5.patch \
+	   file://CVE-2025-59375-6.patch \
+	   file://CVE-2025-59375-7.patch \
+	   file://CVE-2025-59375-8.patch \
+	   file://CVE-2025-59375-9.patch \
+	   file://CVE-2025-59375-10.patch \
+	   file://CVE-2025-59375-11.patch \
+	   file://CVE-2025-59375-12.patch \
+	   file://CVE-2025-59375-13.patch \
+	   file://CVE-2025-59375-14.patch \
 	   file://CVE-2026-32776.patch \
-           file://CVE-2026-32778.patch \
+	   file://CVE-2026-32778.patch \
            "
 
-PR .= ".2"
+PR .= ".3"
 UPSTREAM_CHECK_URI = "https://github.com/libexpat/libexpat/releases/"
 
 SRC_URI[sha256sum] = "6f0e6e01f7b30025fa05c85fdad1e5d0ec7fd35d9f61b22f34998de11969ff67"
