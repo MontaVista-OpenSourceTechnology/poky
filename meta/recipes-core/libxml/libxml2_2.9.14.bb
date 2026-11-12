@@ -51,9 +51,11 @@ SRC_URI += "http://www.w3.org/XML/Test/xmlts20080827.tar;subdir=${BP};name=testt
            file://CVE-2026-1757.patch \
            file://CVE-2026-11979.patch \
            file://CVE-2026-86140.patch \
+           file://CVE-2026-74860.patch \
+           file://CVE-2026-86138.patch \
            "
 
-PR .= ".2"
+PR .= ".3"
 SRC_URI[archive.sha256sum] = "60d74a257d1ccec0475e749cba2f21559e48139efba6ff28224357c7c798dfee"
 SRC_URI[testtar.sha256sum] = "9b2c865aba66c6429ca301a7ef048d7eca2cdb7a9106184416710853c7b37d0d"
 
