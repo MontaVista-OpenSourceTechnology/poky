@@ -1,0 +1,76 @@
+From 19829a590a6504b148223d0de3ea3835699c876c Mon Sep 17 00:00:00 2001
+From: Yoann Congal <yoann.congal@smile.fr>
+Date: Wed, 11 Nov 2026 10:15:06 -0600
+Subject: [PATCH] configure: Require GCC 5 or later
+
+From: Mark Hatle <mark.hatle@amd.com>
+
+pseudo uses __has_include, which GCC only supports from version 5, so
+older compilers such as GCC 4.8 on CentOS 7 failed part way through the
+build.
+
+clang reports itself as GCC 4.2.1, so it is only checked for
+__has_include.
+
+(cherry picked from commit 7add07ba4f5b5095a66614bb210e5d42cfe33555)
+
+Upstream-Status: Pending [patches under test, https://lore.kernel.org/all/1794413712-18072-2-git-send-email-mark.hatle@kernel.crashing.org/]
+AI-Generated: Uses GitHub Copilot
+Signed-off-by: Mark Hatle <mark.hatle@amd.com>
+Signed-off-by: Mark Hatle <mark.hatle@amd.com>
+Signed-off-by: Yoann Congal <yoann.congal@smile.fr>
+---
+ README    |  3 +++
+ configure | 25 +++++++++++++++++++++++++
+ 2 files changed, 28 insertions(+)
+
+diff --git a/README b/README
+index c4cb997..039f960 100644
+--- a/README
++++ b/README
+@@ -11,6 +11,9 @@ environment, allowing ordinary users to run commands which give the illusion
+ of creating device nodes, changing file ownership, and otherwise doing
+ things necessary for creating distribution packages or filesystems.
+ 
++Building pseudo requires GCC 5 or later (or clang), which the configure
++script checks for.
++
+ To configure, run the provided configure script.  Note that this is
+ NOT an autoconf script.
+ 
+diff --git a/configure b/configure
+index 68c9962..f561dcb 100755
+--- a/configure
++++ b/configure
+@@ -232,6 +232,31 @@ if [ -z "$opt_sqlite_lib" ]; then
+     opt_sqlite_lib=$opt_lib
+ fi
+ 
++# pseudo uses __has_include, which needs GCC 5 or later.  clang reports
++# itself as GCC 4.2.1, so only check its support for __has_include.
++if ! cc_version=$(${CC:-cc} -dumpversion 2>/dev/null); then
++    echo >&2 "Error: can't run the C compiler '${CC:-cc}'."
++    exit 1
++fi
++cc_check=$(mktemp -d "${TMPDIR:-/tmp}/pseudo-configure.XXXXXX") || exit 1
++cat > "$cc_check/cc_check.c" <<EOF
++#if defined(__clang__)
++# if !defined(__has_include)
++#  error clang without __has_include
++# endif
++#elif !defined(__GNUC__) || __GNUC__ < 5
++# error GCC older than 5
++#endif
++int pseudo_cc_check;
++EOF
++if ! cc_check_out=$(${CC:-cc} -c -o "$cc_check/cc_check.o" "$cc_check/cc_check.c" 2>&1); then
++    echo >&2 "Error: pseudo requires GCC 5 or later (${CC:-cc} reports version $cc_version)."
++    echo >&2 "$cc_check_out"
++    rm -rf "$cc_check"
++    exit 1
++fi
++rm -rf "$cc_check"
++
+ if [ ! -f "${opt_sqlite}/include/sqlite3.h" ]; then
+     echo >&2 "SQLite3 headers not found in at ${opt_sqlite}/include/sqlite3.h. Please check that SQLite3 and SQLite3 headers are installed."
+     exit 1

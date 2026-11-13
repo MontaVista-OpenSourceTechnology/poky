@@ -1,0 +1,67 @@
+From 71e5702d36d9ecf27c32f064105459e25b1721f2 Mon Sep 17 00:00:00 2001
+From: Yoann Congal <yoann.congal@smile.fr>
+Date: Wed, 11 Nov 2026 10:15:05 -0600
+Subject: [PATCH] ports/linux: Don't require <linux/mount.h>
+
+From: Mark Hatle <mark.hatle@amd.com>
+
+<linux/mount.h> only exists in kernel headers from 5.2, so pseudo no
+longer built on older hosts such as CentOS 7.  pseudo only needs
+OPEN_TREE_CLONE, which already has a fallback, and struct mount_attr,
+which is only used through pointers, so declare it instead of including
+the header.  The forward declaration is also needed without the header,
+or each prototype using the struct declares a different type.
+
+(cherry picked from commit e545758f96dbe8a70623957009fd79502e638cd1)
+
+Upstream-Status: Pending [patches under test, https://lore.kernel.org/all/1794413712-18072-2-git-send-email-mark.hatle@kernel.crashing.org/]
+AI-Generated: Uses GitHub Copilot
+Signed-off-by: Mark Hatle <mark.hatle@amd.com>
+Signed-off-by: Mark Hatle <mark.hatle@amd.com>
+Signed-off-by: Yoann Congal <yoann.congal@smile.fr>
+---
+ ports/linux/portdefs.h             | 7 +++++--
+ test/test-open_tree_attr-syscall.c | 1 -
+ 2 files changed, 5 insertions(+), 3 deletions(-)
+
+diff --git a/ports/linux/portdefs.h b/ports/linux/portdefs.h
+index ac1d971..546c33b 100644
+--- a/ports/linux/portdefs.h
++++ b/ports/linux/portdefs.h
+@@ -35,7 +35,6 @@ GLIBC_COMPAT_SYMBOL(memcpy,2.0);
+ #include <sys/prctl.h>
+ #include <linux/seccomp.h>
+ #include <sys/mount.h>
+-#include <linux/mount.h>
+ 
+ /* close_range()'s flags, and unshare(), are only declared by glibc under
+  * _GNU_SOURCE, which pseudo does not build with. <linux/close_range.h> is
+@@ -94,11 +93,15 @@ extern int unshare(int flags);
+ #define SYS_open_tree __NR_open_tree
+ #endif
+ 
+-/* OPEN_TREE_CLONE may be missing from older host headers.
++/* The new mount API is only in <sys/mount.h> from glibc 2.36, and
++ * <linux/mount.h> is missing from older kernel headers (before 5.2), so
++ * don't rely on either.  OPEN_TREE_CLONE is kernel ABI, and struct
++ * mount_attr is only used through pointers, so it can stay incomplete.
+  */
+ #ifndef OPEN_TREE_CLONE
+ #define OPEN_TREE_CLONE (1U << 0)
+ #endif
++struct mount_attr;
+ 
+ #ifndef SYS_open_tree_attr
+ 
+diff --git a/test/test-open_tree_attr-syscall.c b/test/test-open_tree_attr-syscall.c
+index e4e652e..aead9d4 100644
+--- a/test/test-open_tree_attr-syscall.c
++++ b/test/test-open_tree_attr-syscall.c
+@@ -5,7 +5,6 @@
+ #include <stdio.h>
+ #include <unistd.h>
+ #include <sys/syscall.h>
+-#include <linux/mount.h>
+ #include <sys/stat.h>
+ 
+ #ifndef SYS_open_tree_attr

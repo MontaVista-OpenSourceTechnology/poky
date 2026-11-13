@@ -3,6 +3,16 @@ require pseudo.inc
 SRC_URI = "git://git.yoctoproject.org/pseudo;branch=pseudo-1.9;protocol=https \
            file://fallback-passwd \
            file://fallback-group \
+           file://0001-test-Skip-open_tree-tests-when-the-function-or-sysca.patch \
+           file://0002-makewrappers-Don-t-generate-unused-_int-paths-with-n.patch \
+           file://0003-ports-linux-Don-t-require-linux-mount.h.patch \
+           file://0004-configure-Require-GCC-5-or-later.patch \
+           file://0005-pseudo_client-serialize-path-changes-across-clients.patch \
+           file://0006-ports-hold-the-path-lock-in-create-and-metadata-wrap.patch \
+           file://0007-ports-check-created-files-under-the-path-lock-before.patch \
+           file://0008-test-parallel-ops-Add-a-parallel-create-rename-link-.patch \
+           file://0009-README.security-Add-information-specific-to-file-pro.patch \
+           file://0010-AGENTS.md-Add-to-assist-future-developers.patch \
            "
 SRC_URI:append:class-native = " \
     http://downloads.yoctoproject.org/mirror/sources/pseudo-prebuilt-2.33.tar.xz;subdir=git/prebuilt;name=prebuilt \

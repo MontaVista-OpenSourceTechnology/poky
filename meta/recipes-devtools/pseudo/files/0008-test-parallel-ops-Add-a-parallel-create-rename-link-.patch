@@ -1,0 +1,87 @@
+From ad74f92191757254172af8ae39549b256b880321 Mon Sep 17 00:00:00 2001
+From: Yoann Congal <yoann.congal@smile.fr>
+Date: Wed, 11 Nov 2026 10:15:10 -0600
+Subject: [PATCH] test-parallel-ops: Add a parallel create/rename/link/chmod
+ test
+
+From: Mark Hatle <mark.hatle@amd.com>
+
+Four workers repeatedly create, rename onto, chmod, chown, symlink,
+hard link and remove the same names in one directory.  The test fails
+if any of the operations fail, or if the server logged an inode or path
+mismatch while it ran.
+
+Without the path lock in the create, metadata and open wrappers, the
+server reports mismatches and occasionally aborts a client.
+
+(cherry picked from commit 7f582310cb7eb67da9b20ceb3082331518f6d4fb)
+
+Upstream-Status: Pending [patches under test, https://lore.kernel.org/all/1794413712-18072-2-git-send-email-mark.hatle@kernel.crashing.org/]
+AI-Generated: Uses GitHub Copilot
+Signed-off-by: Mark Hatle <mark.hatle@amd.com>
+Signed-off-by: Mark Hatle <mark.hatle@amd.com>
+Signed-off-by: Yoann Congal <yoann.congal@smile.fr>
+---
+ test/test-parallel-ops.sh | 53 +++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 53 insertions(+)
+ create mode 100755 test/test-parallel-ops.sh
+
+diff --git a/test/test-parallel-ops.sh b/test/test-parallel-ops.sh
+new file mode 100755
+index 0000000..2fccd30
+--- /dev/null
++++ b/test/test-parallel-ops.sh
+@@ -0,0 +1,53 @@
++#!/bin/bash
++#
++# SPDX-License-Identifier: LGPL-2.1-only
++#
++# Several clients create, rename, link, chmod and remove the same names in
++# one directory at once.  pseudo must not let one client's operation land in
++# the middle of another client's change to the same name, or the server
++# finds the database out of step with the filesystem.  It then logs an
++# "inode mismatch" or "path mismatch" error, and may abort a client.
++#
++# The temporary tree has to live below $PWD so that pseudo tracks it.
++
++tmpdir="$(mktemp -d -p "$PWD" parallel_ops_XXXXXX)"
++trap "rm -rf '$tmpdir'" EXIT TERM INT
++
++log="${PSEUDO_LOCALSTATEDIR:-$PWD/var/pseudo}/pseudo.log"
++mismatches() {
++    grep -c "mismatch" "$log" 2>/dev/null || true
++}
++before=$(mismatches)
++
++cd "$tmpdir" || exit 1
++: > target
++
++worker() {
++    for i in $(seq 50); do
++        echo "$1 $i" > "tmp.$1"            || echo "FAILED: create tmp.$1" >> failed
++        mv -f "tmp.$1" target              || echo "FAILED: mv tmp.$1 target" >> failed
++        chmod 640 target 2>/dev/null
++        chown 0:0 target 2>/dev/null
++        ln -sf target lnk                  || echo "FAILED: ln -sf target lnk" >> failed
++        mkdir dir 2>/dev/null; rmdir dir 2>/dev/null
++        mkfifo "f.$1" && mv -f "f.$1" fifo || echo "FAILED: mkfifo/mv f.$1" >> failed
++        ln -f target "hard.$1" 2>/dev/null && rm -f "hard.$1"
++    done
++}
++
++for w in 1 2 3 4; do
++    worker $w &
++done
++wait
++
++rc=0
++if [ -e failed ]; then
++    sort failed | uniq -c
++    rc=1
++fi
++after=$(mismatches)
++if [ "${after:-0}" -ne "${before:-0}" ]; then
++    echo "FAILED: $((after - before)) mismatch error(s) in $log"
++    rc=1
++fi
++exit $rc

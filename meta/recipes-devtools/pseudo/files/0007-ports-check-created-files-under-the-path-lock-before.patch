@@ -1,0 +1,248 @@
+From 45bf43b216bfa281bbbf838f18acbf8df0531f67 Mon Sep 17 00:00:00 2001
+From: Yoann Congal <yoann.congal@smile.fr>
+Date: Wed, 11 Nov 2026 10:15:09 -0600
+Subject: [PATCH] ports: check created files under the path lock before
+ recording them
+
+From: Mark Hatle <mark.hatle@amd.com>
+
+open() and friends with O_CREAT create a file and then send OP_CREAT
+for the path, so another client can rename onto or remove the name in
+between, like the other wrappers that create names.  They can't hold
+the path lock across the real call, as opening a FIFO can block
+indefinitely, which could deadlock against a client waiting for the
+lock.
+
+Instead, take the lock after the file has been opened, and only send
+OP_CREAT if the path still names the file that was opened, using a new
+pseudo_client_path_matches_fd().  With the lock held no other client is
+part way through changing the path, so if it now names a different
+file, that client has already recorded the change and recording ours
+would be wrong.
+
+This covers openat (and so open, creat and their variants), openat2,
+fopen, freopen, fopen64 and freopen64.  openat and openat2 now also take
+the recorded stat data from the descriptor rather than from an earlier
+lookup of the path.
+
+AI-Generated: Uses GitHub Copilot
+Signed-off-by: Mark Hatle <mark.hatle@amd.com>
+(cherry picked from commit 21fe63e9dbeb50aa21b498b485d0c3d87f632bc3)
+
+Also include the pseudo_real_fstat and pseudo_real_stat declarations
+(pseudo_client.h), definitions (pseudo_util.c) and initialization
+(pseudo_wrappers.c) from fcd8a81 ("pseudo_client: resolve
+/proc/<pid>/fd/<n> to the descriptor").
+
+The new pseudo_client_path_matches_fd() needs them, but the rest of
+fcd8a81 is an unrelated behavior change that is not being backported.
+
+Upstream-Status: Pending [patches under test, https://lore.kernel.org/all/1794413712-18072-2-git-send-email-mark.hatle@kernel.crashing.org/]
+Signed-off-by: Mark Hatle <mark.hatle@amd.com>
+Signed-off-by: Yoann Congal <yoann.congal@smile.fr>
+---
+ ports/linux/guts/fopen64.c         |  5 ++++-
+ ports/linux/guts/freopen64.c       |  5 ++++-
+ ports/linux/guts/openat.c          |  8 +++++++-
+ ports/linux/openat2/guts/openat2.c |  8 +++++++-
+ ports/unix/guts/fopen.c            |  5 ++++-
+ ports/unix/guts/freopen.c          |  5 ++++-
+ pseudo_client.c                    | 25 +++++++++++++++++++++++++
+ pseudo_client.h                    |  3 +++
+ pseudo_util.c                      |  2 ++
+ pseudo_wrappers.c                  |  2 ++
+ 10 files changed, 62 insertions(+), 6 deletions(-)
+
+diff --git a/ports/linux/guts/fopen64.c b/ports/linux/guts/fopen64.c
+index e76da69..a6efd18 100644
+--- a/ports/linux/guts/fopen64.c
++++ b/ports/linux/guts/fopen64.c
+@@ -22,8 +22,11 @@
+ 		pseudo_debug(PDBGF_FILE, "fopen64 '%s': fd %d <FILE %p>\n", path, fd, (void *) rc);
+ 		if (real___fxstat64(_STAT_VER, fd, &buf) != -1) {
+ 			if (!existed) {
++				int path_lock_fd = pseudo_client_path_lock(0);
+ 				real_fchmod(fd, PSEUDO_FS_MODE(0666 & ~pseudo_umask, 0));
+-				pseudo_client_op(OP_CREAT, 0, -1, -1, path, &buf);
++				if (pseudo_client_path_matches_fd(path, fd, 0))
++					pseudo_client_op(OP_CREAT, 0, -1, -1, path, &buf);
++				pseudo_client_path_unlock(path_lock_fd);
+ 			}
+ 			pseudo_client_op(OP_OPEN, pseudo_access_fopen(mode), fd, -1, path, &buf);
+ 		} else {
+diff --git a/ports/linux/guts/freopen64.c b/ports/linux/guts/freopen64.c
+index 5fc9073..6057eda 100644
+--- a/ports/linux/guts/freopen64.c
++++ b/ports/linux/guts/freopen64.c
+@@ -21,8 +21,11 @@
+ 		pseudo_debug(PDBGF_FILE, "freopen64 '%s': fd %d\n", path, fd);
+ 		if (real___fxstat64(_STAT_VER, fd, &buf) != -1) {
+ 			if (!existed) {
++				int path_lock_fd = pseudo_client_path_lock(0);
+ 				real_fchmod(fd, PSEUDO_FS_MODE(0666 & ~pseudo_umask, 0));
+-				pseudo_client_op(OP_CREAT, 0, -1, -1, path, &buf);
++				if (pseudo_client_path_matches_fd(path, fd, 0))
++					pseudo_client_op(OP_CREAT, 0, -1, -1, path, &buf);
++				pseudo_client_path_unlock(path_lock_fd);
+ 			}
+ 			pseudo_client_op(OP_OPEN, pseudo_access_fopen(mode), fd, -1, path, &buf);
+ 		} else {
+diff --git a/ports/linux/guts/openat.c b/ports/linux/guts/openat.c
+index 656ac2b..13bd395 100644
+--- a/ports/linux/guts/openat.c
++++ b/ports/linux/guts/openat.c
+@@ -148,9 +148,15 @@
+ 		if (stat_rc != -1) {
+ 			buf.st_mode = PSEUDO_DB_MODE(buf.st_mode, mode);
+ 			if (!existed) {
++				int path_lock_fd = pseudo_client_path_lock(0);
+ 				real_fchmod(rc, PSEUDO_FS_MODE(mode, 0));
+ 				// file has no path, but has been created
+-				pseudo_client_op(OP_CREAT, 0, -1, dirfd, path, &buf);
++				if (pseudo_client_path_matches_fd(path, rc, flags & O_NOFOLLOW) &&
++				    real___fxstat64(_STAT_VER, rc, &buf) != -1) {
++					buf.st_mode = PSEUDO_DB_MODE(buf.st_mode, mode);
++					pseudo_client_op(OP_CREAT, 0, -1, dirfd, path, &buf);
++				}
++				pseudo_client_path_unlock(path_lock_fd);
+ 			}
+ 				pseudo_client_op(OP_OPEN, PSEUDO_ACCESS(flags), rc, dirfd, path, &buf);
+ 		} else {
+diff --git a/ports/linux/openat2/guts/openat2.c b/ports/linux/openat2/guts/openat2.c
+index a0acbe7..687029a 100644
+--- a/ports/linux/openat2/guts/openat2.c
++++ b/ports/linux/openat2/guts/openat2.c
+@@ -183,9 +183,15 @@
+ 		if (stat_rc != -1) {
+ 			buf.st_mode = PSEUDO_DB_MODE(buf.st_mode, my_how.mode);
+ 			if (!existed) {
++				int path_lock_fd = pseudo_client_path_lock(0);
+ 				real_fchmod(rc, PSEUDO_FS_MODE(my_how.mode, 0));
+ 				// file has no path, but has been created
+-				pseudo_client_op(OP_CREAT, 0, -1, dirfd, pseudo_path, &buf);
++				if (pseudo_client_path_matches_fd(pseudo_path, rc, my_how.flags & O_NOFOLLOW) &&
++				    real___fxstat64(_STAT_VER, rc, &buf) != -1) {
++					buf.st_mode = PSEUDO_DB_MODE(buf.st_mode, my_how.mode);
++					pseudo_client_op(OP_CREAT, 0, -1, dirfd, pseudo_path, &buf);
++				}
++				pseudo_client_path_unlock(path_lock_fd);
+ 			}
+ 				pseudo_client_op(OP_OPEN, PSEUDO_ACCESS(my_how.flags), rc, dirfd, pseudo_path, &buf);
+ 		} else {
+diff --git a/ports/unix/guts/fopen.c b/ports/unix/guts/fopen.c
+index 26a6abc..78388f7 100644
+--- a/ports/unix/guts/fopen.c
++++ b/ports/unix/guts/fopen.c
+@@ -21,8 +21,11 @@
+ 		pseudo_debug(PDBGF_OP, "fopen '%s': fd %d <FILE %p>\n", path, fd, (void *) rc);
+ 		if (base_fstat(fd, &buf) != -1) {
+ 			if (!existed) {
++				int path_lock_fd = pseudo_client_path_lock(0);
+ 				real_fchmod(fd, PSEUDO_FS_MODE(0666 & ~pseudo_umask, 0));
+-				pseudo_client_op(OP_CREAT, 0, -1, -1, path, &buf);
++				if (pseudo_client_path_matches_fd(path, fd, 0))
++					pseudo_client_op(OP_CREAT, 0, -1, -1, path, &buf);
++				pseudo_client_path_unlock(path_lock_fd);
+ 			}
+ 			pseudo_client_op(OP_OPEN, pseudo_access_fopen(mode), fd, -1, path, &buf);
+ 		} else {
+diff --git a/ports/unix/guts/freopen.c b/ports/unix/guts/freopen.c
+index 703b6aa..5d63c9f 100644
+--- a/ports/unix/guts/freopen.c
++++ b/ports/unix/guts/freopen.c
+@@ -21,8 +21,11 @@
+ 		pseudo_debug(PDBGF_OP, "freopen '%s': fd %d\n", path, fd);
+ 		if (base_fstat(fd, &buf) != -1) {
+ 			if (!existed) {
++				int path_lock_fd = pseudo_client_path_lock(0);
+ 				real_fchmod(fd, PSEUDO_FS_MODE(0666 & ~pseudo_umask, 0));
+-				pseudo_client_op(OP_CREAT, 0, -1, -1, path, &buf);
++				if (pseudo_client_path_matches_fd(path, fd, 0))
++					pseudo_client_op(OP_CREAT, 0, -1, -1, path, &buf);
++				pseudo_client_path_unlock(path_lock_fd);
+ 			}
+ 			pseudo_client_op(OP_OPEN, pseudo_access_fopen(mode), fd, -1, path, &buf);
+ 		} else {
+diff --git a/pseudo_client.c b/pseudo_client.c
+index 759afeb..fe99aa6 100644
+--- a/pseudo_client.c
++++ b/pseudo_client.c
+@@ -1249,6 +1249,31 @@ pseudo_client_path_unlock(int fd) {
+ 	errno = save_errno;
+ }
+ 
++/* Operations that can block, such as open() on a FIFO, can't hold the path
++ * lock across the real call.  Instead they take the lock afterwards and
++ * check that the path still names the file they opened before recording
++ * it.  With the lock held, no other client is part way through changing the
++ * path, so if it now names a different file, that client has already
++ * recorded the change, and recording ours would be wrong.
++ */
++int
++pseudo_client_path_matches_fd(const char *path, int fd, int nofollow) {
++	PSEUDO_STATBUF pbuf, fbuf;
++	int save_errno = errno;
++	int rc;
++
++	if (!path || fd < 0 || !pseudo_real_fstat || !pseudo_real_lstat || !pseudo_real_stat)
++		return 1;
++	rc = pseudo_real_fstat(fd, &fbuf) == 0 &&
++	     (nofollow ? pseudo_real_lstat(path, &pbuf) : pseudo_real_stat(path, &pbuf)) == 0 &&
++	     pbuf.st_dev == fbuf.st_dev && pbuf.st_ino == fbuf.st_ino;
++	if (!rc)
++		pseudo_debug(PDBGF_FILE, "'%s' no longer names fd %d, not recording it.\n",
++			path, fd);
++	errno = save_errno;
++	return rc;
++}
++
+ static int
+ client_connect(void) {
+ 	/* we have a server pid, is it responsive? */
+diff --git a/pseudo_client.h b/pseudo_client.h
+index 217981d..77fe2ff 100644
+--- a/pseudo_client.h
++++ b/pseudo_client.h
+@@ -30,6 +30,7 @@ extern int pseudo_client_shutdown(int);
+ extern int pseudo_fd(int fd, int how);
+ extern int pseudo_client_path_lock(int shared);
+ extern void pseudo_client_path_unlock(int fd);
++extern int pseudo_client_path_matches_fd(const char *path, int fd, int nofollow);
+ #define MOVE_FD	0
+ #define COPY_FD	1
+ #define PSEUDO_MIN_FD	20
+@@ -53,6 +54,8 @@ extern FILE *pseudo_grp;
+ 
+ /* pseudo_wrappers will try to initialize these */
+ extern int (*pseudo_real_lstat)(const char *path, PSEUDO_STATBUF *buf);
++extern int (*pseudo_real_fstat)(int fd, PSEUDO_STATBUF *buf);
++extern int (*pseudo_real_stat)(const char *path, PSEUDO_STATBUF *buf);
+ extern int (*pseudo_real_fork)(void);
+ extern int (*pseudo_real_execv)(const char *, char * const *);
+ 
+diff --git a/pseudo_util.c b/pseudo_util.c
+index b8afe34..0267585 100644
+--- a/pseudo_util.c
++++ b/pseudo_util.c
+@@ -97,6 +97,8 @@ static int pseudo_util_initted = -1;  /* Not yet run */
+ 
+ /* bypass wrapper logic on path computations */
+ int (*pseudo_real_lstat)(const char *path, PSEUDO_STATBUF *buf) = NULL;
++int (*pseudo_real_fstat)(int fd, PSEUDO_STATBUF *buf) = NULL;
++int (*pseudo_real_stat)(const char *path, PSEUDO_STATBUF *buf) = NULL;
+ /* bash workaround */
+ int (*pseudo_real_unsetenv)(const char *) = unsetenv;
+ char * (*pseudo_real_getenv)(const char *) = getenv;
+diff --git a/pseudo_wrappers.c b/pseudo_wrappers.c
+index e54dad5..94f4260 100644
+--- a/pseudo_wrappers.c
++++ b/pseudo_wrappers.c
+@@ -177,6 +177,8 @@ pseudo_init_wrappers(void) {
+ 	pseudo_real_fsetxattr = real_fsetxattr;
+ #endif
+ 	pseudo_real_lstat = base_lstat;
++	pseudo_real_fstat = base_fstat;
++	pseudo_real_stat = base_stat;
+ 	/* and these are used so the client's server spawn can bypass
+ 	 * wrappers.
+ 	 */
