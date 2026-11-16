@@ -40,6 +40,7 @@ SRC_URI += " \
            file://CVE-2026-4105.patch \
            file://0023-journal-replace-a-bunch-of-assert-with-friendlier-ch.patch \
            file://0024-fs-util-try-AT_EMPTY_PATH-for-access_fd-first.patch \
+           file://0025-sd-journal-rate-limit-tail-timestamp-refresh-during-.patch \
            "
 
 # patches needed by musl

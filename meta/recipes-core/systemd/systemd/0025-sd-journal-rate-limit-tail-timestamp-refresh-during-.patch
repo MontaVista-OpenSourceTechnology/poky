@@ -1,0 +1,95 @@
+From 46e1b78bb2724e9691e4c91b7b4b8559d218fbfc Mon Sep 17 00:00:00 2001
+From: dongshengyuan <545258830@qq.com>
+Date: Wed, 24 Jun 2026 13:01:32 +0800
+Subject: [PATCH] sd-journal: rate-limit tail timestamp refresh during
+ iteration
+
+journal_file_read_tail_timestamp() is called unconditionally in
+next_beyond_location() for every file on every iteration step,
+resulting in O(N x files) volatile mmap reads. For large queries
+like 'journalctl -n 1000000' this makes the command unusably slow
+(~5 minutes on systems with many journal files).
+
+Rather than suppressing the call entirely (which would make the
+inotify path fully load-bearing for cross-boot ordering), rate-limit
+it to at most once per second per file. This reduces the overhead
+from O(N x files) to O(T x files) where T is the iteration time in
+seconds, while still providing periodic refresh as a fallback for
+any missed inotify events and keeping cross-boot ordering
+reasonably fresh.
+
+Embed a RateLimit struct in JournalFile for this purpose.
+
+Measured improvement on a real system: 5:24 -> 2:39 (-51%) for
+'journalctl -n 1000000'.
+
+Fixes: #42521
+Regression introduced in: #26355 (34af74946e)
+
+Signed-off-by: dongshengyuan <dongshengyuan@uniontech.com>
+(cherry picked from commit 8f8ab4bf98f930fcbbdd7efcbba8577981d31df9)
+(cherry picked from commit de01a0f78f833208fb9c8eca69bed6420b0e7e65)
+(cherry picked from commit 578dc90e6c4a87ad77927c462f5c42794c464c4d)
+(cherry picked from commit c066fab7052e41b2de4893488fdd39a0c3db4fef)
+
+Upstream-Status: Backport [https://github.com/systemd/systemd/commit/46e1b78bb2724e9691e4c91b7b4b8559d218fbfc]
+Signed-off-by: Vijay Anusuri <vanusuri@mvista.com>
+---
+ src/libsystemd/sd-journal/journal-file.c | 1 +
+ src/libsystemd/sd-journal/journal-file.h | 2 ++
+ src/libsystemd/sd-journal/sd-journal.c   | 7 ++++++-
+ 3 files changed, 9 insertions(+), 1 deletion(-)
+
+diff --git a/src/libsystemd/sd-journal/journal-file.c b/src/libsystemd/sd-journal/journal-file.c
+index d96a0aa22d..95775c1956 100644
+--- a/src/libsystemd/sd-journal/journal-file.c
++++ b/src/libsystemd/sd-journal/journal-file.c
+@@ -4123,6 +4123,7 @@ int journal_file_open(
+                 .strict_order = FLAGS_SET(file_flags, JOURNAL_STRICT_ORDER),
+                 .newest_boot_id_prioq_idx = PRIOQ_IDX_NULL,
+                 .last_direction = _DIRECTION_INVALID,
++                .tail_timestamp_ratelimit = { .interval = USEC_PER_SEC, .burst = 1 },
+         };
+ 
+         if (fname) {
+diff --git a/src/libsystemd/sd-journal/journal-file.h b/src/libsystemd/sd-journal/journal-file.h
+index 81fafb9bec..d6fd569e2c 100644
+--- a/src/libsystemd/sd-journal/journal-file.h
++++ b/src/libsystemd/sd-journal/journal-file.h
+@@ -16,6 +16,7 @@
+ #include "hashmap.h"
+ #include "journal-def.h"
+ #include "mmap-cache.h"
++#include "ratelimit.h"
+ #include "sparse-endian.h"
+ #include "time-util.h"
+ 
+@@ -130,6 +131,7 @@ typedef struct JournalFile {
+         uint64_t newest_realtime_usec;
+         unsigned newest_boot_id_prioq_idx;
+         usec_t newest_mtime;
++        RateLimit tail_timestamp_ratelimit; /* rate-limits journal_file_read_tail_timestamp() calls during iteration */
+ } JournalFile;
+ 
+ typedef enum JournalFileFlags {
+diff --git a/src/libsystemd/sd-journal/sd-journal.c b/src/libsystemd/sd-journal/sd-journal.c
+index acabec699f..1bc795cc29 100644
+--- a/src/libsystemd/sd-journal/sd-journal.c
++++ b/src/libsystemd/sd-journal/sd-journal.c
+@@ -807,7 +807,12 @@ static int next_beyond_location(sd_journal *j, JournalFile *f, direction_t direc
+         assert(j);
+         assert(f);
+ 
+-        (void) journal_file_read_tail_timestamp(j, f);
++        /* Rate-limit tail timestamp refreshes during iteration. Calling this unconditionally is
++	 * O(N x files) volatile mmap overhead that makes large 'journalctl -n N' queries unusably
++	 * slow. Periodic refresh keeps cross-boot ordering reasonably fresh and provides a fallback
++	 * for any missed inotify events. */
++	if (ratelimit_below(&f->tail_timestamp_ratelimit))
++		(void) journal_file_read_tail_timestamp(j, f);
+ 
+         n_entries = le64toh(f->header->n_entries);
+ 
+-- 
+2.34.1
+
