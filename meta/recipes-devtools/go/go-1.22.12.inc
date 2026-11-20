@@ -63,6 +63,7 @@ SRC_URI += "\
     file://CVE-2026-25679.patch \
     file://CVE-2026-32288.patch \
     file://CVE-2026-27145.patch \
+    file://CVE-2026-33814.patch \
     file://CVE-2026-39823.patch \
     file://CVE-2026-56862.patch \
 "
